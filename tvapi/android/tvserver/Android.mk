@@ -45,8 +45,6 @@ LOCAL_SHARED_LIBRARIES += \
     libam_adp \
     libam_ver
 
-LOCAL_STATIC_LIBRARIES := \
-	lib$(strip $(TVAPI_TARGET_BOARD_VERSION))
 LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/../../libtv \
     $(LOCAL_PATH)/../ \
@@ -54,7 +52,6 @@ LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/../../libtv/tv \
     $(LOCAL_PATH)/../../libtv/include \
     $(LOCAL_PATH)/../../build/include \
-    $(LOCAL_PATH)/../../libtv/projects
 
 LOCAL_C_INCLUDES += \
     bionic/libc/include \
@@ -78,7 +75,6 @@ LOCAL_C_INCLUDES += \
     $(AM_LIBPLAYER_PATH)/amffmpeg \
     $(AM_LIBPLAYER_PATH)/amplayer
 
-LOCAL_CFLAGS += -DTARGET_BOARD_$(strip $(TVAPI_TARGET_BOARD_VERSION))
 
 LOCAL_MODULE:= libtvserver
 

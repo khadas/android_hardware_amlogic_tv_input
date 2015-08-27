@@ -186,7 +186,6 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/tv \
     $(LOCAL_PATH)/include \
     $(LOCAL_PATH)/../build/include \
-    $(LOCAL_PATH)/projects
 
 
 
@@ -215,10 +214,8 @@ ifeq ($(strip $(BOARD_TVAPI_NO_VERSION)),)
 endif
 
 
-LOCAL_CFLAGS += -DTARGET_BOARD_$(strip $(TVAPI_TARGET_BOARD_VERSION))
 
 
 LOCAL_MODULE:= libtv
 
 include $(BUILD_SHARED_LIBRARY)
-include $(LOCAL_PATH)/projects/Android.mk

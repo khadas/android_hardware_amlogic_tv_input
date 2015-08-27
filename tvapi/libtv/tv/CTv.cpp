@@ -45,7 +45,6 @@
 #include "../tvutils/CFile.h"
 #include <hardware_legacy/power.h>
 #include "../tvutils/serial_operate.h"
-#include <xxxconfig.h>
 
 extern "C" {
 #include "am_ver.h"

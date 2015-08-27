@@ -39,3 +39,4 @@ LOCAL_SHARED_LIBRARIES += \
 	libtv \
 	libtvserver
 include $(BUILD_SHARED_LIBRARY)
+include $(LOCAL_PATH)/tvapi/Android.mk
