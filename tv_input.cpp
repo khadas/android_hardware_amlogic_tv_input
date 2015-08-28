@@ -23,15 +23,9 @@
 
 #include <hardware/tv_input.h>
 #include <tv/CTv.h>
+#include <tvin/CTvin.h>
 #include <tvserver/TvService.h>
 /*****************************************************************************/
-
-#define ATV_DEV_ID      1
-#define DTV_DEV_ID      2
-#define AV_DEV_ID       3
-#define HDMI1_DEV_ID    4
-#define HDMI2_DEV_ID    5
-#define HDMI3_DEV_ID    6
 
 typedef struct tv_input_private {
     tv_input_device_t device;
@@ -46,7 +40,7 @@ typedef struct tv_input_private {
 static int notify_ATV_device_available(tv_input_private_t *priv)
 {
     tv_input_event_t event;
-    event.device_info.device_id = ATV_DEV_ID;
+    event.device_info.device_id = SOURCE_TV;
     event.device_info.type = TV_INPUT_TYPE_TUNER;
     event.type = TV_INPUT_EVENT_DEVICE_AVAILABLE;
     event.device_info.audio_type = AUDIO_DEVICE_NONE;
@@ -57,7 +51,7 @@ static int notify_ATV_device_available(tv_input_private_t *priv)
 static int notify_DTV_device_available(tv_input_private_t *priv)
 {
     tv_input_event_t event;
-    event.device_info.device_id = DTV_DEV_ID;
+    event.device_info.device_id = SOURCE_DTV;
     event.device_info.type = TV_INPUT_TYPE_TUNER;
     event.type = TV_INPUT_EVENT_DEVICE_AVAILABLE;
     event.device_info.audio_type = AUDIO_DEVICE_NONE;
@@ -68,7 +62,7 @@ static int notify_DTV_device_available(tv_input_private_t *priv)
 static int notify_AV_device_available(tv_input_private_t *priv)
 {
     tv_input_event_t event;
-    event.device_info.device_id = AV_DEV_ID;
+    event.device_info.device_id = SOURCE_AV1;
     event.device_info.type = TV_INPUT_TYPE_COMPONENT;
     event.type = TV_INPUT_EVENT_DEVICE_AVAILABLE;
     event.device_info.audio_type = AUDIO_DEVICE_NONE;
@@ -95,48 +89,48 @@ static int get_stream_configs(int dev_id, int *num_configurations, const tv_stre
         return -1;
     }
     switch (dev_id) {
-    case ATV_DEV_ID:
-        mconfig->stream_id = ATV_DEV_ID;
+    case SOURCE_TV:
+        mconfig->stream_id = SOURCE_TV;
         mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
         mconfig->max_video_width = 1920;
         mconfig->max_video_height = 1080;
         *num_configurations = 1;
         *configs = mconfig;
         break;
-    case DTV_DEV_ID:
-        mconfig->stream_id = DTV_DEV_ID;
+    case SOURCE_DTV:
+        mconfig->stream_id = SOURCE_DTV;
         mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
         mconfig->max_video_width = 1920;
         mconfig->max_video_height = 1080;
         *num_configurations = 1;
         *configs = mconfig;
         break;
-    case AV_DEV_ID:
-        mconfig->stream_id = AV_DEV_ID;
+    case SOURCE_AV1:
+        mconfig->stream_id = SOURCE_AV1;
         mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
         mconfig->max_video_width = 1920;
         mconfig->max_video_height = 1080;
         *num_configurations = 1;
         *configs = mconfig;
         break;
-    case HDMI1_DEV_ID:
-        mconfig->stream_id = HDMI1_DEV_ID;
+    case SOURCE_HDMI1:
+        mconfig->stream_id = SOURCE_HDMI1;
         mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
         mconfig->max_video_width = 1920;
         mconfig->max_video_height = 1080;
         *num_configurations = 1;
         *configs = mconfig;
         break;
-    case HDMI2_DEV_ID:
-        mconfig->stream_id = HDMI2_DEV_ID;
+    case SOURCE_HDMI2:
+        mconfig->stream_id = SOURCE_HDMI2;
         mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
         mconfig->max_video_width = 1920;
         mconfig->max_video_height = 1080;
         *num_configurations = 1;
         *configs = mconfig;
         break;
-    case HDMI3_DEV_ID:
-        mconfig->stream_id = HDMI3_DEV_ID;
+    case SOURCE_HDMI3:
+        mconfig->stream_id = SOURCE_HDMI3;
         mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
         mconfig->max_video_width = 1920;
         mconfig->max_video_height = 1080;
@@ -197,11 +191,11 @@ static int tv_input_initialize(struct tv_input_device *dev,
     /*  AV_DEVICE_AVAILABLE */
     notify_AV_device_available(priv);
     /*  HDMI1_DEVICE_AVAILABLE */
-    notify_hdmi_device_available(priv, HDMI1_DEV_ID, 1);
+    notify_hdmi_device_available(priv, SOURCE_HDMI1, 1);
     /*  HDMI2_DEVICE_AVAILABLE */
-    notify_hdmi_device_available(priv, HDMI2_DEV_ID, 2);
+    notify_hdmi_device_available(priv, SOURCE_HDMI2, 2);
     /*  HDMI3_DEVICE_AVAILABLE */
-    notify_hdmi_device_available(priv, HDMI3_DEV_ID, 3);
+    notify_hdmi_device_available(priv, SOURCE_HDMI3, 3);
 
     return 0;
 }
@@ -216,13 +210,19 @@ static int tv_input_get_stream_configurations(const struct tv_input_device *dev,
     return -EINVAL;
 }
 
-static int tv_input_open_stream(struct tv_input_device *, int, tv_stream_t *)
+static int tv_input_open_stream(struct tv_input_device* dev, int device_id,
+            tv_stream_t* stream)
 {
+    tv_input_private_t *priv = (tv_input_private_t *)dev;
+    priv->pTv->SetSourceSwitchInput((tv_source_input_t) device_id);
     return -EINVAL;
 }
 
-static int tv_input_close_stream(struct tv_input_device *, int, int)
+static int tv_input_close_stream(struct tv_input_device* dev, int device_id,
+            int stream_id)
 {
+    tv_input_private_t *priv = (tv_input_private_t *)dev;
+    priv->pTv->StopTvLock();
     return -EINVAL;
 }
 
