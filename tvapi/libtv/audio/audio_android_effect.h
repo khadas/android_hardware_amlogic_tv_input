@@ -5,8 +5,8 @@
 
 #include <media/AudioEffect.h>
 #include <hardware/audio_effect.h>
-#include <hardware/audio_effect_srs.h>
-#include <hardware/audio_effect_hpeq.h>
+#include <audio_effects/effect_srs.h>
+#include <audio_effects/effect_hpeq.h>
 #include <audio_effects/effect_equalizer.h>
 #include "tvsetting/audio_cfg.h"
 
