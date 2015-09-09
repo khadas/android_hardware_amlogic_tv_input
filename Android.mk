@@ -37,6 +37,7 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_SHARED_LIBRARIES += \
 	libtv \
-	libtvserver
+	libtvserver \
+	libtv_jni
 include $(BUILD_SHARED_LIBRARY)
 include $(LOCAL_PATH)/tvapi/Android.mk

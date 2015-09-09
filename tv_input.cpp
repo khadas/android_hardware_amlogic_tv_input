@@ -133,61 +133,83 @@ static int notify_HDMI_stream_configurations_change(tv_input_private_t *priv, in
 	return 0;
 }
 
+#define NORMAL_STREAM_ID 1
+#define FRAME_CAPTURE_STREAM_ID 2
+static tv_stream_config_t mconfig[2];
 static int get_stream_configs(int dev_id, int *num_configurations, const tv_stream_config_t **configs)
 {
-	tv_stream_config_t *mconfig = (tv_stream_config_t *)malloc(sizeof(mconfig));
-	if (!mconfig)
-	{
-		return -1;
-	}
 	switch (dev_id)
 	{
 	case SOURCE_TV:
-		mconfig->stream_id = SOURCE_TV;
-		mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-		mconfig->max_video_width = 1920;
-		mconfig->max_video_height = 1080;
-		*num_configurations = 1;
+		mconfig[0].stream_id = NORMAL_STREAM_ID;
+		mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
+		mconfig[0].max_video_width = 1920;
+		mconfig[0].max_video_height = 1080;
+		mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
+		mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
+		mconfig[1].max_video_width = 1920;
+		mconfig[1].max_video_height = 1080;
+		*num_configurations = 2;
 		*configs = mconfig;
 		break;
 	case SOURCE_DTV:
-		mconfig->stream_id = SOURCE_DTV;
-		mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-		mconfig->max_video_width = 1920;
-		mconfig->max_video_height = 1080;
-		*num_configurations = 1;
+		mconfig[0].stream_id = NORMAL_STREAM_ID;
+		mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
+		mconfig[0].max_video_width = 1920;
+		mconfig[0].max_video_height = 1080;
+		mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
+		mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
+		mconfig[1].max_video_width = 1920;
+		mconfig[1].max_video_height = 1080;
+		*num_configurations = 2;
 		*configs = mconfig;
 		break;
 	case SOURCE_AV1:
-		mconfig->stream_id = SOURCE_AV1;
-		mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-		mconfig->max_video_width = 1920;
-		mconfig->max_video_height = 1080;
-		*num_configurations = 1;
+		mconfig[0].stream_id = NORMAL_STREAM_ID;
+		mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
+		mconfig[0].max_video_width = 1920;
+		mconfig[0].max_video_height = 1080;
+		mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
+		mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
+		mconfig[1].max_video_width = 1920;
+		mconfig[1].max_video_height = 1080;
+		*num_configurations = 2;
 		*configs = mconfig;
 		break;
 	case SOURCE_HDMI1:
-		mconfig->stream_id = SOURCE_HDMI1;
-		mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-		mconfig->max_video_width = 1920;
-		mconfig->max_video_height = 1080;
-		*num_configurations = 1;
+		mconfig[0].stream_id = NORMAL_STREAM_ID;
+		mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
+		mconfig[0].max_video_width = 1920;
+		mconfig[0].max_video_height = 1080;
+		mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
+		mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
+		mconfig[1].max_video_width = 1920;
+		mconfig[1].max_video_height = 1080;
+		*num_configurations = 2;
 		*configs = mconfig;
 		break;
 	case SOURCE_HDMI2:
-		mconfig->stream_id = SOURCE_HDMI2;
-		mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-		mconfig->max_video_width = 1920;
-		mconfig->max_video_height = 1080;
-		*num_configurations = 1;
+		mconfig[0].stream_id = NORMAL_STREAM_ID;
+		mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
+		mconfig[0].max_video_width = 1920;
+		mconfig[0].max_video_height = 1080;
+		mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
+		mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
+		mconfig[1].max_video_width = 1920;
+		mconfig[1].max_video_height = 1080;
+		*num_configurations = 2;
 		*configs = mconfig;
 		break;
 	case SOURCE_HDMI3:
-		mconfig->stream_id = SOURCE_HDMI3;
-		mconfig->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-		mconfig->max_video_width = 1920;
-		mconfig->max_video_height = 1080;
-		*num_configurations = 1;
+		mconfig[0].stream_id = NORMAL_STREAM_ID;
+		mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
+		mconfig[0].max_video_width = 1920;
+		mconfig[0].max_video_height = 1080;
+		mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
+		mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
+		mconfig[1].max_video_width = 1920;
+		mconfig[1].max_video_height = 1080;
+		*num_configurations = 2;
 		*configs = mconfig;
 		break;
 	default:
@@ -196,47 +218,18 @@ static int get_stream_configs(int dev_id, int *num_configurations, const tv_stre
 	return 0;
 }
 
-static int get_tv_stream(int device_id, tv_stream_t *stream)
+static int get_tv_stream(tv_stream_t *stream)
 {
-	native_handle *h = native_handle_create(0, 0);
-	if (!h)
-	{
-		return -EINVAL;
+	if (stream->stream_id == NORMAL_STREAM_ID) {
+		native_handle *h = native_handle_create(0, 0);
+		if (!h) {
+			return -EINVAL;
+		}
+		stream->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE;
+		stream->sideband_stream_source_handle = h;
 	}
-	switch (device_id)
-	{
-	case SOURCE_TV:
-		stream->stream_id = SOURCE_TV;
-		stream->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE;
-		stream->sideband_stream_source_handle = h;
-		break;
-	case SOURCE_DTV:
-		stream->stream_id = SOURCE_DTV;
-		stream->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE;
-		stream->sideband_stream_source_handle = h;
-		break;
-	case SOURCE_AV1:
-		stream->stream_id = SOURCE_AV1;
-		stream->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE;
-		stream->sideband_stream_source_handle = h;
-		break;
-	case SOURCE_HDMI1:
-		stream->stream_id = SOURCE_HDMI1;
-		stream->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE;
-		stream->sideband_stream_source_handle = h;
-		break;
-	case SOURCE_HDMI2:
-		stream->stream_id = SOURCE_HDMI2;
-		stream->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE;
-		stream->sideband_stream_source_handle = h;
-		break;
-	case SOURCE_HDMI3:
-		stream->stream_id = SOURCE_HDMI3;
-		stream->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE;
-		stream->sideband_stream_source_handle = h;
-		break;
-defualt:
-		break;
+	else if (stream->stream_id == NORMAL_STREAM_ID) {
+		stream->type = TV_STREAM_TYPE_BUFFER_PRODUCER;
 	}
 	return 0;
 }
@@ -325,14 +318,19 @@ static int tv_input_open_stream(struct tv_input_device *dev, int device_id,
 	tv_input_private_t *priv = (tv_input_private_t *)dev;
 	if (priv)
 	{
-		if (get_tv_stream(device_id, stream) != 0)
+		if (get_tv_stream(stream) != 0)
 		{
 			return -EINVAL;
 		}
-		LOGD ( "%s, SetSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
-		priv->pTv->StartTvLock();
-		priv->pTv->SetSourceSwitchInput((tv_source_input_t) device_id);
-		return 0;
+		if (stream->stream_id == NORMAL_STREAM_ID) {
+			LOGD ( "%s, SetSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
+			priv->pTv->StartTvLock();
+			priv->pTv->SetSourceSwitchInput((tv_source_input_t) device_id);
+			return 0;
+		}
+		else if (stream->stream_id == FRAME_CAPTURE_STREAM_ID) {
+			return 0;
+		}
 	}
 	return -EINVAL;
 }
@@ -343,7 +341,7 @@ static int tv_input_close_stream(struct tv_input_device *dev, int device_id,
 	tv_input_private_t *priv = (tv_input_private_t *)dev;
 	if (priv)
 	{
-		LOGD ( "%s\n", __FUNCTION__ );
+		LOGD ( "%s, SetSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
 		priv->pTv->StopTvLock();
 		return 0;
 	}
