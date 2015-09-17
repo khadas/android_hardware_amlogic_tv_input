@@ -15,8 +15,7 @@
 
 
 // TV Satellite相关信息
-class CTvSatellite
-{
+class CTvSatellite {
 };
 
 #endif  //_CTVSATELLITE_H

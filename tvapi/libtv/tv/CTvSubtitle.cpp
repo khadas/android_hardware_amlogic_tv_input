@@ -1,23 +1,23 @@
 //
 //
-//  amlogic 2013
+//	amlogic	2013
 //
-//  @ Project : tv
-//  @ Date : 2013-11
-//  @ Author :
+//	@ Project :	tv
+//	@ Date : 2013-11
+//	@ Author :
 //
 //
 #include "CTvSubtitle.h"
 CTvSubtitle::CTvSubtitle()
 {
-    mpObser = NULL;
+	mpObser = NULL;
 }
 CTvSubtitle::~CTvSubtitle()
 {
 }
 void CTvSubtitle::setObser(IObserver *pObser)
 {
-    mpObser = pObser;
+	mpObser = pObser;
 }
 void CTvSubtitle::stopDecoder()
 {
@@ -79,9 +79,9 @@ void CTvSubtitle::goHome()
 
 /**
  * 在图文模式下根据颜色跳转到指定链接
- * @param color 颜色，COLOR_RED/COLOR_GREEN/COLOR_YELLOW/COLOR_BLUE
+ * @param color	颜色，COLOR_RED/COLOR_GREEN/COLOR_YELLOW/COLOR_BLUE
  */
-void CTvSubtitle::colorLink(int color)
+void CTvSubtitle::colorLink(int	color)
 {
 
 }
@@ -110,79 +110,79 @@ void CTvSubtitle::searchPrevious()
 {
 }
 
-int CTvSubtitle::sub_init()
+int	CTvSubtitle::sub_init()
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_destroy()
+int	CTvSubtitle::sub_destroy()
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_lock()
+int	CTvSubtitle::sub_lock()
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_unlock()
+int	CTvSubtitle::sub_unlock()
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_clear()
+int	CTvSubtitle::sub_clear()
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_start_dvb_sub(int dmx_id, int pid, int page_id, int anc_page_id)
+int	CTvSubtitle::sub_start_dvb_sub(int dmx_id, int pid,	int	page_id, int anc_page_id)
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_start_dtv_tt(int dmx_id, int region_id, int pid, int page, int sub_page, bool is_sub)
+int	CTvSubtitle::sub_start_dtv_tt(int dmx_id, int region_id, int pid, int page,	int	sub_page, bool is_sub)
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_stop_dvb_sub()
+int	CTvSubtitle::sub_stop_dvb_sub()
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_stop_dtv_tt()
+int	CTvSubtitle::sub_stop_dtv_tt()
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_tt_goto(int page)
+int	CTvSubtitle::sub_tt_goto(int page)
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_tt_color_link(int color)
+int	CTvSubtitle::sub_tt_color_link(int color)
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_tt_home_link()
+int	CTvSubtitle::sub_tt_home_link()
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_tt_next(int dir)
+int	CTvSubtitle::sub_tt_next(int dir)
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_tt_set_search_pattern(char *pattern, bool casefold)
+int	CTvSubtitle::sub_tt_set_search_pattern(char *pattern, bool casefold)
 {
-    return 0;
+	return 0;
 }
 
-int CTvSubtitle::sub_tt_search(int dir)
+int	CTvSubtitle::sub_tt_search(int dir)
 {
-    return 0;
+	return 0;
 }
 
 /*
@@ -230,94 +230,94 @@ program, no signal, blocked...*/
 
 //channel_num == 0 ,if frontend is dtv
 //else != 0
-int CTvSubtitle::sub_start_atsc_cc(enum cc_param_country country, enum cc_param_source_type src_type, int channel_num, enum cc_param_caption_type caption_type)
+int	CTvSubtitle::sub_start_atsc_cc(enum cc_param_country country, enum cc_param_source_type src_type, int channel_num, enum cc_param_caption_type caption_type)
 {
-    LOGD("----sub_start_atsc_cc-1--- country=%d,src=%d,ctype=%d", country, src_type, caption_type);
-    switch (country) {
-    case CC_PARAM_COUNTRY_USA:
-        AM_CC_Cmd(CMD_SET_COUNTRY_USA);
-        break;
-    case CC_PARAM_COUNTRY_KOREA:
-        AM_CC_Cmd(CMD_SET_COUNTRY_KOREA);
-        break;
-    default:
-        AM_CC_Cmd(CMD_SET_COUNTRY_USA);
-        break;
-    }
+	LOGD("----sub_start_atsc_cc-1--- country=%d,src=%d,ctype=%d", country, src_type, caption_type);
+	switch(country) {
+	case CC_PARAM_COUNTRY_USA:
+		AM_CC_Cmd(CMD_SET_COUNTRY_USA);
+		break;
+	case CC_PARAM_COUNTRY_KOREA:
+		AM_CC_Cmd(CMD_SET_COUNTRY_KOREA);
+		break;
+	default:
+		AM_CC_Cmd(CMD_SET_COUNTRY_USA);
+		break;
+	}
 
-    switch (src_type) {
-    case CC_PARAM_SOURCE_VBIDATA:
-        AM_CC_Cmd(CMD_CC_SET_VBIDATA);
-        break;
-    case CC_PARAM_SOURCE_USERDATA:
-        AM_CC_Cmd(CMD_CC_SET_USERDATA);
-        break;
-    default:
-        AM_CC_Cmd(CMD_CC_SET_USERDATA);
-        break;
-    }
+	switch(src_type) {
+	case CC_PARAM_SOURCE_VBIDATA:
+		AM_CC_Cmd(CMD_CC_SET_VBIDATA);
+		break;
+	case CC_PARAM_SOURCE_USERDATA:
+		AM_CC_Cmd(CMD_CC_SET_USERDATA);
+		break;
+	default:
+		AM_CC_Cmd(CMD_CC_SET_USERDATA);
+		break;
+	}
 
-    //just for test
-    if (channel_num == 0) {
-    } else {
-        //AM_CC_Cmd(CMD_CC_SET_CHAN_NUM);
-    }
+	//just for test
+	if(channel_num == 0) {
+	} else {
+		//AM_CC_Cmd(CMD_CC_SET_CHAN_NUM);
+	}
 
-    AM_CLOSECAPTION_cmd_t cc_t_cmd;
-    switch (caption_type) {
-    case CC_PARAM_ANALOG_CAPTION_TYPE_CC1:
-        cc_t_cmd = CMD_CC_1;
-        break;
-    case CC_PARAM_ANALOG_CAPTION_TYPE_CC2:
-        cc_t_cmd = CMD_CC_2;
-        break;
-    case CC_PARAM_ANALOG_CAPTION_TYPE_CC3:
-        cc_t_cmd = CMD_CC_3;
-        break;
-    case CC_PARAM_ANALOG_CAPTION_TYPE_CC4:
-        cc_t_cmd = CMD_CC_4;
-        break;
-    case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE1:
-        cc_t_cmd = CMD_SERVICE_1;
-        break;
-    case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE2:
-        cc_t_cmd = CMD_SERVICE_2;
-        break;
-    case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE3:
-        cc_t_cmd = CMD_SERVICE_3;
-        break;
-    case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE4:
-        cc_t_cmd = CMD_SERVICE_4;
-        break;
-    default:
-        cc_t_cmd = CMD_SERVICE_1;
-        break;
-    }
-    AM_CC_Cmd(cc_t_cmd);
+	AM_CLOSECAPTION_cmd_t cc_t_cmd;
+	switch(caption_type) {
+	case CC_PARAM_ANALOG_CAPTION_TYPE_CC1:
+		cc_t_cmd = CMD_CC_1;
+		break;
+	case CC_PARAM_ANALOG_CAPTION_TYPE_CC2:
+		cc_t_cmd = CMD_CC_2;
+		break;
+	case CC_PARAM_ANALOG_CAPTION_TYPE_CC3:
+		cc_t_cmd = CMD_CC_3;
+		break;
+	case CC_PARAM_ANALOG_CAPTION_TYPE_CC4:
+		cc_t_cmd = CMD_CC_4;
+		break;
+	case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE1:
+		cc_t_cmd = CMD_SERVICE_1;
+		break;
+	case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE2:
+		cc_t_cmd = CMD_SERVICE_2;
+		break;
+	case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE3:
+		cc_t_cmd = CMD_SERVICE_3;
+		break;
+	case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE4:
+		cc_t_cmd = CMD_SERVICE_4;
+		break;
+	default:
+		cc_t_cmd = CMD_SERVICE_1;
+		break;
+	}
+	AM_CC_Cmd(cc_t_cmd);
 
-    AM_CC_Set_CallBack(close_caption_callback, this);
-    AM_VCHIP_Set_CallBack(atv_vchip_callback, this);
-    //start
-    AM_CC_Cmd(CMD_CC_START);
-    LOGD("----sub_start_atsc_cc-2--- country=%d,src=%d,ctype=%d", country, src_type, caption_type);
-    return 0;
+	AM_CC_Set_CallBack(close_caption_callback, this);
+	AM_VCHIP_Set_CallBack(atv_vchip_callback, this);
+	//start
+	AM_CC_Cmd(CMD_CC_START);
+	LOGD("----sub_start_atsc_cc-2--- country=%d,src=%d,ctype=%d", country, src_type, caption_type);
+	return 0;
 }
 
-int CTvSubtitle::sub_stop_atsc_cc()
+int	CTvSubtitle::sub_stop_atsc_cc()
 {
-    LOGD("----sub_stop_atsc_cc----");
-    AM_CC_Cmd(CMD_CC_STOP);
-    return 0;
+	LOGD("----sub_stop_atsc_cc----");
+	AM_CC_Cmd(CMD_CC_STOP);
+	return 0;
 }
-int CTvSubtitle::ResetVchipChgStat()
+int	CTvSubtitle::ResetVchipChgStat()
 {
-    avchip_chg = 0;
-    AM_CC_Cmd(CMD_VCHIP_RST_CHGSTAT);
-    return 0;
+	avchip_chg = 0;
+	AM_CC_Cmd(CMD_VCHIP_RST_CHGSTAT);
+	return 0;
 }
 int CTvSubtitle::IsVchipChange()
 {
-    return avchip_chg;
+	return avchip_chg;
 }
 //cnt :data buf len
 //databuf len  is max 512
@@ -325,24 +325,24 @@ int CTvSubtitle::IsVchipChange()
 void CTvSubtitle::close_caption_callback(char *str, int cnt, int data_buf[], int cmd_buf[], void *user_data)
 {
 
-    CTvSubtitle *pSub = (CTvSubtitle *)user_data;
+	CTvSubtitle *pSub = (CTvSubtitle *)user_data;
 
-    if (pSub == NULL) {
-        LOGD("sub cc callback is null user data for this");
-        return;
-    }
+	if(pSub == NULL) {
+		LOGD("sub cc callback is null user data for this");
+		return;
+	}
 
-    if (pSub->mpObser == NULL) return;
+	if(pSub->mpObser == NULL) return;
 
-    pSub->mCurCCEv.mDataBufSize = cnt;
-    pSub->mCurCCEv.mpDataBuffer = data_buf;
-    pSub->mCurCCEv.mCmdBufSize = 128;//max
-    pSub->mCurCCEv.mpCmdBuffer = cmd_buf;
+	pSub->mCurCCEv.mDataBufSize = cnt;
+	pSub->mCurCCEv.mpDataBuffer = data_buf;
+	pSub->mCurCCEv.mCmdBufSize = 128;//max
+	pSub->mCurCCEv.mpCmdBuffer = cmd_buf;
 
-    pSub->mpObser->onEvent(pSub->mCurCCEv);
+	pSub->mpObser->onEvent(pSub->mCurCCEv);
 }
 void CTvSubtitle::atv_vchip_callback(int Is_chg,  void *user_data)
 {
-    CTvSubtitle *pSub = (CTvSubtitle *)user_data;
-    pSub->avchip_chg = Is_chg;
+	CTvSubtitle *pSub = (CTvSubtitle *)user_data;
+	pSub->avchip_chg = Is_chg;
 }

@@ -5,18 +5,18 @@ LOCAL_SRC_FILES:= \
     android_tvtest.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-    libcutils \
-    libutils \
-    libbinder \
-    libtvbinder \
-    libnativehelper \
-    libandroid_runtime \
-    liblog
-
+	libcutils \
+	libutils \
+	libbinder \
+	libtvbinder \
+	libnativehelper \
+	libandroid_runtime \
+	liblog
+    
 LOCAL_C_INCLUDES += \
     bionic/libc/include \
-    $(LOCAL_PATH)/../ \
-    $(LOCAL_PATH)/../android
+	$(LOCAL_PATH)/../ \
+	$(LOCAL_PATH)/../android    
 
 LOCAL_MODULE:= tvtest
 
@@ -29,20 +29,20 @@ LOCAL_SRC_FILES:= \
     comm_test.cpp
 
 LOCAL_SHARED_LIBRARIES := \
-    libcutils \
-    libutils \
-    libbinder \
-    libtvbinder \
-    libnativehelper \
-    libandroid_runtime \
-    liblog \
-    libtv
-
+	libcutils \
+	libutils \
+	libbinder \
+	libtvbinder \
+	libnativehelper \
+	libandroid_runtime \
+	liblog \
+	libtv
+    
 LOCAL_C_INCLUDES += \
     bionic/libc/include \
-    $(LOCAL_PATH)/../ \
-    $(LOCAL_PATH)/../libtv\
-    $(LOCAL_PATH)/../android
+	$(LOCAL_PATH)/../ \
+	$(LOCAL_PATH)/../libtv\
+	$(LOCAL_PATH)/../android    
 
 LOCAL_MODULE:= comm_test
 

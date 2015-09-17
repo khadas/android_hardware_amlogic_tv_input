@@ -9,35 +9,33 @@ using namespace android;
 #if !defined(_C_MSG_QUEUE_H)
 #define _C_MSG_QUEUE_H
 
-class CMessage
-{
+class CMessage {
 public:
-    CMessage();
-    ~CMessage();
-    nsecs_t mDelayMs;//delay times , MS
-    nsecs_t mWhenMs;//when, the msg will handle
-    int mType;
-    void *mpData;
-    unsigned char mpPara[2048];
+	CMessage();
+	~CMessage();
+	nsecs_t mDelayMs;//delay times , MS
+	nsecs_t mWhenMs;//when, the msg will handle
+	int mType;
+	void *mpData;
+	unsigned char mpPara[2048];
 };
 
-class CMsgQueueThread: public CThread
-{
+class CMsgQueueThread: public CThread {
 public:
-    CMsgQueueThread();
-    virtual ~CMsgQueueThread();
-    int startMsgQueue();
-    void sendMsg(CMessage &msg);
-    void removeMsg(CMessage &msg);
+	CMsgQueueThread();
+	virtual ~CMsgQueueThread();
+	int startMsgQueue();
+	void sendMsg(CMessage &msg);
+	void removeMsg(CMessage &msg);
 private:
-    bool  threadLoop();
-    nsecs_t getNowMs();//get system time , MS
-    virtual void handleMessage(CMessage &msg) = 0;
+	bool  threadLoop();
+	nsecs_t getNowMs();//get system time , MS
+	virtual void handleMessage(CMessage &msg) = 0;
 
-    //
-    Vector<CMessage> m_v_msg;
-    CCondition mGetMsgCondition;
-    CMutex   mLockQueue;
+	//
+	Vector<CMessage> m_v_msg;
+	CCondition mGetMsgCondition;
+	CMutex   mLockQueue;
 };
 
 /*class CHandler

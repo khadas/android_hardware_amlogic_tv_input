@@ -9,22 +9,20 @@
 
 using namespace android;
 
-class ITvClient: public IInterface
-{
+class ITvClient: public IInterface {
 public:
-    DECLARE_META_INTERFACE(TvClient);
+	DECLARE_META_INTERFACE(TvClient);
 
-    virtual void notifyCallback(int32_t msgType, const Parcel &p) = 0;
+	virtual void notifyCallback(int32_t msgType, const Parcel &p) = 0;
 };
 
 
-class BnTvClient: public BnInterface<ITvClient>
-{
+class BnTvClient: public BnInterface<ITvClient> {
 public:
-    virtual status_t onTransact(uint32_t code,
-                                const Parcel &data,
-                                Parcel *reply,
-                                uint32_t flags = 0);
+	virtual status_t onTransact(uint32_t code,
+								const Parcel &data,
+								Parcel *reply,
+								uint32_t flags = 0);
 };
 
 #endif

@@ -11,13 +11,12 @@
 
 #include "CTvSettingCfg.h"
 
-class CTvSettingDeviceFactory
-{
+class CTvSettingDeviceFactory {
 public:
-    CTvSettingDeviceFactory();
-    ~CTvSettingDeviceFactory();
-    CBlobDevice *getSaveDeviceFromConfigFile();
+	CTvSettingDeviceFactory();
+	~CTvSettingDeviceFactory();
+	CBlobDevice *getSaveDeviceFromConfigFile();
 private:
-    CBlobDevice *mpCurDevice;
+	CBlobDevice *mpCurDevice;
 };
 #endif

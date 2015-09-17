@@ -66,9 +66,9 @@
 #define CC_AUD_RESAMPLE_TYPE_SW                                         (2)
 
 extern int *GetAudioAmplifierNoLinePointsIndexBuffer(int lut_buf_type,
-        int get_type);
+		int get_type);
 extern int *GetAudioAmplifierNoLinePointsDataBuffer(int lut_buf_type,
-        int get_type);
+		int get_type);
 
 extern int GetAudioAmplifierMasterNoLineSwitchFlag();
 extern int GetAudioAmplifierMasterNoLinePointsCount();
@@ -93,11 +93,11 @@ extern int GetAudioMainVolLutBufNameModifyUbootenvCFG();
 extern int GetAudioMainVolLutBufNameModifyEnableCFG();
 extern int GetAudioMainVolLutBufNameCFG(int get_type, char name_buf[]);
 extern int *GetAudioAmplifierMasterVolumeLUTBufferPtr(int get_type,
-        int audio_std);
+		int audio_std);
 extern int GetAudioSupperBassVolLutBufNameModifyEnableCFG();
 extern int GetAudioSupperBassVolLutBufNameCFG(int get_type, char name_buf[]);
 extern int *GetAudioAmplifierSupperBassVolumeLUTBufferPtr(int get_type,
-        int audio_std);
+		int audio_std);
 extern int *GetAudioEQPresetBufferPtr();
 extern int GetAudioDVISupportEnable();
 extern int GetTvAudioCardID(char tv_card_id_buf[]);

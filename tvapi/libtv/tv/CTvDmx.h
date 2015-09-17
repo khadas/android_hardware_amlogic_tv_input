@@ -4,15 +4,14 @@
 #include "CTvLog.h"
 #include "am_dmx.h"
 
-class CTvDmx
-{
+class CTvDmx {
 public:
-    CTvDmx();
-    ~CTvDmx();
-    int Open(AM_DMX_OpenPara_t &para);
-    int Close();
-    int SetSource(AM_DMX_Source_t source);
+	CTvDmx();
+	~CTvDmx();
+	int Open(AM_DMX_OpenPara_t &para);
+	int Close();
+	int SetSource(AM_DMX_Source_t source);
 private:
-    int mDmxDevId;
+	int mDmxDevId;
 };
 #endif

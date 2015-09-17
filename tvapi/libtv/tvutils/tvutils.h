@@ -10,8 +10,8 @@
 #define CPQDB_DB_SIZE_ID       "tv.db.size.id"
 
 struct erase_info_user {
-    uint32_t start;
-    uint32_t length;
+	uint32_t start;
+	uint32_t length;
 };
 
 extern int *GetFileAttrIntValueStr(const char *fp);
@@ -56,12 +56,12 @@ extern int GetPlatformHaveDDFlag();
 #define CC_PROJECT_INFO_ITEM_MAX_LEN  (64)
 
 typedef struct project_info_s {
-    char version[CC_PROJECT_INFO_ITEM_MAX_LEN];
-    char panel_type[CC_PROJECT_INFO_ITEM_MAX_LEN];
-    char panel_outputmode[CC_PROJECT_INFO_ITEM_MAX_LEN];
-    char panel_rev[CC_PROJECT_INFO_ITEM_MAX_LEN];
-    char panel_name[CC_PROJECT_INFO_ITEM_MAX_LEN];
-    char amp_curve_name[CC_PROJECT_INFO_ITEM_MAX_LEN];
+	char version[CC_PROJECT_INFO_ITEM_MAX_LEN];
+	char panel_type[CC_PROJECT_INFO_ITEM_MAX_LEN];
+	char panel_outputmode[CC_PROJECT_INFO_ITEM_MAX_LEN];
+	char panel_rev[CC_PROJECT_INFO_ITEM_MAX_LEN];
+	char panel_name[CC_PROJECT_INFO_ITEM_MAX_LEN];
+	char amp_curve_name[CC_PROJECT_INFO_ITEM_MAX_LEN];
 } project_info_t;
 
 extern unsigned int CalCRC32(unsigned int crc, const unsigned char *ptr, unsigned int buf_len);
@@ -73,16 +73,16 @@ extern int GetProjectInfo(project_info_t *proj_info_ptr);
 #define AML_DBG_REGS_IOC_MAGIC 'R'
 
 typedef struct aml_debug_reg_s {
-    unsigned int addr;
-    unsigned int val;
-    unsigned char mode;
+	unsigned int addr;
+	unsigned int val;
+	unsigned char mode;
 } aml_debug_reg_t;
 
 typedef struct aml_debug_bit_s {
-    unsigned int addr;
-    unsigned int val;
-    unsigned int start;
-    unsigned int len;
+	unsigned int addr;
+	unsigned int val;
+	unsigned int start;
+	unsigned int len;
 } aml_debug_bit_t;
 
 /*ioctl for reg*/

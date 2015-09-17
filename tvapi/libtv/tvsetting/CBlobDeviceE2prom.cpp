@@ -25,27 +25,27 @@ CBlobDeviceE2prom::~CBlobDeviceE2prom()
 
 int CBlobDeviceE2prom::WriteBytes(int offset, int size, unsigned char *buf)
 {
-    return 0;
+	return 0;
 }
 int CBlobDeviceE2prom::ReadBytes(int offset, int size, unsigned char *buf)
 {
-    return 0;
+	return 0;
 }
 int CBlobDeviceE2prom::EraseAllData()
 {
-    return 0;
+	return 0;
 }
 int CBlobDeviceE2prom::InitCheck()
 {
-    return 0;
+	return 0;
 }
 int CBlobDeviceE2prom::OpenDevice()
 {
-    return 0;
+	return 0;
 }
 int CBlobDeviceE2prom::CloseDevice()
 {
-    return 0;
+	return 0;
 }
 //int CBlobDeviceE2prom::InitCheck() {
 /* int i, tmp_dev_total_size = 0, tmp_offset = 0, rw_check_count = 4;
@@ -217,7 +217,7 @@ return device_fd;*/
 
     //GetDeviceSlaveAddress(&tmp_dev_slave_addr);
 
-    //showboz
+	//showboz
     msg.addr = //
     //tmp_dev_slave_addr//0;
     msg.flags = I2C_M_WR;

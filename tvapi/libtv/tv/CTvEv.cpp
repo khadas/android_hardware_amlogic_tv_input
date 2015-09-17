@@ -7,5 +7,5 @@
 #include "CTvEv.h"
 CTvEv::CTvEv(int type)
 {
-    mEvType = type;
+	mEvType = type;
 }

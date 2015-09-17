@@ -215,9 +215,9 @@ static const int VPP_DATA_POS_NOISE_REDUCTION_START         =      (VPP_DATA_POS
 static const int VPP_DATA_POS_NOISE_REDUCTION_SIZE          =      (1 * (SOURCE_TYPE_MAX));
 static const int VPP_DATA_POS_NOISE_REDUCTION_END           =      (VPP_DATA_POS_NOISE_REDUCTION_START + VPP_DATA_POS_NOISE_REDUCTION_SIZE);
 //SceneMode 1byte
-static const int VPP_DATA_POS_SCENE_MODE_START              =      (VPP_DATA_POS_NOISE_REDUCTION_END + 0);
-static const int VPP_DATA_POS_SCENE_MODE_SIZE               =      (1);
-static const int VPP_DATA_POS_SCENE_MODE_END                =      (VPP_DATA_POS_SCENE_MODE_START + VPP_DATA_POS_SCENE_MODE_SIZE);
+static const int VPP_DATA_POS_SCENE_MODE_START				=	   (VPP_DATA_POS_NOISE_REDUCTION_END + 0);
+static const int VPP_DATA_POS_SCENE_MODE_SIZE				=	   (1);
+static const int VPP_DATA_POS_SCENE_MODE_END				=	   (VPP_DATA_POS_SCENE_MODE_START + VPP_DATA_POS_SCENE_MODE_SIZE);
 //PictureMode 1*7=7byte
 static const int VPP_DATA_POS_PICTURE_MODE_START            =      (VPP_DATA_POS_SCENE_MODE_END + 0);
 static const int VPP_DATA_POS_PICTURE_MODE_SIZE             =      (1 * (SOURCE_TYPE_MAX));

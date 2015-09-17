@@ -32,8 +32,7 @@
 __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__); }
 
 
-typedef struct tv_input_private
-{
+typedef struct tv_input_private {
 	tv_input_device_t device;
 
 	// Callback related data
@@ -138,8 +137,7 @@ static int notify_HDMI_stream_configurations_change(tv_input_private_t *priv, in
 static tv_stream_config_t mconfig[2];
 static int get_stream_configs(int dev_id, int *num_configurations, const tv_stream_config_t **configs)
 {
-	switch (dev_id)
-	{
+	switch (dev_id) {
 	case SOURCE_TV:
 		mconfig[0].stream_id = NORMAL_STREAM_ID;
 		mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
@@ -227,8 +225,7 @@ static int get_tv_stream(tv_stream_t *stream)
 		}
 		stream->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE;
 		stream->sideband_stream_source_handle = h;
-	}
-	else if (stream->stream_id == NORMAL_STREAM_ID) {
+	} else if (stream->stream_id == NORMAL_STREAM_ID) {
 		stream->type = TV_STREAM_TYPE_BUFFER_PRODUCER;
 	}
 	return 0;
@@ -237,14 +234,12 @@ static int get_tv_stream(tv_stream_t *stream)
 static int tv_input_device_open(const struct hw_module_t *module,
 								const char *name, struct hw_device_t **device);
 
-static struct hw_module_methods_t tv_input_module_methods =
-{
+static struct hw_module_methods_t tv_input_module_methods = {
 open:
 	tv_input_device_open
 };
 
-tv_input_module_t HAL_MODULE_INFO_SYM =
-{
+tv_input_module_t HAL_MODULE_INFO_SYM = {
 common:
 	{
 tag:
@@ -267,13 +262,11 @@ methods:
 static int tv_input_initialize(struct tv_input_device *dev,
 							   const tv_input_callback_ops_t *callback, void *data)
 {
-	if (dev == NULL || callback == NULL)
-	{
+	if (dev == NULL || callback == NULL) {
 		return -EINVAL;
 	}
 	tv_input_private_t *priv = (tv_input_private_t *)dev;
-	if (priv->callback != NULL)
-	{
+	if (priv->callback != NULL) {
 		return -EEXIST;
 	}
 
@@ -305,8 +298,7 @@ static int tv_input_get_stream_configurations(const struct tv_input_device *dev,
 		int device_id, int *num_configurations,
 		const tv_stream_config_t **configs)
 {
-	if (get_stream_configs(device_id, num_configurations, configs) == 0)
-	{
+	if (get_stream_configs(device_id, num_configurations, configs) == 0) {
 		return 0;
 	}
 	return -EINVAL;
@@ -316,10 +308,8 @@ static int tv_input_open_stream(struct tv_input_device *dev, int device_id,
 								tv_stream_t *stream)
 {
 	tv_input_private_t *priv = (tv_input_private_t *)dev;
-	if (priv)
-	{
-		if (get_tv_stream(stream) != 0)
-		{
+	if (priv) {
+		if (get_tv_stream(stream) != 0) {
 			return -EINVAL;
 		}
 		if (stream->stream_id == NORMAL_STREAM_ID) {
@@ -327,8 +317,7 @@ static int tv_input_open_stream(struct tv_input_device *dev, int device_id,
 			priv->pTv->StartTvLock();
 			priv->pTv->SetSourceSwitchInput((tv_source_input_t) device_id);
 			return 0;
-		}
-		else if (stream->stream_id == FRAME_CAPTURE_STREAM_ID) {
+		} else if (stream->stream_id == FRAME_CAPTURE_STREAM_ID) {
 			return 0;
 		}
 	}
@@ -339,8 +328,7 @@ static int tv_input_close_stream(struct tv_input_device *dev, int device_id,
 								 int stream_id)
 {
 	tv_input_private_t *priv = (tv_input_private_t *)dev;
-	if (priv)
-	{
+	if (priv) {
 		LOGD ( "%s, SetSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
 		priv->pTv->StopTvLock();
 		return 0;
@@ -364,12 +352,10 @@ static int tv_input_cancel_capture(struct tv_input_device *, int, int, uint32_t)
 static int tv_input_device_close(struct hw_device_t *dev)
 {
 	tv_input_private_t *priv = (tv_input_private_t *)dev;
-	if (priv->pTv != NULL)
-	{
+	if (priv->pTv != NULL) {
 		delete priv->pTv;
 	}
-	if (priv)
-	{
+	if (priv) {
 		free(priv);
 	}
 	return 0;
@@ -381,8 +367,7 @@ static int tv_input_device_open(const struct hw_module_t *module,
 								const char *name, struct hw_device_t **device)
 {
 	int status = -EINVAL;
-	if (!strcmp(name, TV_INPUT_DEFAULT_DEVICE))
-	{
+	if (!strcmp(name, TV_INPUT_DEFAULT_DEVICE)) {
 		tv_input_private_t *dev = (tv_input_private_t *)malloc(sizeof(*dev));
 
 		/* initialize our state here */

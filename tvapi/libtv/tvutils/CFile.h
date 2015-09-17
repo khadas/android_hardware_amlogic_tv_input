@@ -14,34 +14,33 @@
 
 #define BUFFER_SIZE 1024
 
-class CFile
-{
+class CFile {
 public:
-    CFile(const char *path);
-    CFile();
-    virtual ~CFile();
-    virtual int openFile(const char *path);
-    virtual int closeFile();
-    virtual int writeFile(const unsigned char *pData, int uLen);
-    virtual int readFile(const unsigned char *pBuf, int uLen);
-    int copyTo(const char *dstPath);
-    static int delFile(const char *path);
-    static int  getFileAttrValue(const char *path);
-    static int  setFileAttrValue(const char *path, int value);
-    static int getFileAttrStr(const char *path, char *str);
-    static int setFileAttrStr(const char *path, const char *str);
-    int delFile();
-    int flush();
-    int seekTo();
-    int seekToBegin();
-    int seekToEnd();
-    int getLength();
-    int getFd()
-    {
-        return mFd;
-    };
+	CFile(const char *path);
+	CFile();
+	virtual ~CFile();
+	virtual int openFile(const char *path);
+	virtual int closeFile();
+	virtual int writeFile(const unsigned char *pData, int uLen);
+	virtual int readFile(const unsigned char *pBuf, int uLen);
+	int copyTo(const char *dstPath);
+	static int delFile(const char *path);
+	static int  getFileAttrValue(const char *path);
+	static int  setFileAttrValue(const char *path, int value);
+	static int getFileAttrStr(const char *path, char *str);
+	static int setFileAttrStr(const char *path, const char *str);
+	int delFile();
+	int flush();
+	int seekTo();
+	int seekToBegin();
+	int seekToEnd();
+	int getLength();
+	int getFd()
+	{
+		return mFd;
+	};
 protected:
-    char mPath[CC_MAX_FILE_PATH_LEN];
-    int  mFd;
+	char mPath[CC_MAX_FILE_PATH_LEN];
+	int  mFd;
 };
 #endif

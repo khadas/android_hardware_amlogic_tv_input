@@ -12,16 +12,16 @@
 
 CTvSettingDeviceFactory::CTvSettingDeviceFactory()
 {
-    mpCurDevice = NULL;
+	mpCurDevice = NULL;
 }
 
 CTvSettingDeviceFactory::~CTvSettingDeviceFactory()
 {
 
-    if (mpCurDevice != NULL) {
-        delete mpCurDevice;
-        mpCurDevice = NULL;
-    }
+	if(mpCurDevice != NULL) {
+		delete mpCurDevice;
+		mpCurDevice = NULL;
+	}
 
 }
 
@@ -169,19 +169,19 @@ CTvSettingDeviceFactory::~CTvSettingDeviceFactory()
 
 CBlobDevice *CTvSettingDeviceFactory::getSaveDeviceFromConfigFile()
 {
-    const char *device_type = config_get_str("SETTING", "store.device.type", "file");
-    const char *device_path = config_get_str("SETTING", "device_path", "/param/default_data");
-    const char *device_size = config_get_str("SETTING", "device_size", "0x1000");
-    LOGD("getSaveDeviceFromConfigFile type=%s path=%s size=%s", device_type, device_path, device_size);
+	const char *device_type = config_get_str("SETTING", "store.device.type", "file");
+	const char *device_path = config_get_str("SETTING", "device_path", "/param/default_data");
+	const char *device_size = config_get_str("SETTING", "device_size", "0x1000");
+	LOGD("getSaveDeviceFromConfigFile type=%s path=%s size=%s", device_type, device_path, device_size);
 
-    //
-    if (mpCurDevice != NULL) delete mpCurDevice;
+	//
+	if(mpCurDevice != NULL) delete mpCurDevice;
 
-    if (strcmp(device_type, "file") == 0) {
-        mpCurDevice = new CBlobDeviceFile();
-    } else if (strcmp(device_type, "e2prom") == 0) {
-    } else if (strcmp(device_type, "ram") == 0) {
-    }
+	if(strcmp(device_type, "file") == 0) {
+		mpCurDevice = new CBlobDeviceFile();
+	} else if(strcmp(device_type, "e2prom") == 0) {
+	} else if(strcmp(device_type, "ram") == 0) {
+	}
 
-    return mpCurDevice;
+	return mpCurDevice;
 }

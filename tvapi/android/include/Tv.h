@@ -13,69 +13,66 @@ class ITvService;
 class ITv;
 
 // ref-counted object for callbacks
-class TvListener: virtual public RefBase
-{
+class TvListener: virtual public RefBase {
 public:
-    virtual void notify(int32_t msgType, const Parcel &ext) = 0;
+	virtual void notify(int32_t msgType, const Parcel &ext) = 0;
 };
 
-class Tv : public BnTvClient, public IBinder::DeathRecipient
-{
+class Tv : public BnTvClient, public IBinder::DeathRecipient {
 public:
-    // construct a tv client from an existing remote
-    static sp<Tv> create(const sp<ITv> &tv);
-    static sp<Tv> connect();
-    ~Tv();
-    void        init();
-    status_t    reconnect();
-    void        disconnect();
-    status_t    lock();
-    status_t    unlock();
+	// construct a tv client from an existing remote
+	static sp<Tv> create(const sp<ITv> &tv);
+	static sp<Tv> connect();
+	~Tv();
+	void        init();
+	status_t    reconnect();
+	void        disconnect();
+	status_t    lock();
+	status_t    unlock();
 
-    status_t    getStatus()
-    {
-        return mStatus;
-    }
-    status_t    processCmd(const Parcel &p, Parcel *r);
-    status_t    createSubtitle(const sp<IMemory> &share_mem);
-    status_t    createVideoFrame(const sp<IMemory> &share_mem);
-    void        setListener(const sp<TvListener> &listener);
+	status_t    getStatus()
+	{
+		return mStatus;
+	}
+	status_t 	processCmd(const Parcel &p, Parcel *r);
+	status_t    createSubtitle(const sp<IMemory> &share_mem);
+	status_t 	createVideoFrame(const sp<IMemory> &share_mem);
+	void        setListener(const sp<TvListener> &listener);
 
-    // ITvClient interface
-    virtual void notifyCallback(int32_t msgType, const Parcel &p);
+	// ITvClient interface
+	virtual void notifyCallback(int32_t msgType, const Parcel &p);
 
-    sp<ITv> remote();
+	sp<ITv> remote();
 
 private:
-    Tv();
-    Tv(const Tv &);
-    Tv &operator = (const Tv);
-    virtual void binderDied(const wp<IBinder> &who);
+	Tv();
+	Tv(const Tv &);
+	Tv &operator = (const Tv);
+	virtual void binderDied(const wp<IBinder> &who);
 
-    class DeathNotifier: public IBinder::DeathRecipient
-    {
-    public:
-        DeathNotifier() {}
-        virtual void binderDied(const wp<IBinder> &who);
-    };
+	class DeathNotifier: public IBinder::DeathRecipient {
+	public:
+		DeathNotifier() {}
+		virtual void binderDied(const wp<IBinder> &who);
+	};
 
-    static sp<DeathNotifier> mDeathNotifier;
+	static sp<DeathNotifier> mDeathNotifier;
 
-    // helper function to obtain tv service handle
-    static const sp<ITvService> &getTvService();
+	// helper function to obtain tv service handle
+	static const sp<ITvService> &getTvService();
 
-    sp<ITv>         mTv;
-    status_t        mStatus;
+	sp<ITv>         mTv;
+	status_t        mStatus;
 
-    sp<TvListener>  mListener;
+	sp<TvListener>  mListener;
 
-    friend class DeathNotifier;
+	friend class DeathNotifier;
 
-    static  Mutex           mLock;
-    static  sp<ITvService>  mTvService;
+	static  Mutex           mLock;
+	static  sp<ITvService>  mTvService;
 
-    sp<MemoryHeapBase>         mBmpMemHeap;
-    sp<MemoryBase>             mBmpMemBase;
+	sp<MemoryHeapBase>         mBmpMemHeap;
+	sp<MemoryBase>             mBmpMemBase;
 };
 
 
