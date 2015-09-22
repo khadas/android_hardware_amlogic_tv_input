@@ -25,12 +25,20 @@
 #include <tv/CTv.h>
 #include <tvin/CTvin.h>
 #include <tvserver/TvService.h>
+#include <screen_source/v4l2_vdin.h>
+#include <ui/GraphicBufferMapper.h>
+#include <ui/GraphicBuffer.h>
 /*****************************************************************************/
 
 #define LOGD(...) \
 { \
 __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__); }
 
+#ifndef container_of
+#define container_of(ptr, type, member) ({                      \
+		const typeof(((type *) 0)->member) *__mptr = (ptr);     \
+		(type *) ((char *) __mptr - (char *)(&((type *)0)->member)); })
+#endif
 
 typedef struct tv_input_private {
 	tv_input_device_t device;
@@ -40,6 +48,7 @@ typedef struct tv_input_private {
 	void *callback_data;
 	//TvService* pTvService;
 	CTv *pTv;
+	vdin_screen_source *pScreen;
 } tv_input_private_t;
 
 static int notify_ATV_device_available(tv_input_private_t *priv)
@@ -290,7 +299,7 @@ static int tv_input_initialize(struct tv_input_device *dev,
 	/*  HDMI3_DEVICE_AVAILABLE */
 	notify_HDMI_device_available(priv, SOURCE_HDMI3, 1);
 	notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI3, 1);
-
+	//
 	return 0;
 }
 
@@ -318,6 +327,8 @@ static int tv_input_open_stream(struct tv_input_device *dev, int device_id,
 			priv->pTv->SetSourceSwitchInput((tv_source_input_t) device_id);
 			return 0;
 		} else if (stream->stream_id == FRAME_CAPTURE_STREAM_ID) {
+			priv->pScreen->set_format(1920, 1080, V4L2_PIX_FMT_NV21);
+			priv->pScreen->start_v4l2_device();
 			return 0;
 		}
 	}
@@ -328,18 +339,49 @@ static int tv_input_close_stream(struct tv_input_device *dev, int device_id,
 								 int stream_id)
 {
 	tv_input_private_t *priv = (tv_input_private_t *)dev;
-	if (priv) {
+	if (stream_id == NORMAL_STREAM_ID) {
 		LOGD ( "%s, SetSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
 		priv->pTv->StopTvLock();
+		return 0;
+	} else if (stream_id == FRAME_CAPTURE_STREAM_ID) {
+		priv->pScreen->stop_v4l2_device();
 		return 0;
 	}
 	return -EINVAL;
 }
 
 static int tv_input_request_capture(
-	struct tv_input_device *, int, int, buffer_handle_t, uint32_t)
+	struct tv_input_device *dev, int device_id, int stream_id, buffer_handle_t buffer, uint32_t seq)
 {
-	return -EINVAL;
+	tv_input_private_t *priv = (tv_input_private_t *)dev;
+	int index;
+	aml_screen_buffer_info_t buff_info;
+	int mFrameWidth , mFrameHeight ;
+	int ret;
+	long *src = NULL;
+	unsigned char *dest = NULL;
+	ANativeWindowBuffer *buf;
+	ret = priv->pScreen->aquire_buffer(&buff_info);
+	if (ret != 0 || (buff_info.buffer_mem == 0)) {
+		LOGD("Get V4l2 buffer failed");
+		return -EWOULDBLOCK;
+	}
+	src = (long *)buff_info.buffer_mem;
+
+	buf = container_of(&buffer, ANativeWindowBuffer, handle);
+
+	sp<GraphicBuffer> graphicBuffer(new GraphicBuffer(buf, false));
+	graphicBuffer->lock(SCREENSOURCE_GRALLOC_USAGE, (void **)&dest);
+	if (dest == NULL) {
+		LOGD("Invalid Gralloc Handle");
+		return -EWOULDBLOCK;
+	}
+	memcpy(dest, src, mFrameWidth * mFrameHeight * 3 / 2);
+	graphicBuffer->unlock();
+	graphicBuffer.clear();
+	LOGD("queue one buffer to native window");
+	priv->pScreen->release_buffer(src);
+	return 0;
 }
 
 static int tv_input_cancel_capture(struct tv_input_device *, int, int, uint32_t)
@@ -376,6 +418,10 @@ static int tv_input_device_open(const struct hw_module_t *module,
 		dev->pTv = new CTv();
 		TvService::instantiate(dev->pTv);
 		dev->pTv->OpenTv();
+		dev->pScreen = new vdin_screen_source();
+		if (dev->pScreen->init() != 0 ) {
+			LOGD("init screen source not ok!");
+		}
 		/* initialize the procs */
 		dev->device.common.tag = HARDWARE_DEVICE_TAG;
 		dev->device.common.version = TV_INPUT_DEVICE_API_VERSION_0_1;
