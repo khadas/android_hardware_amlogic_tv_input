@@ -11,6 +11,7 @@
 #include <am_scan.h>
 #include <am_epg.h>
 #include <am_mem.h>
+#include <am_db.h>
 #include "CTvChannel.h"
 #include "CTvLog.h"
 #include "CTvEv.h"
@@ -50,6 +51,7 @@ public:
 		static const int EVENT_BLINDSCAN_NEWCHANNEL = 5;
 		static const int EVENT_BLINDSCAN_END    = 6;
 		static const int EVENT_ATV_PROG_DATA = 7;
+		static const int EVENT_DTV_PROG_DATA = 8;
 
 		ScannerEvent(): CTvEv(CTvEv::TV_EVENT_SCANNER)
 		{
@@ -57,6 +59,8 @@ public:
 		~ScannerEvent()
 		{
 		}
+
+		//common
 		int mType;
 		int mPercent;
 		int mTotalChannelCount;
@@ -69,6 +73,7 @@ public:
 		int mModulation;
 		int mBandwidth;
 		int mOfdm_mode;
+
 		int mAudio;
 		int mStandard;
 		int mSat_polarisation;
@@ -83,6 +88,21 @@ public:
 		int mAudioStd;
 		int mIsAutoStd;//1 is true
 		int mAfcData;
+
+
+		//for DTV
+		int mTsId;
+		int mONetId;
+		int mServiceId;
+		int mVid;
+		int mVfmt;
+		int mAcnt;
+		int mAid[32];
+		int mAfmt[32];
+		char mAlang[32][10];
+		int mAtype[32];
+		int mPcr;
+
 		//      ScannerEvent(int type){
 		//          this->mType = type;
 		//      }
@@ -137,6 +157,35 @@ private:
 	static const int ATV_MODE_MANUAL = 2;
 
 	//
+#define AM_SCAN_MAX_SRV_NAME_LANG 4
+
+	typedef struct {
+		uint8_t srv_type, eit_sche, eit_pf, rs, free_ca, access_controlled, hidden, hide_guide, plp_id;
+		int vid, aid1, aid2, srv_id, pmt_pid, pcr_pid;
+		int vfmt, chan_num, afmt_tmp, vfmt_tmp, scrambled_flag, major_chan_num, minor_chan_num, source_id;
+		int src, srv_dbid, satpara_dbid;
+		char name[(AM_DB_MAX_SRV_NAME_LEN + 4)*AM_SCAN_MAX_SRV_NAME_LANG + 1];
+		char *default_text_lang;
+		char *text_langs;
+		AM_SI_AudioInfo_t aud_info;
+		AM_SI_SubtitleInfo_t sub_info;
+		AM_SI_TeletextInfo_t ttx_info;
+		int sdt_version;
+	} SCAN_ServiceInfo_t;
+
+
+	static dvbpsi_pat_t *get_valid_pats(AM_SCAN_TS_t *ts);
+	static void scan_process_ts_info(AM_SCAN_Result_t *result, AM_SCAN_TS_t *ts, ScannerEvent *evt);
+	static void scan_init_service_info(SCAN_ServiceInfo_t *srv_info);
+	static int get_pmt_pid(dvbpsi_pat_t *pats, int program_number);
+	static void scan_extract_ca_scrambled_flag(dvbpsi_descriptor_t *p_first_descriptor, int *flag);
+	static void scan_extract_srv_info_from_sdt(AM_SCAN_Result_t *result, dvbpsi_sdt_t *sdts, SCAN_ServiceInfo_t *srv_info);
+	static void scan_update_service_info(AM_SCAN_Result_t *result, SCAN_ServiceInfo_t *srv_info);
+	static void scan_store_dvb_ts_evt_service(SCAN_ServiceInfo_t *srv);
+	static void scan_store_dvb_ts(AM_SCAN_Result_t *result, AM_SCAN_TS_t *ts);
+	static void dtv_scan_store(AM_SCAN_Result_t *result);
+
+
 private:
 
 	//
@@ -150,6 +199,7 @@ private:
 	int mTvOptions;
 	int mSat_id;
 	int mSource;
+
 	//showboz
 	//TVSatelliteParams tv_satparams;
 	int mTsSourceID;

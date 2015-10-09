@@ -152,6 +152,7 @@ public:
 	virtual int playDvbcProgram ( int progId );
 	virtual int playDtmbProgram ( int progId );
 	virtual int playAtvProgram ( int, int, int, int);
+	virtual int playDtvProgram ( int, int, int, int, int, int, int, int, int);
 	virtual int stopPlayingLock();
 	virtual int resetFrontEndPara ( frontend_para_set_t feParms );
 	int SetCurProgramAudioVolumeCompensationVal ( int tmpVal );

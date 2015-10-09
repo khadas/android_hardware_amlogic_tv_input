@@ -60,6 +60,7 @@ extern "C" {
 
 #define LOG_TAG "CTv"
 
+
 using namespace android;
 
 // Called each time a message is logged.
@@ -818,6 +819,18 @@ int CTv::ResetAudioDecoderForPCMOutput()
 	LOGD ( "%s, iOutRet = %d AM_AV_ResetAudioDecoder\n", __FUNCTION__,  iOutRet );
 	return iOutRet;
 }
+
+int CTv::playDtvProgram ( int mode, int freq, int para1, int para2, int vpid, int vfmt, int apid, int afmt, int pcr)
+{
+
+	mFrontDev.setPara ( mode, freq, para1, para2);
+
+	startPlayTv ( SOURCE_DTV, vpid, apid, vfmt, afmt );
+
+	return 0;
+}
+
+
 int CTv::playDtmbProgram ( int progId )
 {
 	CTvProgram prog;
@@ -1648,7 +1661,7 @@ int CTv::OpenTv ( void )
 
 int CTv::CloseTv ( void )
 {
-	LOGD ( "%s, tv close");
+	LOGD ( "tv close");
 	mSigDetectThread.stopDetect();
 	if (mpUpgradeFBC != NULL) {
 		mpUpgradeFBC->stop();

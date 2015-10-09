@@ -88,6 +88,8 @@ void TvService::onTvEvent(const CTvEv &ev)
 			sp<Client> ScannerClient = mpScannerClient.promote();
 			if(ScannerClient != 0) {
 				Parcel p;
+				LOGD("scanner evt type:%d freq:%d vid:%d acnt:%d",
+					 pScannerEv->mType, pScannerEv->mFrequency, pScannerEv->mVid, pScannerEv->mAcnt);
 				p.writeInt32(pScannerEv->mType);
 				p.writeInt32(pScannerEv->mPercent);
 				p.writeInt32(pScannerEv->mTotalChannelCount);
@@ -99,10 +101,31 @@ void TvService::onTvEvent(const CTvEv &ev)
 				p.writeString16(String16(pScannerEv->mMSG));
 				p.writeInt32(pScannerEv->mStrength);
 				p.writeInt32(pScannerEv->mSnr);
-				//
+				//ATV
 				p.writeInt32(pScannerEv->mVideoStd);
 				p.writeInt32(pScannerEv->mAudioStd);
 				p.writeInt32(pScannerEv->mIsAutoStd);
+				//DTV
+				p.writeInt32(pScannerEv->mMode);
+				p.writeInt32(pScannerEv->mSymbolRate);
+				p.writeInt32(pScannerEv->mModulation);
+				p.writeInt32(pScannerEv->mBandwidth);
+				p.writeInt32(pScannerEv->mOfdm_mode);
+				p.writeInt32(pScannerEv->mTsId);
+				p.writeInt32(pScannerEv->mONetId);
+				p.writeInt32(pScannerEv->mServiceId);
+				p.writeInt32(pScannerEv->mVid);
+				p.writeInt32(pScannerEv->mVfmt);
+				p.writeInt32(pScannerEv->mAcnt);
+				for (int i = 0; i < pScannerEv->mAcnt; i++)
+					p.writeInt32(pScannerEv->mAid[i]);
+				for (int i = 0; i < pScannerEv->mAcnt; i++)
+					p.writeInt32(pScannerEv->mAfmt[i]);
+				for (int i = 0; i < pScannerEv->mAcnt; i++)
+					p.writeString16(String16(pScannerEv->mAlang[i]));
+				for (int i = 0; i < pScannerEv->mAcnt; i++)
+					p.writeInt32(pScannerEv->mAtype[i]);
+				p.writeInt32(pScannerEv->mPcr);
 				ScannerClient->notifyCallback(SCAN_EVENT_CALLBACK, p);
 			}
 		}
@@ -4180,11 +4203,23 @@ status_t TvService::Client::processCmd(const Parcel &p, Parcel *r)
 		break;
 	}
 	case PLAY_PROGRAM: {
+		int mode = p.readInt32();
 		int freq = p.readInt32();
-		int videoStd = p.readInt32();
-		int audioStd = p.readInt32();
-		int fineTune = p.readInt32();
-		mpTv->playAtvProgram(freq, videoStd, audioStd, fineTune);
+		if (mode == FE_ANALOG) {
+			int videoStd = p.readInt32();
+			int audioStd = p.readInt32();
+			int fineTune = p.readInt32();
+			mpTv->playAtvProgram(freq, videoStd, audioStd, fineTune);
+		} else {
+			int para1 = p.readInt32();
+			int para2 = p.readInt32();
+			int vid = p.readInt32();
+			int vfmt = p.readInt32();
+			int aid = p.readInt32();
+			int afmt = p.readInt32();
+			int pcr = p.readInt32();
+			mpTv->playDtvProgram(mode, freq, para1, para2, vid, vfmt, aid, afmt, pcr);
+		}
 		break;
 	}
 	case GET_PROGRAM_LIST: {
