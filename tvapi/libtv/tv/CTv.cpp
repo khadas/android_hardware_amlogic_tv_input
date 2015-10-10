@@ -824,7 +824,7 @@ int CTv::playDtvProgram ( int mode, int freq, int para1, int para2, int vpid, in
 {
 
 	mFrontDev.setPara ( mode, freq, para1, para2);
-
+	mTvAction = mTvAction | TV_ACTION_PLAYING;
 	startPlayTv ( SOURCE_DTV, vpid, apid, vfmt, afmt );
 
 	return 0;
@@ -886,6 +886,8 @@ int CTv::playDtmbProgram ( int progId )
 
 int CTv::playAtvProgram (int  freq, int videoStd, int audioStd, int fineTune)
 {
+	mTvAction = mTvAction | TV_ACTION_PLAYING;
+
 	//image selecting channel
 	mSigDetectThread.requestAndWaitPauseDetect();
 	mTvin.Tvin_StopDecoder();
