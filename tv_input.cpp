@@ -341,7 +341,7 @@ static int tv_input_close_stream(struct tv_input_device *dev, int device_id,
 	tv_input_private_t *priv = (tv_input_private_t *)dev;
 	if (stream_id == NORMAL_STREAM_ID) {
 		LOGD ( "%s, SetSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
-		priv->pTv->StopTvLock();
+		//priv->pTv->StopTvLock();
 		return 0;
 	} else if (stream_id == FRAME_CAPTURE_STREAM_ID) {
 		priv->pScreen->stop_v4l2_device();
