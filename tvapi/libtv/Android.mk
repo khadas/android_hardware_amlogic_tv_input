@@ -172,14 +172,14 @@ endif
 
 
 LOCAL_C_INCLUDES += \
-    $(LOCAL_PATH)/dtv_play \
-    $(LIB_ZVBI_PATH)/ntsc_decode/include \
-    $(LIB_ZVBI_PATH)/ntsc_decode/include/ntsc_dmx \
-    $(LIB_ZVBI_PATH)/src \
     $(DVB_PATH)/include/am_adp \
     $(DVB_PATH)/include/am_mw \
     $(DVB_PATH)/include/am_ver \
     $(DVB_PATH)/android/ndk/include \
+    $(LOCAL_PATH)/dtv_play \
+    $(LIB_ZVBI_PATH)/ntsc_decode/include \
+    $(LIB_ZVBI_PATH)/ntsc_decode/include/ntsc_dmx \
+    $(LIB_ZVBI_PATH)/src \
     $(AM_LIBPLAYER_PATH)/amadec/include \
     $(AM_LIBPLAYER_PATH)/amcodec/include \
     $(AM_LIBPLAYER_PATH)/amffmpeg \

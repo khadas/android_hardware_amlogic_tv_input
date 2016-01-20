@@ -115,7 +115,7 @@ CTv::CTv() :
     }
 
     AM_EVT_Init();
-    mTvEpg.setObserver ( &mTvMsgQueue );
+    //mTvEpg.setObserver ( &mTvMsgQueue );
     mpObserver = NULL;
     fbcIns = NULL;
     dtv_auto_3d_flag = 0;
@@ -534,7 +534,7 @@ int CTv::ClearAnalogFrontEnd() {
 int CTv::dtvAutoScan() {
     AutoMutex lock ( mLock );
     mTvAction |= TV_ACTION_SCANNING;
-    mTvEpg.leaveChannel();
+    //mTvEpg.leaveChannel();
     mAv.StopTS ();
     mAv.DisableVideoWithBlueColor();
     CTvProgram::CleanAllProgramBySrvType ( CTvProgram::TYPE_DTV );
@@ -562,7 +562,7 @@ int CTv::dtvCleanProgramByFreq ( int freq ) {
 int CTv::dtvManualScan (int beginFreq, int endFreq, int modulation) {
     AutoMutex lock ( mLock );
     mTvAction |= TV_ACTION_SCANNING;
-    mTvEpg.leaveChannel();
+    //mTvEpg.leaveChannel();
     mAv.StopTS ();
     mAv.DisableVideoWithBlueColor();
     CTvChannel::DeleteBetweenFreq(beginFreq, endFreq);
@@ -740,7 +740,7 @@ int CTv::stopScan() {
     }
     mSigDetectThread.requestAndWaitPauseDetect();
     mSigDetectThread.setObserver(this);
-    mTvEpg.leaveChannel();
+    //mTvEpg.leaveChannel();
     mTvScanner.stopScan();
     mFrontDev.Close();
     mTvAction &= ~TV_ACTION_SCANNING;
@@ -1165,8 +1165,8 @@ int CTv::stopPlaying() {
     } else if (m_source_input ==  SOURCE_DTV) {
         //mFrontDev.setPara(FE_DTMB, 51000000, 0, 0);
         mAv.StopTS ();
-        mTvEpg.leaveChannel();
-        mTvEpg.leaveProgram();
+        //mTvEpg.leaveChannel();
+        //mTvEpg.leaveProgram();
     }
     config_value = config_get_str ( CFG_SECTION_TV, CFG_BLUE_SCREEN_COLOR, "null" );
     if ( strcmp ( config_value, "black" ) == 0 ) {
@@ -1574,7 +1574,7 @@ int CTv::OpenTv ( void ) {
     mTvDmx.Open(para_dmx );
     mTvDmx.SetSource (AM_DMX_SRC_TS2);
     mAv.Open();
-    mTvEpg.Init ( 0, 0, 1, "eng zho chi", "GB2312" );
+    //mTvEpg.Init ( 0, 0, 1, "eng zho chi", "GB2312" );
     resetDmxAndAvSource();
     //	mSourceConnectDetectThread.startDetect();
     mSourceConnectDetectThread.startDetect();
