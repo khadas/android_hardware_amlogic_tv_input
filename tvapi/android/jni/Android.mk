@@ -4,7 +4,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES:= \
-	android_amlogic_tv.cpp
+	com_droidlogic_app_tv_TvControlManager.cpp
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libutils \
@@ -17,8 +17,10 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_C_INCLUDES += \
     frameworks/base/core/jni \
-	$(LOCAL_PATH)/../ \
-	 external/skia/include \
+    frameworks/base/core/jni/android/graphics \
+    frameworks/base/libs/hwui \
+    $(LOCAL_PATH)/../ \
+    external/skia/include \
 
 LOCAL_MODULE:= libtv_jni
 LOCAL_PRELINK_MODULE := false
@@ -34,6 +36,7 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_C_INCLUDES += \
     frameworks/base/core/jni \
     $(LOCAL_PATH)/../../libtv \
+    external/skia/include \
     $(LOCAL_PATH)/../../libtv/tv \
     bionic/libc/include \
     bionic/libc/private \

@@ -44,11 +44,13 @@ public:
 		return 0;
 	}
 
-	virtual status_t createVideoFrame(const sp<IMemory> &share_mem)
+	virtual status_t createVideoFrame(const sp<IMemory> &share_mem, int iSourceMode, int iCapVideoLayerOnly)
 	{
 		Parcel data, reply;
 		data.writeInterfaceToken(ITv::getInterfaceDescriptor());
-		data.writeStrongBinder(share_mem->asBinder());
+		data.writeStrongBinder(IInterface::asBinder(share_mem));
+		data.writeInt32(iSourceMode);
+		data.writeInt32(iCapVideoLayerOnly);
 		remote()->transact(TV_CREATE_VIDEO_FRAME, data, &reply);
 		return reply.readInt32();
 	}
@@ -57,7 +59,7 @@ public:
 	{
 		Parcel data, reply;
 		data.writeInterfaceToken(ITv::getInterfaceDescriptor());
-		data.writeStrongBinder(share_mem->asBinder());
+		data.writeStrongBinder(IInterface::asBinder(share_mem));
 		remote()->transact(TV_CREATE_SUBTITLE, data, &reply);
 		return reply.readInt32();
 	}
@@ -65,7 +67,7 @@ public:
 	{
 		Parcel data, reply;
 		data.writeInterfaceToken(ITv::getInterfaceDescriptor());
-		data.writeStrongBinder(tvClient->asBinder());
+		data.writeStrongBinder(IInterface::asBinder(tvClient));
 		remote()->transact(CONNECT, data, &reply);
 		return reply.readInt32();
 	}
@@ -90,7 +92,7 @@ IMPLEMENT_META_INTERFACE(Tv, "android.amlogic.ITv");
 status_t BnTv::onTransact(
 	uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags)
 {
-	switch(code) {
+	switch (code) {
 	case DISCONNECT: {
 		CHECK_INTERFACE(ITv, data, reply);
 		disconnect();
@@ -132,7 +134,9 @@ status_t BnTv::onTransact(
 	case TV_CREATE_VIDEO_FRAME: {
 		CHECK_INTERFACE(ITv, data, reply);
 		sp<IMemory> buffer = interface_cast<IMemory>(data.readStrongBinder());
-		createVideoFrame(buffer);
+		int srcMode = data.readInt32();
+		int capVideoLayerOnly = data.readInt32();
+		createVideoFrame(buffer, srcMode, capVideoLayerOnly);
 		//reply->write(tmp.data(), tmp.dataSize());
 		return NO_ERROR;
 	}

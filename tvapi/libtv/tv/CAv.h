@@ -4,6 +4,7 @@
 #include "am_aout.h"
 #include "CTvEv.h"
 #include "CTvLog.h"
+#include "../tvin/CTvin.h"
 static const char *PATH_FRAME_COUNT  = "/sys/module/di/parameters/frame_count";
 //3D=====================================================================
 static const char *PATH_SET_3D_TYPE = "/sys/class/video/threedim_mode";
@@ -13,6 +14,8 @@ static const char *PATH_3D_SCALER = "/sys/module/amvideo/parameters/force_3d_sca
 //0是不做3dscaler 1是做3dscaler
 static const char *PATH_VIDEO_SCALER = "/sys/class/video/stereo_scaler";
 
+static const char *PATH_MEPG_DTMB_LOOKUP_PTS_FLAG = "/sys/module/amvdec_mpeg12/parameters/dtmb_flag";
+static const char *PATH_VIDEO_HEIGHT = "/sys/class/video/frame_height";
 /*cmd use for 3d operation*/
 #define MODE_3D_DISABLE     0x00000000
 #define MODE_3D_ENABLE      0x00000001
@@ -24,17 +27,17 @@ static const char *PATH_VIDEO_SCALER = "/sys/class/video/stereo_scaler";
 #define MODE_3D_LR_SWITCH   0x00000100
 #define MODE_3D_TO_2D_L     0x00000200
 #define MODE_3D_TO_2D_R     0x00000400
-#define MODE_3D_MVC	    0x00000800
-#define MODE_3D_OUT_TB 	0x00010000
-#define MODE_3D_OUT_LR 	0x00020000
+#define MODE_3D_MVC     0x00000800
+#define MODE_3D_OUT_TB  0x00010000
+#define MODE_3D_OUT_LR  0x00020000
 
 /*when the output mode is field alterlative*/
 //LRLRLRLRL mode
-#define MODE_3D_OUT_FA_L_FIRST 	0x00001000
-#define MODE_3D_OUT_FA_R_FIRST	0x00002000
+#define MODE_3D_OUT_FA_L_FIRST  0x00001000
+#define MODE_3D_OUT_FA_R_FIRST  0x00002000
 //LBRBLBRB
 #define MODE_3D_OUT_FA_LB_FIRST 0x00004000
-#define MODE_3D_OUT_FA_RB_FIRST	0x00008000
+#define MODE_3D_OUT_FA_RB_FIRST 0x00008000
 
 
 typedef enum VIDEO_3D_MODE_E {
@@ -78,8 +81,7 @@ public:
 
 		};
 		~AVEvent()
-		{
-		};
+		{};
 		static const int EVENT_AV_STOP            = 1;
 		static const int EVENT_AV_RESUEM           = 2;
 		static const int EVENT_AV_SCAMBLED      = 3;
@@ -121,11 +123,14 @@ public:
 	int DisableVideoWithBlackColor();
 	int EnableVideoAuto();
 	int EnableVideoNow();
+	int EnableVideoWhenVideoPlaying(int minFrameCount = 8, int waitTime = 5000);
+	int WaittingVideoPlaying(int minFrameCount = 8, int waitTime = 5000);
 	int EnableVideoBlackout();
 	int DisableVideoBlackout();
 	int getVideoDisableValue();
 	int SetVideoLayerDisable ( int value );
 	int ClearVideoBuffer();
+	bool videoIsPlaying(int minFrameCount = 8);
 	int setVideoScreenMode ( int value );
 	int getVideoScreenMode();
 	int setVideoAxis ( int h, int v, int width, int height );
@@ -133,8 +138,11 @@ public:
 	//LR_switch: 1 is  enable,    3D_TO_2D:1 is L  , 2 is R
 	int set3DMode(VIDEO_3D_MODE_T mode, int LR_switch, int mode_3D_TO_2D);
 	//
+	int setLookupPtsForDtmb(int enable);
+	tvin_sig_fmt_t getVideoResolutionToFmt();
 private:
 	static void av_evt_callback ( long dev_no, int event_type, void *param, void *user_data );
+	int getVideoFrameCount();
 	int mTvPlayDevId;
 	IObserver *mpObserver;
 	AVEvent mCurAvEvent;

@@ -195,7 +195,7 @@ public:
 	static Vector<CTvChannel> tvChannelList(int sat_id);
 	static int selectByID(int id, CTvChannel &c);
 	static int updateByID(int progID, int std, int freq, int fineFreq);
-	static	int SelectByFreq(int freq, CTvChannel &channel);
+	static  int SelectByFreq(int freq, CTvChannel &channel);
 	static int DeleteBetweenFreq(int beginFreq, int endFreq);
 	static int CleanAllChannelBySrc(int src);
 	static int getChannelListBySrc(int src, Vector< sp<CTvChannel> > &v_channel);

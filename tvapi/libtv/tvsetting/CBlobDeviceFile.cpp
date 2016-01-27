@@ -25,7 +25,7 @@ CBlobDeviceFile::CBlobDeviceFile()
 
 CBlobDeviceFile::~CBlobDeviceFile()
 {
-	if(mDataBuf != NULL) {
+	if (mDataBuf != NULL) {
 		delete mDataBuf;
 		mDataBuf = NULL;
 	}
@@ -58,7 +58,7 @@ int CBlobDeviceFile::InitCheck()
 
 int CBlobDeviceFile::OpenDevice()
 {
-	if(strlen(m_dev_path) <= 0) return -1;
+	if (strlen(m_dev_path) <= 0) return -1;
 
 	m_dev_fd = open(m_dev_path, O_RDWR | O_SYNC | O_CREAT, S_IRUSR | S_IWUSR);
 

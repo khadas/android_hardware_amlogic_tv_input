@@ -17,12 +17,12 @@ void CTvEpg::epg_evt_callback(long dev_no, int event_type, void *param, void *us
 
 	AM_EPG_GetUserData((AM_EPG_Handle_t)dev_no, (void **)&pEpg);
 
-	if(pEpg == NULL) return;
+	if (pEpg == NULL) return;
 
-	if(pEpg->mpObserver == NULL) {
+	if (pEpg->mpObserver == NULL) {
 		return;
 	}
-	switch(event_type) {
+	switch (event_type) {
 	case AM_EPG_EVT_NEW_TDT:
 	case AM_EPG_EVT_NEW_STT: {
 		int utc_time;
@@ -87,7 +87,7 @@ void CTvEpg::epg_create(int fend_id, int dmx_id, int src, char *textLangs)
 
 
 	ret = AM_EPG_Create(&para, &mEpgScanHandle);
-	if(ret != AM_SUCCESS) {
+	if (ret != AM_SUCCESS) {
 		LOGD("AM_EPG_Create failed");
 		return;
 	}
@@ -122,7 +122,7 @@ void CTvEpg::epg_change_mode(int op, int mode)
 {
 	AM_ErrorCode_t ret;
 	ret = AM_EPG_ChangeMode(mEpgScanHandle, op, mode);
-	if(ret != AM_SUCCESS)
+	if (ret != AM_SUCCESS)
 		LOGD("AM_EPG_ChangeMode failed");
 }
 
@@ -131,7 +131,7 @@ void CTvEpg::epg_change_mode(int op, int mode)
 void CTvEpg::epg_monitor_service(int srv_id)
 {
 	int ret = AM_EPG_MonitorService(mEpgScanHandle, srv_id);
-	if(ret != AM_SUCCESS)
+	if (ret != AM_SUCCESS)
 		LOGD("AM_EPG_MonitorService failed");
 }
 
@@ -165,14 +165,14 @@ void CTvEpg::stopScan(int mode)
 void CTvEpg::enterChannel(int chan_id)
 {
 
-	if(chan_id == mCurScanChannelId)
+	if (chan_id == mCurScanChannelId)
 		return;
 	//already enter,leave it
-	if(mCurScanChannelId != INVALID_ID) {
+	if (mCurScanChannelId != INVALID_ID) {
 		leaveChannel();
 	}
 
-	if(mFend_mod == CTvChannel::MODE_ATSC) {
+	if (mFend_mod == CTvChannel::MODE_ATSC) {
 		startScan(SCAN_PSIP_ETT | SCAN_PSIP_EIT | SCAN_MGT | SCAN_VCT | SCAN_RRT | SCAN_STT);
 	} else {
 		startScan(SCAN_EIT_ALL | SCAN_SDT | SCAN_NIT | SCAN_TDT | SCAN_CAT);
@@ -192,10 +192,10 @@ void CTvEpg::leaveChannel()
 /*Enter the program.*/
 void CTvEpg::enterProgram(int prog_id)
 {
-	if(prog_id == mCurScanProgramId)
+	if (prog_id == mCurScanProgramId)
 		return;
 
-	if(mCurScanProgramId != INVALID_ID) {
+	if (mCurScanProgramId != INVALID_ID) {
 		leaveProgram();
 	}
 
@@ -207,7 +207,7 @@ void CTvEpg::enterProgram(int prog_id)
 /*Leave the program.*/
 void CTvEpg::leaveProgram()
 {
-	if(mCurScanProgramId == INVALID_ID)
+	if (mCurScanProgramId == INVALID_ID)
 		return;
 
 	stopScan(SCAN_PAT | SCAN_PMT);

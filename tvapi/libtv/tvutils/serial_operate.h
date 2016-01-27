@@ -13,11 +13,9 @@ public:
 	class IHeadSetObserver {
 	public:
 		IHeadSetObserver()
-		{
-		};
+		{};
 		virtual ~IHeadSetObserver()
-		{
-		};
+		{};
 		virtual void onHeadSetDetect(int state, int para) {};
 		virtual void onThermalDetect(int state) {};
 

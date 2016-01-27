@@ -17,7 +17,7 @@ public:
 	nsecs_t mWhenMs;//when, the msg will handle
 	int mType;
 	void *mpData;
-	unsigned char mpPara[2048];
+	unsigned char mpPara[3072];
 };
 
 class CMsgQueueThread: public CThread {
@@ -27,6 +27,7 @@ public:
 	int startMsgQueue();
 	void sendMsg(CMessage &msg);
 	void removeMsg(CMessage &msg);
+	void clearMsg();
 private:
 	bool  threadLoop();
 	nsecs_t getNowMs();//get system time , MS

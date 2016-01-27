@@ -139,6 +139,8 @@ static const int SSM_RW_FASTSUSPEND_FLAG_LEN                =      (1);
 static const int SSM_RW_BLACKOUT_ENABLE_START              =      (SSM_RW_FASTSUSPEND_FLAG_START + SSM_RW_FASTSUSPEND_FLAG_LEN);
 static const int SSM_RW_BLACKOUT_ENABLE__LEN                =      (1);
 
+static const int SSM_RW_PANEL_ID_START                      =      (SSM_RW_BLACKOUT_ENABLE_START + SSM_RW_BLACKOUT_ENABLE__LEN);
+static const int SSM_RW_PANEL_ID_LEN                        =      (1);
 //Audio data section
 static const int SSM_AUD_MASTR_VOLUME_VAL                   =      (SSM_RW_AUDIO_START + 0);
 static const int SSM_AUD_BALANCE_VAL                        =      (SSM_AUD_MASTR_VOLUME_VAL + 1);
@@ -156,6 +158,13 @@ static const int SSM_AUD_SPDIF_MODE_VAL                     =      (SSM_AUD_SPDI
 static const int SSM_AUD_EQ_MODE_VAL                        =      (SSM_RW_AUDIO_START + 32);
 static const int SSM_AUD_EQ_GAIN                            =      (SSM_AUD_EQ_MODE_VAL + 1);
 static const int SSM_AUD_NOLINE_POINTS                      =      (SSM_AUD_EQ_GAIN + 16);
+static const int SSM_AUD_DBX_TV_SON               =      (SSM_AUD_NOLINE_POINTS + 2);
+static const int SSM_AUD_DBX_TV_VAL               =      (SSM_AUD_NOLINE_POINTS + 2 + 1);
+static const int SSM_AUD_DBX_TV_SUR               =      (SSM_AUD_NOLINE_POINTS + 2 + 2);
+static const int SSM_AUD_DBX_TV_SIZE = 3;
+static const int SSM_AUD_AVOUT_MUTE                         =      (SSM_AUD_DBX_TV_SUR + 2);
+static const int SSM_AUD_SPIDF_MUTE                         =      (SSM_AUD_AVOUT_MUTE + 1);
+static const int SSM_AUD_DRC_ONOFF                          =      (SSM_AUD_SPIDF_MUTE + 1);
 
 //VPP Data (115 bytes)
 //ColorDemoMode 1byte
@@ -176,7 +185,7 @@ static const int VPP_DATA_POS_DDR_SSC_SIZE                  =      (1);
 static const int VPP_DATA_POS_DDR_SSC_END                   =      (VPP_DATA_POS_DDR_SSC_START + VPP_DATA_POS_DDR_SSC_SIZE);
 //LVDS SSC 1byte
 static const int VPP_DATA_POS_LVDS_SSC_START                =      (VPP_DATA_POS_DDR_SSC_END + 0);
-static const int VPP_DATA_POS_LVDS_SSC_SIZE                 =      (1);
+static const int VPP_DATA_POS_LVDS_SSC_SIZE                 =      (2);
 static const int VPP_DATA_POS_LVDS_SSC_END                  =      (VPP_DATA_POS_LVDS_SSC_START + VPP_DATA_POS_LVDS_SSC_SIZE);
 //dream panel 1byte
 static const int VPP_DATA_POS_DREAM_PANEL_START             =      (VPP_DATA_POS_LVDS_SSC_END + 0);
@@ -215,9 +224,9 @@ static const int VPP_DATA_POS_NOISE_REDUCTION_START         =      (VPP_DATA_POS
 static const int VPP_DATA_POS_NOISE_REDUCTION_SIZE          =      (1 * (SOURCE_TYPE_MAX));
 static const int VPP_DATA_POS_NOISE_REDUCTION_END           =      (VPP_DATA_POS_NOISE_REDUCTION_START + VPP_DATA_POS_NOISE_REDUCTION_SIZE);
 //SceneMode 1byte
-static const int VPP_DATA_POS_SCENE_MODE_START				=	   (VPP_DATA_POS_NOISE_REDUCTION_END + 0);
-static const int VPP_DATA_POS_SCENE_MODE_SIZE				=	   (1);
-static const int VPP_DATA_POS_SCENE_MODE_END				=	   (VPP_DATA_POS_SCENE_MODE_START + VPP_DATA_POS_SCENE_MODE_SIZE);
+static const int VPP_DATA_POS_SCENE_MODE_START              =      (VPP_DATA_POS_NOISE_REDUCTION_END + 0);
+static const int VPP_DATA_POS_SCENE_MODE_SIZE               =      (1);
+static const int VPP_DATA_POS_SCENE_MODE_END                =      (VPP_DATA_POS_SCENE_MODE_START + VPP_DATA_POS_SCENE_MODE_SIZE);
 //PictureMode 1*7=7byte
 static const int VPP_DATA_POS_PICTURE_MODE_START            =      (VPP_DATA_POS_SCENE_MODE_END + 0);
 static const int VPP_DATA_POS_PICTURE_MODE_SIZE             =      (1 * (SOURCE_TYPE_MAX));
@@ -332,6 +341,37 @@ static const int VPP_DATA_POS_FBC_COLORTEMP_START               =      (VPP_DATA
 static const int VPP_DATA_POS_FBC_COLORTEMP_SIZE                =      (1);
 static const int VPP_DATA_POS_FBC_COLORTEMP_END                 =      (VPP_DATA_POS_FBC_COLORTEMP_START + VPP_DATA_POS_FBC_COLORTEMP_SIZE);
 
+static const int VPP_DATA_POS_FBC_N310_BACKLIGHT_START               =      (VPP_DATA_POS_FBC_COLORTEMP_END + 0);
+static const int VPP_DATA_POS_FBC_N310_BACKLIGHT_SIZE                =      (1);
+static const int VPP_DATA_POS_FBC_N310_BACKLIGHT_END                 =      (VPP_DATA_POS_FBC_N310_BACKLIGHT_START + VPP_DATA_POS_FBC_N310_BACKLIGHT_SIZE);
+//fbc colortemp 1 byte N310
+static const int VPP_DATA_POS_FBC_N310_COLORTEMP_START               =      (VPP_DATA_POS_FBC_N310_BACKLIGHT_END + 0);
+static const int VPP_DATA_POS_FBC_N310_COLORTEMP_SIZE                =      (1);
+static const int VPP_DATA_POS_FBC_N310_COLORTEMP_END                 =      (VPP_DATA_POS_FBC_N310_COLORTEMP_START + VPP_DATA_POS_FBC_N310_COLORTEMP_SIZE);
+//fbc lightsensor 1 byte N310
+static const int VPP_DATA_POS_FBC_N310_LIGHTSENSOR_START               =      (VPP_DATA_POS_FBC_N310_COLORTEMP_END + 0);
+static const int VPP_DATA_POS_FBC_N310_LIGHTSENSOR_SIZE                =      (1);
+static const int VPP_DATA_POS_FBC_N310_LIGHTSENSOR_END                 =      (VPP_DATA_POS_FBC_N310_LIGHTSENSOR_START + VPP_DATA_POS_FBC_N310_LIGHTSENSOR_SIZE);
+//fbc MEMC 1 byte N310
+static const int VPP_DATA_POS_FBC_N310_MEMC_START               =      (VPP_DATA_POS_FBC_N310_LIGHTSENSOR_END + 0);
+static const int VPP_DATA_POS_FBC_N310_MEMC_SIZE                =      (1);
+static const int VPP_DATA_POS_FBC_N310_MEMC_END                 =      (VPP_DATA_POS_FBC_N310_MEMC_START + VPP_DATA_POS_FBC_N310_MEMC_SIZE);
+//fbc DREAMPANEL 1 byte N310
+static const int VPP_DATA_POS_FBC_N310_DREAMPANEL_START               =      (VPP_DATA_POS_FBC_N310_MEMC_END + 0);
+static const int VPP_DATA_POS_FBC_N310_DREAMPANEL_SIZE                =      (1);
+static const int VPP_DATA_POS_FBC_N310_DREAMPANEL_END                 =      (VPP_DATA_POS_FBC_N310_DREAMPANEL_START + VPP_DATA_POS_FBC_N310_DREAMPANEL_SIZE);
+//fbc Multi_pq 1 byte N310
+static const int VPP_DATA_POS_FBC_N310_MULTI_PQ_START               =      (VPP_DATA_POS_FBC_N310_DREAMPANEL_END + 0);
+static const int VPP_DATA_POS_FBC_N310_MULTI_PQ_SIZE                =      (1);
+static const int VPP_DATA_POS_FBC_N310_MULTI_PQ_END                 =      (VPP_DATA_POS_FBC_N310_MULTI_PQ_START + VPP_DATA_POS_FBC_N310_MULTI_PQ_SIZE);
+//fbc Multi_pq 1 byte N310
+static const int VPP_DATA_POS_N311_VBYONE_SPREAD_SPECTRUM_START               =      (VPP_DATA_POS_FBC_N310_MULTI_PQ_END + 0);
+static const int VPP_DATA_POS_N311_VBYONE_SPREAD_SPECTRUM_SIZE                =      (1);
+static const int VPP_DATA_POS_N311_VBYONE_SPREAD_SPECTRUM_END                 =      (VPP_DATA_POS_N311_VBYONE_SPREAD_SPECTRUM_START + VPP_DATA_POS_N311_VBYONE_SPREAD_SPECTRUM_SIZE);
+//bluetooth volume 1 byte N311
+static const int VPP_DATA_POS_N311_BLUETOOTH_VAL_START               =      (VPP_DATA_POS_N311_VBYONE_SPREAD_SPECTRUM_END + 0);
+static const int VPP_DATA_POS_N311_BLUETOOTH_VAL_SIZE                =      (1);
+static const int VPP_DATA_POS_N311_BLUETOOTH_VAL_END                 =      (VPP_DATA_POS_N311_BLUETOOTH_VAL_START + VPP_DATA_POS_N311_BLUETOOTH_VAL_SIZE);
 
 //Tvin data section (581 bytes)
 //SourceInput 1byte

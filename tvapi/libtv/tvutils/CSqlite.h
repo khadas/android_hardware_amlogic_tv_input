@@ -76,7 +76,7 @@ public:
 		bool moveToFirst()
 		{
 			//LOGD("moveToFirst mRowNums = %d", mRowNums);
-			if(mRowNums <= 0) return false;
+			if (mRowNums <= 0) return false;
 			mCurRowIndex = 0;
 			return true;
 		}
@@ -85,7 +85,7 @@ public:
 
 		bool moveToNext()
 		{
-			if(mCurRowIndex >= mRowNums - 1)return false;
+			if (mCurRowIndex >= mRowNums - 1)return false;
 			mCurRowIndex++;
 			return true;
 		}
@@ -95,8 +95,8 @@ public:
 		int getColumnIndex(const char *columnName)
 		{
 			int index = 0;
-			for(int i = 0; i < mColNums; i++) {
-				if(strcmp(columnName, mData[i]) == 0)
+			for (int i = 0; i < mColNums; i++) {
+				if (strcmp(columnName, mData[i]) == 0)
 					return index;
 				index++;
 			}
@@ -110,14 +110,14 @@ public:
 		//字符串长度问题,弃用
 		int getString(char *str, int columnIndex)
 		{
-			if(columnIndex >= mColNums || str == NULL) return -1;
+			if (columnIndex >= mColNums || str == NULL) return -1;
 			strcpy(str, mData[mColNums * (mCurRowIndex + 1) + columnIndex]);
 			return 0;
 		}
 		//不限长度,依赖于String8
 		String8 getString(int columnIndex)
 		{
-			if(columnIndex >= mColNums) return String8("");
+			if (columnIndex >= mColNums) return String8("");
 			return String8(mData[mColNums * (mCurRowIndex + 1) + columnIndex]);
 		}
 

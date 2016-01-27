@@ -21,6 +21,17 @@
 #include "CVpp.h"
 #include "tvutils/CSqlite.h"
 
+#define SQL_DEBUG 0
+#define getSqlParams(func, buffer, args...) \
+    do{\
+        sprintf(buffer, ##args);\
+        if(SQL_DEBUG){\
+            LOGD("getSqlParams for %s\n", func);\
+            LOGD("%s = %s\n",#buffer, buffer);\
+        }\
+    }while(0)
+
+
 typedef enum tvpq_data_type_e {
 	TVPQ_DATA_BRIGHTNESS,
 	TVPQ_DATA_CONTRAST,
@@ -72,7 +83,8 @@ public:
 	int PQ_GetNR2Params(vpp_noise_reduction2_mode_t basemode, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs);
 	int PQ_GetXVYCCParams(vpp_xvycc_mode_t xvycc_mode, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs, am_regs_t *regs_1);
 	int PQ_GetMCDIParams(vpp_mcdi_mode_t mcdi_mode, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs);
-	int PQ_ColorTemperatureRGBogo2Params(void *params, tcon_rgb_ogo_t rgb_ogo);
+    int PQ_GetDeblockParams(vpp_deblock_mode_t mode, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs);
+    int PQ_ColorTemperatureRGBogo2Params(void *params, tcon_rgb_ogo_t rgb_ogo);
 	int PQ_ColorTemperatureParams2RGBogo(tcon_rgb_ogo_t *rgb_ogo, void *params);
 	int PQ_GetColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, tvin_trans_fmt_t trans_fmt,
 									 tcon_rgb_ogo_t *params);
@@ -99,7 +111,7 @@ public:
 	int PQ_SetHueParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params);
 	int PQ_SetNoLineAllSharpnessParams(tv_source_input_type_t source_type, int osd0, int osd25, int osd50, int osd75, int osd100);
 	int PQ_GetNoLineAllSharpnessParams(tv_source_input_type_t source_type, int *osd0, int *osd25, int *osd50, int *osd75, int *osd100);
-	int PQ_GetSharpnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, am_regs_t *regs);
+	int PQ_GetSharpnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, am_regs_t *regs, am_regs_t *regs_l);
 	int PQ_SetSharpnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, am_regs_t regs);
 	int PQ_SetNoLineAllVolumeParams(tv_source_input_type_t source_type, int osd0, int osd25, int osd50, int osd75, int osd100);
 	int PQ_GetNoLineAllVolumeParams(tv_source_input_type_t source_type, int *osd0, int *osd25, int *osd50, int *osd75, int *osd100);
@@ -126,23 +138,27 @@ public:
 	int PQ_GetPLLParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,  am_regs_t *regs);
 	int PQ_GetCVD2Params(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,  am_regs_t *regs);
 
-	int openDB();
+	int openPqDB(const char *);
 	int closeDB();
-	int getRegValues(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs);
+	int reopenDB();
+	int getRegValues(const char *table_name, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs);
 	int getRegValuesByValue(const char *name, const char *f_name, const char *f2_name, const int val, const int val2, am_regs_t *regs);
 	int getRegValuesByValue_long(const char *name, const char *f_name, const char *f2_name, const int val, const int val2, am_regs_t *regs, am_regs_t *regs_1);
 	int LoadAllPQData(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int flag);
 	void initialTable(int type);
 	void transferFixTable();
+	int replacePqDb(const char *newFilePath);
+    int getSharpnessFlag();
 
 private:
 	int CaculateLevelParam(tvpq_data_t *pq_data, int nodes, int level);
-	am_regs_t CaculateLevelRegsParam(tvpq_sharpness_regs_t *pq_regs, int level);
+	am_regs_t CaculateLevelRegsParam(tvpq_sharpness_regs_t *pq_regs, int level, int flag);
 	int GetNonlinearMapping(tvpq_data_type_t data_type, tvin_port_t source_port, int level, int *params);
 	int GetNonlinearMappingByOSDFac(tvpq_data_type_t data_type, tv_source_input_type_t source_type, int *params);
 	int SetNonlinearMapping(tvpq_data_type_t data_type, tv_source_input_type_t source_type, int osd0, int osd25, int osd50, int osd75, int osd100);
 	int LoadPQData(tvpq_data_type_t data_type, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int flag);
-	int PQ_GetGammaTable(int panel_id, tvin_port_t source_port, tvin_sig_fmt_t fmt, const char *f_name, tcon_gamma_table_t *val);
+    int loadSharpnessData(char *sqlmaster, char *table_name);
+    int PQ_GetGammaTable(int panel_id, tvin_port_t source_port, tvin_sig_fmt_t fmt, const char *f_name, tcon_gamma_table_t *val);
 	int SetNonlinearMappingByName(const char *name, tvpq_data_type_t data_type, tv_source_input_type_t source_type, int osd0, int osd25, int osd50, int osd75, int osd100);
 	int PQ_SetPQModeParamsByName(const char *name, tv_source_input_type_t source_type, vpp_picture_mode_t pq_mode, vpp_pq_para_t *params);
 
@@ -151,10 +167,14 @@ private:
 	tvpq_data_t pq_sat_data[15];
 	tvpq_data_t pq_hue_data[15];
 	tvpq_sharpness_regs_t pq_sharpness_reg_data[10];
+    tvpq_sharpness_regs_t pq_sharpness_reg_data_1[10];
 	int bri_nodes;
 	int con_nodes;
 	int hue_nodes;
 	int sat_nodes;
 	int sha_nodes;
+    int sha_nodes_1;
+    int sha_diff_flag;
+	char PQ_DB_PATH[256];
 };
 #endif

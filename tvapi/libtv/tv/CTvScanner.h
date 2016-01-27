@@ -52,9 +52,19 @@ public:
 		static const int EVENT_BLINDSCAN_END    = 6;
 		static const int EVENT_ATV_PROG_DATA = 7;
 		static const int EVENT_DTV_PROG_DATA = 8;
+		static const int EVENT_SCAN_EXIT     = 9;
 
 		ScannerEvent(): CTvEv(CTvEv::TV_EVENT_SCANNER)
 		{
+			clear();
+		}
+		void clear()
+		{
+			mType = -1;
+			mProgramName[0] = '\0';
+			mMSG[0] = '\0';
+			mAcnt = 0;
+			mScnt = 0;
 		}
 		~ScannerEvent()
 		{
@@ -103,6 +113,14 @@ public:
 		int mAtype[32];
 		int mPcr;
 
+		int mScnt;
+		int mStype[32];
+		int mSid[32];
+		int mSstype[32];
+		int mSid1[32];
+		int mSid2[32];
+		char mSlang[32][10];
+
 		//      ScannerEvent(int type){
 		//          this->mType = type;
 		//      }
@@ -131,6 +149,7 @@ private:
 	static void am_scan_atv_store(AM_SCAN_Result_t *result);
 	void tv_scan_reconnect_dmx_to_fend(int dmx_no, int fend_no);
 	int getAtscChannelPara(int attennaType, Vector<sp<CTvChannel> > &vcp);
+	void sendEvent(ScannerEvent &evt);
 	//
 	AM_SCAN_Handle_t mScanHandle;
 	volatile bool mbScanStart;
@@ -157,6 +176,13 @@ private:
 	static const int ATV_MODE_MANUAL = 2;
 
 	//
+	/*subtitle*/
+	static const int TYPE_DVB_SUBTITLE = 1;
+	static const int TYPE_DTV_TELETEXT = 2;
+	static const int TYPE_ATV_TELETEXT = 3;
+	static const int TYPE_DTV_CC = 4;
+	static const int TYPE_ATV_CC = 5;
+
 #define AM_SCAN_MAX_SRV_NAME_LANG 4
 
 	typedef struct {

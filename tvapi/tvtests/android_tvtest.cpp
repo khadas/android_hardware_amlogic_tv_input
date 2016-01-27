@@ -17,7 +17,7 @@ void usage(char *processname)
 
 int main(int argc, char **argv)
 {
-	if(argc < 2)
+	if (argc < 2)
 		usage(argv[0]);
 	sp<Tv> tv = Tv::connect();
 	int cmd = atoi(argv[1]);

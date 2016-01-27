@@ -51,16 +51,16 @@ void AutoBackLight::updateSigState(int state)
 void AutoBackLight::startAutoBacklight( tv_source_input_type_t source_type )
 {
 	mAutoBacklightSource = source_type;
-	mCur_source_default_backlight = myVpp->Tv_GetBacklight(source_type);
+	mCur_source_default_backlight = myVpp->GetBacklight(source_type);
 	mCurrent_backlight = mCur_source_default_backlight;
-	myVpp->Tv_SetBacklight(mCur_source_default_backlight, source_type, 1);
+	myVpp->SetBacklight(mCur_source_default_backlight, source_type, 1);
 
 	/*
 	mDefault_auto_bl_value = def_source_bl_value;
 	dynamicGamma = mDefault_auto_bl_value * mCur_source_default_backlight / 100;
 	// this if should not happen
 	if (dynamicGamma > mCur_source_default_backlight) {
-		dynamicGamma = mCur_source_default_backlight;
+	    dynamicGamma = mCur_source_default_backlight;
 	}
 	*/
 
@@ -74,7 +74,7 @@ void AutoBackLight::stopAutoBacklight()
 {
 	if (mAutoBacklight_OnOff_Flag) {
 		mAutoBacklight_OnOff_Flag = false;
-		myVpp->Tv_SetBacklight(mCur_source_default_backlight, mAutoBacklightSource, 1);
+		myVpp->SetBacklight(mCur_source_default_backlight, mAutoBacklightSource, 1);
 	}
 }
 
@@ -99,8 +99,7 @@ void AutoBackLight::adjustDstBacklight()
 		if (read(fd, &temp_str, 1) > 0) {
 
 			if (temp_str == 'N') {
-				mCurrent_backlight = mCur_dest_backlight = mCur_source_default_backlight;
-				myVpp->Tv_SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
+				mCur_dest_backlight = mCur_source_default_backlight;
 			} else if (temp_str == 'Y') {
 				int pwm = HistogramGet_AVE();
 				if (pwm <= 20) {
@@ -116,14 +115,14 @@ void AutoBackLight::adjustDstBacklight()
 		close(fd);
 	} else {
 		mCurrent_backlight = mCur_dest_backlight = mCur_source_default_backlight;
-		myVpp->Tv_SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
+		myVpp->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
 	}
 
 	/*
 	if (pwm > 0)
-		pwm_max = pwm;
+	    pwm_max = pwm;
 	else
-		pwm_min = pwm;
+	    pwm_min = pwm;
 	pwm = 255 - pwm;
 	int average = (pwm_min + pwm_max) / 2;
 	dynamicGammaOffset = (pwm - average) / 10;
@@ -133,24 +132,24 @@ void AutoBackLight::adjustDstBacklight()
 	char temp_str = 0;
 	int fd = open("/sys/module/di/parameters/frame_dynamic", O_RDWR);
 	if (fd <= 0) {
-		LOGE("open /sys/module/di/parameters/frame_dynamic ERROR!!\n");
-		return;
+	    LOGE("open /sys/module/di/parameters/frame_dynamic ERROR!!\n");
+	    return;
 	}
 
 	if (read(fd, &temp_str, 1) > 0) {
-		if (temp_str== 'N') {
-			mCur_dest_backlight = mCur_source_default_backlight;
-		}
-		else if (temp_str == 'Y') {
-			mCur_dest_backlight = dynamicGamma + dynamicGammaOffset;
+	    if (temp_str== 'N') {
+	        mCur_dest_backlight = mCur_source_default_backlight;
+	    }
+	    else if (temp_str == 'Y') {
+	        mCur_dest_backlight = dynamicGamma + dynamicGammaOffset;
 
-			if (mCur_dest_backlight > mCur_source_default_backlight) {
-				mCur_dest_backlight = mCur_source_default_backlight;
-			}
-			else if (mCur_dest_backlight < 0) {
-				mCur_dest_backlight = 0;
-			}
-		}
+	        if (mCur_dest_backlight > mCur_source_default_backlight) {
+	            mCur_dest_backlight = mCur_source_default_backlight;
+	        }
+	        else if (mCur_dest_backlight < 0) {
+	            mCur_dest_backlight = 0;
+	        }
+	    }
 	}
 	close(fd);
 	*/
@@ -162,13 +161,13 @@ void AutoBackLight::adjustBacklight()
 		return;
 	} else if ((mCurrent_backlight - mCur_dest_backlight) > -2 && (mCurrent_backlight - mCur_dest_backlight) < 2) {
 		mCurrent_backlight = mCur_dest_backlight;
-		myVpp->Tv_SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
+		myVpp->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
 	} else if (mCurrent_backlight < mCur_dest_backlight) {
 		mCurrent_backlight = mCurrent_backlight + 2;
-		myVpp->Tv_SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
+		myVpp->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
 	} else if (mCurrent_backlight > mCur_dest_backlight) {
 		mCurrent_backlight = mCurrent_backlight - 2;
-		myVpp->Tv_SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
+		myVpp->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
 	}
 
 	//LOGD("mCurrent_backlight = %d", mCurrent_backlight);
@@ -183,7 +182,7 @@ int AutoBackLight::HistogramGet_AVE()
 	int hist_ave = 0;
 	tvin_parm_t vdinParam;
 	if (0 == myTvin->VDIN_GetVdinParam(&vdinParam)) {
-		if(vdinParam.pixel_sum != 0) {
+		if (vdinParam.pixel_sum != 0) {
 			hist_ave = vdinParam.luma_sum / vdinParam.pixel_sum;
 			LOGD("[hist_ave][%d].", hist_ave);
 			return hist_ave;

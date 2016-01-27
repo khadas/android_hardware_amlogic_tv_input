@@ -4,7 +4,11 @@
 #
 #include "CThread.h"
 static const   char *KEY_EVENT_0 = "/dev/input/event0";
+#ifdef ADC_USE_KEY_EVENT0
+static const   char *KEY_EVENT_1 = "/dev/input/event0";
+#else
 static const   char *KEY_EVENT_1 = "/dev/input/event1";
+#endif
 static const   char *KEY_EVENT_2 = "/dev/input/event2";
 class CTvInput: public CThread {
 public:

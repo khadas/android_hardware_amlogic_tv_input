@@ -13,18 +13,18 @@ bool CTvVchipCheck::CheckProgramBlock(int id)
 	int ret = 0;
 
 	ret = CTvProgram::selectByID(id, prog);
-	if(ret != 0) return false;
+	if (ret != 0) return false;
 
 	int type = prog.getProgType();
 
-	if(type == CTvProgram::TYPE_ATV) {
+	if (type == CTvProgram::TYPE_ATV) {
 		ret = ev.getATVProgEvent(prog.getSrc(), prog.getID(), ev);
 	} else {
 		//long epgtime = mDmTime.getTime();
 		//ret = ev.getProgPresentEvent(prog.getSrc(),prog.getSourceId(), epgtime, ev);
 	}
 	if (ret == 0) {
-		if(prog.isATSCMode()) {
+		if (prog.isATSCMode()) {
 			// ATSC V-Chip
 			Vector<CTvDimension::VChipRating *> definedRatings = ev.getVChipRatings();
 			for (int i = 0; i < definedRatings.size(); i++) {

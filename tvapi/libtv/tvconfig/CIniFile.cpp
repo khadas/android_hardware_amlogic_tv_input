@@ -56,7 +56,7 @@ int CIniFile::LoadFromFile(const char *filename)
 		pLINE->LineLen = strlen(pLINE->Text);
 
 		//head
-		if(mpFirstLine == NULL) {
+		if (mpFirstLine == NULL) {
 			mpFirstLine = pLINE;
 		} else {
 			pCurLINE->pNext = pLINE;
@@ -64,12 +64,12 @@ int CIniFile::LoadFromFile(const char *filename)
 
 		pCurLINE = pLINE;
 
-		switch(pCurLINE->type) {
+		switch (pCurLINE->type) {
 		case LINE_TYPE_SECTION: {
 			SECTION *pSec = new SECTION();
 			pSec->pLine = pLINE;
 			pSec->pNext = NULL;
-			if(mpFirstSection == NULL) { //first section
+			if (mpFirstSection == NULL) { //first section
 				mpFirstSection = pSec;
 			} else {
 				pCurSection->pNext = pSec;
@@ -103,12 +103,12 @@ int CIniFile::LoadFromFile(const char *filename)
 void CIniFile::printAll()
 {
 	//line
-	for(LINE *pline = mpFirstLine; pline != NULL; pline = pline->pNext) {
+	for (LINE *pline = mpFirstLine; pline != NULL; pline = pline->pNext) {
 		LOGD("line = %s type = %d", pline->Text, pline->type);
 	}
 
 	//section
-	for(SECTION *psec = mpFirstSection; psec != NULL; psec = psec->pNext) {
+	for (SECTION *psec = mpFirstSection; psec != NULL; psec = psec->pNext) {
 		LOGD("sec = %s", psec->pLine->Text);
 	}
 	return;
@@ -122,12 +122,12 @@ int CIniFile::LoadFromString(const char *str)
 int CIniFile::SaveToFile(const char *filename)
 {
 	const char *file = NULL;
-	if(m_pIniFile != NULL) {
+	if (m_pIniFile != NULL) {
 		fclose (m_pIniFile);
 	}
 
-	if(filename == NULL) {
-		if(strlen(mpFileName) == 0) {
+	if (filename == NULL) {
+		if (strlen(mpFileName) == 0) {
 			LOGD("error save file is null");
 			return -1;
 		} else {
@@ -138,13 +138,13 @@ int CIniFile::SaveToFile(const char *filename)
 	}
 	//LOGD("Save to file name = %s", file);
 
-	if((m_pIniFile = fopen (file, "wb")) == NULL) {
+	if ((m_pIniFile = fopen (file, "wb")) == NULL) {
 		LOGD("Save to file open error = %s", file);
 		return -1;
 	}
 
 	LINE *pCurLine = NULL;
-	for(pCurLine = mpFirstLine; pCurLine != NULL; pCurLine = pCurLine->pNext) {
+	for (pCurLine = mpFirstLine; pCurLine != NULL; pCurLine = pCurLine->pNext) {
 		fprintf (m_pIniFile, "%s\r\n", pCurLine->Text);
 	}
 
@@ -164,7 +164,7 @@ int CIniFile::SetString(const char *section, const char *key, const char *value)
 	LINE *pNewKeyLine = NULL;
 
 	SECTION *pSec = getSection(section);
-	if(pSec == NULL) {
+	if (pSec == NULL) {
 		pNewSec = new SECTION();
 		pNewSecLine = new LINE();
 		pNewKeyLine = new LINE();
@@ -190,7 +190,7 @@ int CIniFile::SetString(const char *section, const char *key, const char *value)
 
 	} else { //find section
 		LINE *pLine = getKeyLineAtSec(pSec, key);
-		if(pLine == NULL) { //, not find key
+		if (pLine == NULL) { //, not find key
 			pNewKeyLine = new LINE();
 			pNewKeyLine->type = LINE_TYPE_KEY;
 
@@ -224,16 +224,16 @@ int CIniFile::SetInt(const char *section, const char *key, int value)
 const char *CIniFile::GetString(const char *section, const char *key, const char *def_value)
 {
 	SECTION *pSec = getSection(section);
-	if(pSec == NULL) return def_value;
+	if (pSec == NULL) return def_value;
 	LINE *pLine = getKeyLineAtSec(pSec, key);
-	if(pLine == NULL) return def_value;
+	if (pLine == NULL) return def_value;
 
 	return pLine->pValueStart;
 }
 int CIniFile::GetInt(const char *section, const char *key, int def_value)
 {
 	const char *num = GetString(section, key, NULL);
-	if(num != NULL) {
+	if (num != NULL) {
 		return atoi(num);
 	}
 	return def_value;
@@ -244,7 +244,7 @@ LINE_TYPE CIniFile::getLineType(char *Str)
 {
 	LINE_TYPE type = LINE_TYPE_COMMENT;
 	//只要有#,就是注释
-	if(strchr(Str, '#')  != NULL) {
+	if (strchr(Str, '#')  != NULL) {
 		type = LINE_TYPE_COMMENT;
 	} else if ( (strstr (Str, "[") != NULL) && (strstr (Str, "]") != NULL) ) { /* Is Section */
 		type = LINE_TYPE_SECTION;
@@ -263,7 +263,7 @@ void CIniFile::FreeAllMem()
 	//line
 	LINE *pCurLine = NULL;
 	LINE *pNextLine = NULL;
-	for(pCurLine = mpFirstLine; pCurLine != NULL;) {
+	for (pCurLine = mpFirstLine; pCurLine != NULL;) {
 		pNextLine = pCurLine->pNext;
 		delete pCurLine;
 		pCurLine = pNextLine;
@@ -272,7 +272,7 @@ void CIniFile::FreeAllMem()
 	//section
 	SECTION *pCurSec = NULL;
 	SECTION *pNextSec = NULL;
-	for(pCurSec = mpFirstSection; pCurSec != NULL;) {
+	for (pCurSec = mpFirstSection; pCurSec != NULL;) {
 		pNextSec = pCurSec->pNext;
 		delete pCurSec;
 		pCurSec = pNextSec;
@@ -301,8 +301,8 @@ int CIniFile::InsertKeyLine(SECTION *pSec, LINE *line)
 SECTION *CIniFile::getSection(const char *section)
 {
 	//section
-	for(SECTION *psec = mpFirstSection; psec != NULL; psec = psec->pNext) {
-		if(strncmp((psec->pLine->Text) + 1, section, strlen(section)) == 0)
+	for (SECTION *psec = mpFirstSection; psec != NULL; psec = psec->pNext) {
+		if (strncmp((psec->pLine->Text) + 1, section, strlen(section)) == 0)
 			return psec;
 	}
 	return NULL;
@@ -310,9 +310,9 @@ SECTION *CIniFile::getSection(const char *section)
 LINE *CIniFile::getKeyLineAtSec(SECTION *pSec, const char *key)
 {
 	//line
-	for(LINE *pline = pSec->pLine->pNext; (pline != NULL && pline->type != LINE_TYPE_SECTION); pline = pline->pNext) {
-		if(pline->type == LINE_TYPE_KEY) {
-			if(strncmp(pline->Text, key, strlen(key)) == 0)
+	for (LINE *pline = pSec->pLine->pNext; (pline != NULL && pline->type != LINE_TYPE_SECTION); pline = pline->pNext) {
+		if (pline->type == LINE_TYPE_KEY) {
+			if (strncmp(pline->Text, key, strlen(key)) == 0)
 				return pline;
 		}
 	}
@@ -336,10 +336,10 @@ void CIniFile::allTrim(char *Str)
 	}
 	//去掉空格
 	pStr = Str;
-	while(*pStr != '\0') { //没到尾部
-		if(*pStr == ' ') { //遇到空格
+	while (*pStr != '\0') { //没到尾部
+		if (*pStr == ' ') { //遇到空格
 			char *pTmp = pStr;//从空格处开始
-			while(*pTmp != '\0') {
+			while (*pTmp != '\0') {
 				*pTmp = *(pTmp + 1);//前移,包括移最后结束符
 				pTmp++;
 			}

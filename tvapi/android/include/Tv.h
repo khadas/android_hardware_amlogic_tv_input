@@ -34,9 +34,9 @@ public:
 	{
 		return mStatus;
 	}
-	status_t 	processCmd(const Parcel &p, Parcel *r);
+	status_t    processCmd(const Parcel &p, Parcel *r);
 	status_t    createSubtitle(const sp<IMemory> &share_mem);
-	status_t 	createVideoFrame(const sp<IMemory> &share_mem);
+	status_t    createVideoFrame(const sp<IMemory> &share_mem, int iSourceMode, int iCapVideoLayerOnly);
 	void        setListener(const sp<TvListener> &listener);
 
 	// ITvClient interface

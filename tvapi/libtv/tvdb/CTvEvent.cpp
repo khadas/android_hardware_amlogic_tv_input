@@ -55,21 +55,22 @@ void CTvEvent::InitFromCursor(CTvDatabase::Cursor &c)
 	char *tmp;
 	Vector<String8> ratings;
 	int l = 0;
-	tmp = strtok(rrtRatings.lockBuffer(rrtRatings.size()), ",");
+	char *pSave;
+	tmp = strtok_r(rrtRatings.lockBuffer(rrtRatings.size()), ",", &pSave);
 	LOGD("%s, %d, %s", "TV", __LINE__, tmp);
 	while (tmp != NULL) {
 		ratings.push_back(String8(tmp));
-		tmp = strtok(NULL, ",");
+		tmp = strtok_r(NULL, ",", &pSave);
 	}
 	rrtRatings.unlockBuffer();
 	rating_len = ratings.size();
 	if (!ratings.isEmpty()) {
 		for (int i = 0; i < ratings.size(); i++) {
 			Vector<String8> rating;
-			tmp = strtok(ratings.editItemAt(i).lockBuffer(ratings.editItemAt(i).length()), " ");
+			tmp = strtok_r(ratings.editItemAt(i).lockBuffer(ratings.editItemAt(i).length()), " ", &pSave);
 			while (tmp != NULL) {
 				rating.push_back(String8(tmp));
-				tmp = strtok(NULL, " ");
+				tmp = strtok_r(NULL, " ", &pSave);
 			}
 			ratings.editItemAt(i).unlockBuffer();
 			if (rating.size() >= 3) {
@@ -107,7 +108,7 @@ int CTvEvent::getProgPresentEvent(int progSrc, int progID, long nowTime, CTvEven
 
 	int ret = CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		ev.InitFromCursor(c);
 	} else {
 		c.close();
@@ -139,10 +140,10 @@ int CTvEvent::getProgScheduleEvents(int progSrc, int progID, long start, long du
 	CTvDatabase::Cursor c;
 	int ret = CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		do {
 			vEv.add(new CTvEvent(c));
-		} while(c.moveToNext());
+		} while (c.moveToNext());
 
 	} else {
 		c.close();
@@ -171,7 +172,7 @@ int CTvEvent::getATVProgEvent(int progSrc, int progID, CTvEvent &ev)
 
 	int ret = CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		ev.InitFromCursor(c);
 	} else {
 		c.close();
@@ -196,7 +197,7 @@ int CTvEvent::selectByID(int id, CTvEvent &evt)
 
 	sql = String8("select * from evt_table where evt_table.db_id = ") + String8::format("%d", id);
 	CTvDatabase::GetTvDb()->select(sql.string(), c);
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		evt.InitFromCursor(c);
 	} else {
 		c.close();

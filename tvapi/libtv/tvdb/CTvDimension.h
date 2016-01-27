@@ -74,7 +74,7 @@ public:
 	static void insertNewDimension(const int region, String8 regionName, String8 name,
 								   int indexj, int *lock, const char **abbrev, const char **text, int size);
 	static  void builtinAtscDimensions();
-	static 	int isDimensionTblExist();
+	static  int isDimensionTblExist();
 	String8 getCurdimension();
 	String8 getCurAbbr();
 	String8 getCurText();

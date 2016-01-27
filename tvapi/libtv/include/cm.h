@@ -1,6 +1,8 @@
 #ifndef _TVOUT_CM_H
 #define _TVOUT_CM_H
 
+#define REGS_MAX_NUMBER 900
+
 // ***************************************************************************
 // *** enum definitions *********************************************
 // ***************************************************************************
@@ -146,7 +148,7 @@ typedef struct am_regs_s {
 #else
 typedef struct am_regs_s {
 	unsigned int    length; // Length of total am_reg
-	struct am_reg_s am_reg[512];
+	struct am_reg_s am_reg[REGS_MAX_NUMBER];
 } am_regs_t;
 #endif
 

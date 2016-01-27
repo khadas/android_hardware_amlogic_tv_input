@@ -21,7 +21,8 @@ BOARD_TV_AUDIO_AMAUDIO_LIB_TYPE := external
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES := \
-		tv/AutoBackLight.cpp \
+    tv/CAutoPQparam.cpp \
+	tv/AutoBackLight.cpp \
     tv/CTvLog.cpp \
     tv/CTvEv.cpp \
     tv/CTvEpg.cpp \
@@ -59,11 +60,11 @@ LOCAL_SRC_FILES := \
     vpp/CPQdb.cpp \
     tvconfig/tvconfig.cpp \
     tvconfig/CIniFile.cpp \
-    audio/audio_api.cpp \
+    audio/CTvAudio.cpp \
     tvsetting/audio_cfg.cpp \
     audio/audio_effect.cpp \
     audio/audio_alsa.cpp \
-    audio/audio_android_effect.cpp \
+    audio/CAudioCustomerCtrl.cpp \
     tvsetting/CBlobDevice.cpp \
     tvsetting/CBlobDeviceE2prom.cpp \
     tvsetting/CBlobDeviceFile.cpp \
@@ -99,7 +100,8 @@ LOCAL_SHARED_LIBRARIES += \
     libntsc_decode \
     libam_mw \
     libam_adp \
-    libam_ver
+    libam_ver \
+    libsystemcontrolservice
 
 ifeq ($(strip $(BOARD_TV_AUDIO_AMAUDIO_LIB_TYPE)), external)
     LOCAL_SHARED_LIBRARIES += libTVaudio
@@ -186,6 +188,7 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/tv \
     $(LOCAL_PATH)/include \
     $(LOCAL_PATH)/../build/include \
+    $(TOP)/vendor/amlogic/frameworks/services \
 
 
 
@@ -213,6 +216,7 @@ ifeq ($(strip $(BOARD_TVAPI_NO_VERSION)),)
     LOCAL_CFLAGS+=-DTVAPI_BOARD_VERSION=\"$(TVAPI_TARGET_BOARD_VERSION)\"
 endif
 
+LOCAL_CFLAGS += -DTARGET_BOARD_$(strip $(TVAPI_TARGET_BOARD_VERSION))
 LOCAL_MODULE:= libtv
 
 include $(BUILD_SHARED_LIBRARY)

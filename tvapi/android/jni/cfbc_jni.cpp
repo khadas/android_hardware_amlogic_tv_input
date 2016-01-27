@@ -54,17 +54,17 @@ void java_jni_callback(char *str, int cnt, int data_buf[])
 {
 	char temp_str[MAX_CNT];
 	int idx = 0;
-	if(str != NULL && cnt > 0) {
+	if (str != NULL && cnt > 0) {
 		memset(temp_str, 0, sizeof(temp_str));
 		JNI_DBG("java jni string is:\n%s, cnt:%d.", str, cnt);
 		//strcpy(temp_str, "Call From C/C++!");
 		memcpy(temp_str, str, strlen(str) % MAX_CNT);
 
-		if(NULL != jni_local_obj) {
+		if (NULL != jni_local_obj) {
 			bool needsDetach = false;
 			jint j_cnt = data_buf[1];
 			jint j_data_buf[MAX_CNT];
-			for(idx = 0; idx < j_cnt; idx++) {
+			for (idx = 0; idx < j_cnt; idx++) {
 				idx %= MAX_CNT;
 				j_data_buf[idx] = data_buf[idx];
 				JNI_DBG("java_jni_callback the %d data is:0x%x, %d.", idx, j_data_buf[idx], data_buf[idx]);
@@ -89,7 +89,7 @@ void java_jni_callback(char *str, int cnt, int data_buf[])
 			//jni_local_env->ReleaseIntArrayElements(cc_cmd_arr, temp_cmd, 0);
 			JNI_DBG("%s %d be called.", __FUNCTION__, __LINE__);
 
-			if(needsDetach) {
+			if (needsDetach) {
 				detachJNI();
 			}
 		}
@@ -105,12 +105,12 @@ static jint jni_java_exec_cmd(JNIEnv *env, jobject obj, jintArray cmdArray)
 	int cmd_cnt = arry[1], idx = 0;
 	int cmd_array[MAX_CNT];
 	memset(cmd_array, 0, sizeof(cmd_array));
-	for(idx = 0; idx < cmd_cnt; idx++)
+	for (idx = 0; idx < cmd_cnt; idx++)
 		cmd_array[idx] = arry[idx];
 
 	JNI_DBG("%s %s %d be called.", __FILE__, __FUNCTION__, __LINE__);
 
-	if(g_cfbc_handle == NULL) {
+	if (g_cfbc_handle == NULL) {
 		g_cfbc_handle = new CFbcCommunication();
 		g_cfbc_handle->run("cfbc_thread", 0, 0);
 	}
@@ -118,7 +118,7 @@ static jint jni_java_exec_cmd(JNIEnv *env, jobject obj, jintArray cmdArray)
 	//g_cfbc_handle->handleCmd(COMM_DEV_CEC, cmd_array);
 	//c_exec_cmd(cmd_array);
 
-	if(NULL == jni_local_obj) {
+	if (NULL == jni_local_obj) {
 		jni_local_obj = env->NewGlobalRef(obj);
 	}
 
@@ -126,8 +126,8 @@ static jint jni_java_exec_cmd(JNIEnv *env, jobject obj, jintArray cmdArray)
 	/* this is used to terminate the jni call if needed
 	** and we should handle the pthread we create in c layer
 	*/
-	if(cmd_array[0] == 0x1002) {
-		if(NULL != jni_local_obj)
+	if (cmd_array[0] == 0x1002) {
+		if (NULL != jni_local_obj)
 			env->DeleteGlobalRef(jni_local_obj);
 	}
 #endif

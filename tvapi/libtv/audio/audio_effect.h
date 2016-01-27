@@ -1,31 +1,27 @@
 #ifndef __TV_AUDIO_EFFECT_H__
 #define __TV_AUDIO_EFFECT_H__
-#include "audio_android_effect.h"
-
+#define CC_BAND_ITEM_CNT                ( 6 )
 class CAudioEffect {
 public:
 	CAudioEffect();
-	virtual ~CAudioEffect();
-	int amAndroidNewAudioEffects();
-	void amAndroidFreeAudioEffects();
-	virtual int GetEQBandCount();
-	virtual int GetEQMinGain();
-	virtual int GetEQMaxGain();
-	virtual int SetEQSwitch(int switch_val);
-	virtual int GetEQSwitch();
-	virtual int SetEQValue(int gain_val_buf[]);
-	virtual int GetEQValue(int gain_val_buf[]);
+	~CAudioEffect();
+	int GetEQBandCount();
+	int SetEQSwitch(int switch_val);
+	int GetEQSwitch();
+	int SetEQValue(int gain_val_buf[]);
+	int GetEQValue(int gain_val_buf[]);
 
-	virtual int SetSrsSurroundSwitch(int switch_val);
-	virtual int SetSrsSurroundGain(int gain_val);
-	virtual int SetSrsTruBassSwitch(int switch_val);
-	virtual int SetSrsTruBassGain(int gain_val);
-	virtual int SetSrsDialogClaritySwitch(int switch_val);
-	virtual int SetSrsDialogClarityGain(int gain_val);
-	virtual int SetSrsDefinitionGain(int gain_val);
-	virtual int SetSrsTrubassSpeakerSize(int tmp_val);
+	int SetSrsSurroundSwitch(int switch_val);
+	int SetSrsInputOutputGain(int input_gain_val, int output_gain_val);
+	int SetSrsSurroundGain(int gain_val);
+	int SetSrsTruBassSwitch(int switch_val);
+	int SetSrsTruBassGain(int gain_val);
+	int SetSrsDialogClaritySwitch(int switch_val);
+	int SetSrsDialogClarityGain(int gain_val);
+	int SetSrsDefinitionGain(int gain_val);
+	int SetSrsTrubassSpeakerSize(int tmp_val);
+	int DbxTv_SetMode(int mode, int son_value, int vol_value, int sur_value);
 
 private:
-	CAndroidEffect mAndroidEffect;
 };
 #endif //__TV_AUDIO_EFFECT_H__

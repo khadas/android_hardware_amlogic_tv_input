@@ -86,7 +86,8 @@ typedef enum fbc_command_e {
 	VPU_CMD_RES3,
 	VPU_CMD_RES4,
 	VPU_CMD_RES5,
-	VPU_CMD_USER_GAMMA = 0x2f,
+	VPU_CMD_USER_VMUTE = 0x2e,
+	VPU_CMD_USER_GAMMA ,
 	//0x30:sound_mode_def
 	VPU_CMD_COLOR_TEMPERATURE_DEF = 0x31,   //def:factory setting
 	VPU_CMD_BRIGHTNESS_DEF,
@@ -149,16 +150,24 @@ typedef enum fbc_command_e {
 	AUDIO_CMD_GET_BALANCE,
 
 	VPU_CMD_SET_ELEC_MODE = 0x64,
-	VPU_CMD_GET_ELEC_MODE,
+	CMD_SET_LED_MODE   = 0x65,
 
 	CMD_SET_FACTORY_SN = 0x66,
 	CMD_GET_FACTORY_SN,
 	CMD_COMMUNICATION_TEST,
 	CMD_CLR_SETTINGS_DEFAULT,
+	CMD_BLUETOOTH_I2S_STATUS = 0x6a,
+	CMD_PANEL_ON_OFF = 0x6b,
 
 	CMD_HDMI_REG   = 0x70,
 	CMD_SET_PROJECT_SELECT = 0x71,
 	CMD_GET_PROJECT_SELECT = 0x72,
+	CMD_SET_LOCKN_DISABLE = 0x73, //0x73
+	CMD_SET_SPLIT_SCREEN_DEMO = 0X74,
+	CMD_SET_UBOOT_STAGE = 0x7b,
+
+	CMD_SET_AUTO_BACKLIGHT_ONFF = 0x85,
+	CMD_GET_AUTO_BACKLIGHT_ONFF = 0x86,
 } fbc_command_t;
 
 typedef struct REQUEST_REPLY_CMD {
@@ -303,7 +312,10 @@ public:
 	int cfbc_Get_Gamma(COMM_DEV_TYPE_E fromDev, int *value);
 	int cfbc_Set_WhiteBalance_OnOff(COMM_DEV_TYPE_E fromDev, unsigned char value);
 	int cfbc_Get_WhiteBalance_OnOff(COMM_DEV_TYPE_E fromDev, int *value);
+	int cfbc_Set_Auto_Backlight_OnOff(COMM_DEV_TYPE_E fromDev, unsigned char value);
+	int cfbc_Get_Auto_Backlight_OnOff(COMM_DEV_TYPE_E fromDev, int *value);
 	int cfbc_WhiteBalance_GrayPattern_OnOff(COMM_DEV_TYPE_E fromDev, int onOff);
+	int cfbc_TestPattern_Select(COMM_DEV_TYPE_E fromDev, int value);
 	int cfbc_WhiteBalance_SetGrayPattern(COMM_DEV_TYPE_E fromDev, unsigned char value);
 	int cfbc_Get_WB_Batch(COMM_DEV_TYPE_E fromDev, unsigned char mode, unsigned char *r_gain, unsigned char *g_gain, unsigned char *b_gain, unsigned char *r_offset, unsigned char *g_offset, unsigned char *b_offset);
 	int cfbc_Set_WB_Batch(COMM_DEV_TYPE_E fromDev, unsigned char mode, unsigned char r_gain, unsigned char g_gain, unsigned char b_gain, unsigned char r_offset, unsigned char g_offset, unsigned char b_offset);
@@ -336,6 +348,15 @@ public:
 	int cfbc_Get_MULT_PQ_N310(COMM_DEV_TYPE_E fromDev, int *value);
 	int cfbc_Set_MEMC_N310(COMM_DEV_TYPE_E fromDev, int value);
 	int cfbc_Get_MEMC_N310(COMM_DEV_TYPE_E fromDev, int *value);
+	int cfbc_Set_LockN_state(COMM_DEV_TYPE_E fromDev, int value);
+	int cfbc_Set_VMute(COMM_DEV_TYPE_E fromDev, unsigned char value);
+	int cfbc_SET_SPLIT_SCREEN_DEMO(COMM_DEV_TYPE_E fromDev, int value);
+	int cfbc_Set_Bluetooth_IIS_onoff(COMM_DEV_TYPE_E fromDev, int value);
+	int cfbc_Get_Bluetooth_IIS_onoff(COMM_DEV_TYPE_E fromDev, int *value);
+	int cfbc_Set_Led_onoff(COMM_DEV_TYPE_E fromDev, int val_1, int val_2, int val_3);
+	int cfbc_Set_AP_STANDBY_N310(COMM_DEV_TYPE_E fromDev, int value);
+	int cfbc_Get_AP_STANDBY_N310(COMM_DEV_TYPE_E fromDev, int *value);
+	virtual int cfbc_Set_Fbc_Uboot_Stage(COMM_DEV_TYPE_E fromDev, int value);
 
 private:
 	//now,just one item in list,haha...

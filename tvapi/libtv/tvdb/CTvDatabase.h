@@ -50,10 +50,10 @@ public:
 	template<typename T>
 	int StringToIndex(const T &t, const char *item)
 	{
-		if(item == NULL) return -1;
+		if (item == NULL) return -1;
 		int size = sizeof(t) / sizeof(t[0]);
-		for(int i = 0; i < size; i++) {
-			if(strcmp(t[i], item) == 0) return i;
+		for (int i = 0; i < size; i++) {
+			if (strcmp(t[i], item) == 0) return i;
 		}
 		return -1;
 	}

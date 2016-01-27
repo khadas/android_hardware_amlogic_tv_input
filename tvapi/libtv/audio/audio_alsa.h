@@ -6,6 +6,10 @@ enum CC_AUD_I2S_MUTE {
 	CC_I2S_MUTE_ON,
 };
 
+enum CC_AUDIO_MUTE_STATUS {
+	CC_MUTE_ON,
+	CC_MUTE_OFF,
+};
 enum CC_AUD_SPDIF_MUTE {
 	CC_SPDIF_MUTE_OFF,
 	CC_SPDIF_MUTE_ON,
@@ -51,6 +55,12 @@ public:
 	~CAudioAlsa();
 	int SetAudioInSource(int source_type);
 	int GetAudioInSource(void);
+	int SetAudioInternalDacPGAInGain(int gain_l_val, int gain_r_val);
+	int GetAudioInternalDacPGAInGain(int *gain_l_val, int *gain_r_val);
+	int SetAudioInternalDacADCDigitalCaptureVolume(int vol_l_val, int vol_r_val);
+	int GetAudioInternalDacADCDigitalCaptureVolume(int *vol_l_val, int *vol_r_val);
+	int SetAudioInternalDacDACDigitalPlayBackVolume(int vol_l_val, int vol_r_val);
+	int GetAudioInternalDacDACDigitalPlayBackVolume(int *vol_l_val, int *vol_r_val);
 	int SetInternalDacLineInSelectChannel(int line_in_number);
 	int SetInternalDacLineInCaptureVolume(int l_vol, int r_vol);
 	int GetInternalDacLineInCaptureVolume(int vol_buf[]);
@@ -75,19 +85,23 @@ public:
 	int GetMixerDacSwitch(void);
 	//dac
 	void SetMainVolDigitLutBuf(int digit_lut_buf[]);
+	int *GetMainVolDigitLutBuf();
 	void SetSupperBassVolDigitLutBuf(int digit_lut_buf[]);
-	int SetDacMute(int mute_state, int mute_type);
-	int SetDacMainVolume(int main_vol);
-	int SetDacSupperBassVolume(int tmp_vol);
-	int SetDacEQMode(int mode_val);
-	int SetBalanceValue(int balance_val);
-	int GetBalanceValue();
 	int SetMainVolumeGain(int gain_val);
 	int GetMainVolumeGain();
 	int SetSupperBassVolumeGain(int gain_val);
 	int GetSupperBassVolumeGain();
-	int SetDacAudioSourceType(int source_type);
+	int SetInternalDacMute(int);
+	int setAudioPcmPlaybackMute(int);
 	//end dac
+	int TransVolumeBarVolToDigitalVol(int *, int);
+	int TransDigitalVolToVolumeBarVol(int *, int, int, int, int, int);
+	int CalculateBalanceVol(int, int, int *);
+	int SetExternalDacMainVolume(int);
+	int SetInternalDacMainVolume(int);
+	int SetDigitalVolume(int, int);
+	int SetDigitalMainVolume(int, int);
+	int SetDigitalMute(int);
 private:
 	int get_aml_card();
 	int AudioControlSetValue(int val_count, int data_buf[], char *match_names);
@@ -100,30 +114,13 @@ private:
 	int GetLineOutMaxVol();
 	char *GetAlsaControlName(int get_type);
 	//
-	int TransVolumeBarVolToDigitalVol(int *, int, int, int, int, int);
-	int TransDigitalVolToVolumeBarVol(int *, int, int, int, int, int);
-	int CalculateBalanceVol(int, int, int *);
-	int SetExternalDacMute(int);
-	int SetInternalDacMute(int);
-	int setAudioPcmPlaybackMute(int);
-	int SetExternalDacMainVolume(int);
-	int SetInternalDacMainVolume(int);
-	int SetExternalDacSupperBassVolume(int);
-	int SetExternalDacEQ(int);
-	int LoadExternalDacLib();
-	int SendCmdToOffBoardCustomerLibExternalDac(int, int);
-	int SendCmdToOffBoardFBCExternalDac(int, int);
-	int HandleDigitalVolume(int, int);
-	int HandleDigitalMute(int);
-	int SetDigitalMainVolume(int);
-	int SetDigitalMute(int);
 	//
 	//mem
 	struct mixer *mpMixer;
 	struct mixer *mpUsbMixer;
-	volatile int mMainVolumeBalanceVal;
-	volatile int mMainVolumeGainVal;
-	volatile int mSupperBassVolumeGainVal;
+	int mMainVolumeBalanceVal;
+	int mMainVolumeGainVal;
+	int mSupperBassVolumeGainVal;
 	int mMainDigitLutBuf[CC_VOL_TRANS_LUT_BUF_SIZE];
 	int mSupperBassDigitLutBuf[CC_VOL_TRANS_LUT_BUF_SIZE];
 };

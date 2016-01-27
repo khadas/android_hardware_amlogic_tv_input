@@ -14,6 +14,8 @@
 #include "CTvLog.h"
 using namespace android;
 #include "am_cc.h"
+#include "am_sub2.h"
+#include "am_pes.h"
 #include "CTvEv.h"
 #define LOG_TAG "CTvSubtitle"
 
@@ -47,6 +49,27 @@ typedef enum cc_param_caption_type {
 };
 class CTvSubtitle {
 public:
+	class IObserver {
+	public:
+		IObserver() {};
+		virtual ~IObserver() {};
+		//virtual void onEvent(const CloseCaptionEvent &ev);
+		virtual void updateSubtitle(int, int) {};
+	};
+
+	AM_SUB2_Handle_t sub_handle;
+	AM_PES_Handle_t  pes_handle;
+	int              dmx_id;
+	int              filter_handle;
+	int              bmp_w;
+	int              bmp_h;
+	int              bmp_pitch;
+	unsigned char           *buffer;
+	int             sub_w;
+	int             sub_h;
+	pthread_mutex_t  lock;
+
+	IObserver *mpObser;
 	CTvSubtitle();
 	~CTvSubtitle();
 
@@ -67,14 +90,8 @@ public:
 		int *mpDataBuffer;
 	};
 
-	class IObserver {
-	public:
-		IObserver() {};
-		virtual ~IObserver() {};
-		virtual void onEvent(const CloseCaptionEvent &ev) = 0;
-	};
-
-	void setObser(IObserver *pObser);
+	void setObserver(IObserver *pObser);
+	void setBuffer(char *share_mem);
 	void stopDecoder();
 	/**
 	 * 开始字幕信息解析showboz sync
@@ -128,7 +145,7 @@ public:
 	 */
 	void searchPrevious();
 
-	int sub_init();
+	int sub_init(int, int);
 	//
 	int sub_destroy();
 	//
@@ -138,6 +155,7 @@ public:
 	//
 	int sub_clear();
 	//
+	int sub_switch_status();
 	int sub_start_dvb_sub(int dmx_id, int pid, int page_id, int anc_page_id);
 	//
 	int sub_start_dtv_tt(int dmx_id, int region_id, int pid, int page, int sub_page, bool is_sub);
@@ -227,7 +245,7 @@ private:
 
 	int mSubType;
 	CloseCaptionEvent mCurCCEv;
-	IObserver *mpObser;
 	int avchip_chg;
+	bool isSubOpen;
 };
 #endif  //_CTVSUBTITLE_H

@@ -28,12 +28,16 @@ CFrontEnd::CFrontEnd()
 	mpObserver = NULL;
 	mCurFineFreq = 0;
 	mCurMode =  FE_ANALOG;
+	mCurFreq = -1;
+	mCurPara1 = -1;
+	mCurPara2 = -1;
+	mbFEOpened = false;
 }
 
 CFrontEnd::~CFrontEnd()
 {
 	AM_EVT_Unsubscribe(mFrontDevID, AM_FEND_EVT_STATUS_CHANGED, dmd_fend_callback, NULL);
-	if(mFrontDevID == FE_DEV_ID)
+	if (mFrontDevID == FE_DEV_ID)
 		AM_FEND_Close(mFrontDevID);
 	mFrontDevID = -1;
 }
@@ -43,10 +47,15 @@ int CFrontEnd::Open(int mode)
 	AM_FEND_OpenPara_t para;
 	int rc = 0;
 
+	if (mbFEOpened) {
+		LOGD("FrontEnd have opened, return");
+		return 0;
+	}
+	mbFEOpened = true;
 	memset(&para, 0, sizeof(AM_FEND_OpenPara_t));
 	para.mode = mode;
 	rc = AM_FEND_Open(mFrontDevID, &para);
-	if((rc == AM_FEND_ERR_BUSY) || (rc == 0)) {
+	if ((rc == AM_FEND_ERR_BUSY) || (rc == 0)) {
 		AM_EVT_Subscribe(mFrontDevID, AM_FEND_EVT_STATUS_CHANGED, dmd_fend_callback, this);
 		LOGD("%s,frontend dev open success!\n", __FUNCTION__);
 		return 0;
@@ -54,14 +63,25 @@ int CFrontEnd::Open(int mode)
 		LOGD("%s,frontend dev open failed! dvb error id is %d\n", __FUNCTION__, rc);
 		return -1;
 	}
+	mCurMode =  mode;
+	mCurFreq = -1;
+	mCurPara1 = -1;
+	mCurPara2 = -1;
 }
 
 int CFrontEnd::Close()
 {
 	int rc = 0;
+	if (!mbFEOpened) {
+		LOGD("FrontEnd have close, but not return");
+	}
 	rc = AM_FEND_Close(mFrontDevID);
-
-	if(rc != 0) {
+	mbFEOpened = false;
+	mCurMode =  -1;
+	mCurFreq = -1;
+	mCurPara1 = -1;
+	mCurPara2 = -1;
+	if (rc != 0) {
 		LOGD("%s,frontend_close fail! dvb error id is %d\n", __FUNCTION__, rc);
 		return -1;
 	} else {
@@ -73,10 +93,10 @@ int CFrontEnd::Close()
 int CFrontEnd::setMode(int mode)
 {
 	int rc = 0;
-	if(mCurMode == mode) return 0;
+	if (mCurMode == mode) return 0;
 	rc = AM_FEND_SetMode(mFrontDevID, mode);
 
-	if(rc != 0) {
+	if (rc != 0) {
 		LOGD("%s,front dev set mode failed! dvb error id is %d\n", __FUNCTION__, rc);
 		return -1;
 	}
@@ -89,12 +109,20 @@ int CFrontEnd::setPara(int mode, int freq, int para1, int para2)
 	int buff_size = 32;
 	char VideoStdBuff[buff_size];
 	char audioStdBuff[buff_size];
+	if (mCurMode == mode && mCurFreq == freq && mCurPara1 == para1 && mCurPara2 == para2) {
+		LOGD("fe setpara  is same return");
+		return 0;
+	}
+	mCurMode = mode;
+	mCurFreq = freq;
+	mCurPara1 = para1;
+	mCurPara2 = para2;
 
 	AM_FENDCTRL_DVBFrontendParameters_t dvbfepara;
 	memset(&dvbfepara, 0, sizeof(AM_FENDCTRL_DVBFrontendParameters_t));
 	LOGD("%s,set fe para mode = %d freq=%d p1=%d p2=%d", __FUNCTION__, mode, freq, para1, para2);
 	dvbfepara.m_type = mode;
-	switch(mode) {
+	switch (mode) {
 	case FE_OFDM:
 		dvbfepara.terrestrial.para.frequency = freq;
 		dvbfepara.terrestrial.para.u.ofdm.bandwidth = (fe_bandwidth_t)para1;
@@ -120,10 +148,11 @@ int CFrontEnd::setPara(int mode, int freq, int para1, int para2)
 		dvbfepara.analog.para.frequency = freq;
 		dvbfepara.analog.para.u.analog.std   =   para1;
 		dvbfepara.analog.para.u.analog.afc_range = AFC_RANGE;
-		if(para2 == 0) {
+		if (para2 == 0) {
 			dvbfepara.analog.para.u.analog.flag |= ANALOG_FLAG_ENABLE_AFC;
 		} else {
 			dvbfepara.analog.para.u.analog.flag &= ~ANALOG_FLAG_ENABLE_AFC;
+			dvbfepara.analog.para.u.analog.afc_range = 0;
 		}
 
 		printAudioStdStr(para1, audioStdBuff, buff_size);
@@ -146,12 +175,12 @@ int CFrontEnd::setPara(int mode, int freq, int para1, int para2)
 int CFrontEnd::fineTune(int fineFreq)
 {
 	int ret = 0;
-	if(mCurFineFreq == fineFreq) return -1;
+	if (mCurFineFreq == fineFreq) return -1;
 
 	mCurFineFreq = fineFreq;
 	ret = AM_FEND_FineTune(FE_DEV_ID, fineFreq);
 
-	if(ret != 0) {
+	if (ret != 0) {
 		LOGD("%s, fail! dvb error id is %d", __FUNCTION__, ret);
 		return -1;
 	}
@@ -167,11 +196,11 @@ int CFrontEnd::GetTSSource(AM_DMX_Source_t *src)
 void CFrontEnd::dmd_fend_callback(long dev_no, int event_type, void *param, void *user_data)
 {
 	CFrontEnd *pFront = (CFrontEnd *)user_data;
-	if(NULL == pFront) {
+	if (NULL == pFront) {
 		LOGD("%s,warnning : dmd_fend_callback NULL == pFront\n", __FUNCTION__);
 		return ;
 	}
-	if(pFront->mpObserver == NULL) {
+	if (pFront->mpObserver == NULL) {
 		LOGD("%s,warnning : mpObserver NULL == mpObserver\n", __FUNCTION__);
 		return;
 	}
@@ -193,19 +222,19 @@ void CFrontEnd::dmd_fend_callback(long dev_no, int event_type, void *param, void
 int CFrontEnd::stdAndColorToAudioEnum(int data)
 {
 	atv_audio_std_t std = CC_ATV_AUDIO_STD_DK;
-	if(((data & V4L2_STD_PAL_DK) == V4L2_STD_PAL_DK) ||
+	if (((data & V4L2_STD_PAL_DK) == V4L2_STD_PAL_DK) ||
 			((data & V4L2_STD_SECAM_DK) == V4L2_STD_SECAM_DK)) {
 		std =  CC_ATV_AUDIO_STD_DK;
-	} else if((data & V4L2_STD_PAL_I) == V4L2_STD_PAL_I) {
+	} else if ((data & V4L2_STD_PAL_I) == V4L2_STD_PAL_I) {
 		std =  CC_ATV_AUDIO_STD_I;
-	} else if(((data & V4L2_STD_PAL_BG) == V4L2_STD_PAL_BG) ||
-			  ((data & V4L2_STD_SECAM_B) == V4L2_STD_SECAM_B) ||
-			  ((data & V4L2_STD_SECAM_G) == V4L2_STD_SECAM_G )) {
+	} else if (((data & V4L2_STD_PAL_BG) == V4L2_STD_PAL_BG) ||
+			   ((data & V4L2_STD_SECAM_B) == V4L2_STD_SECAM_B) ||
+			   ((data & V4L2_STD_SECAM_G) == V4L2_STD_SECAM_G )) {
 		std = CC_ATV_AUDIO_STD_BG;
-	} else if(((data & V4L2_STD_PAL_M) == V4L2_STD_PAL_M) ||
-			  ((data & V4L2_STD_NTSC_M) == V4L2_STD_NTSC_M)) {
+	} else if (((data & V4L2_STD_PAL_M) == V4L2_STD_PAL_M) ||
+			   ((data & V4L2_STD_NTSC_M) == V4L2_STD_NTSC_M)) {
 		std = CC_ATV_AUDIO_STD_M;
-	} else if((data & V4L2_STD_SECAM_L) == V4L2_STD_SECAM_L) {
+	} else if ((data & V4L2_STD_SECAM_L) == V4L2_STD_SECAM_L) {
 		std = CC_ATV_AUDIO_STD_L;
 	}
 	return  std ;
@@ -214,16 +243,25 @@ int CFrontEnd::stdAndColorToAudioEnum(int data)
 int CFrontEnd::stdAndColorToVideoEnum(int std)
 {
 	atv_video_std_t video_standard = CC_ATV_VIDEO_STD_PAL;
-	if((std & V4L2_COLOR_STD_PAL) == V4L2_COLOR_STD_PAL) {
+	if ((std & V4L2_COLOR_STD_PAL) == V4L2_COLOR_STD_PAL) {
 		video_standard = CC_ATV_VIDEO_STD_PAL;
-	} else if((std & V4L2_COLOR_STD_NTSC) == V4L2_COLOR_STD_NTSC) {
+	} else if ((std & V4L2_COLOR_STD_NTSC) == V4L2_COLOR_STD_NTSC) {
 		video_standard = CC_ATV_VIDEO_STD_NTSC;
-	} else if((std & V4L2_COLOR_STD_SECAM) == V4L2_COLOR_STD_SECAM) {
+	} else if ((std & V4L2_COLOR_STD_SECAM) == V4L2_COLOR_STD_SECAM) {
 		video_standard = CC_ATV_VIDEO_STD_SECAM;
 	}
 	return video_standard;
 }
 
+bool CFrontEnd::stdIsColorAuto(int std)
+{
+	return  ((std & V4L2_COLOR_STD_AUTO) == V4L2_COLOR_STD_AUTO) ? true : false;
+}
+
+int CFrontEnd::addColorAutoFlag(int std)
+{
+	return std | V4L2_COLOR_STD_AUTO;
+}
 v4l2_std_id CFrontEnd::enumToStdAndColor(int videoStd, int audioStd)
 {
 	v4l2_std_id tmpTunerStd = 0;
@@ -238,7 +276,7 @@ v4l2_std_id CFrontEnd::enumToStdAndColor(int videoStd, int audioStd)
 		} else if (audioStd == CC_ATV_AUDIO_STD_M) {
 			tmpTunerStd |= V4L2_STD_PAL_M;
 		}
-	} else if (videoStd == CC_ATV_VIDEO_STD_NTSC) {
+	} else if (videoStd == CC_ATV_VIDEO_STD_NTSC || videoStd == CC_ATV_VIDEO_STD_AUTO) {
 		tmpTunerStd |= V4L2_COLOR_STD_NTSC;
 		if (audioStd == CC_ATV_AUDIO_STD_DK) {
 			tmpTunerStd |= V4L2_STD_PAL_DK;
@@ -262,27 +300,27 @@ v4l2_std_id CFrontEnd::enumToStdAndColor(int videoStd, int audioStd)
 		} else if (audioStd == CC_ATV_AUDIO_STD_L) {
 			tmpTunerStd |= V4L2_STD_SECAM_L;
 		}
-	} else if(videoStd == CC_ATV_VIDEO_STD_AUTO) {
-		tmpTunerStd |= V4L2_COLOR_STD_AUTO;
-		tmpTunerStd |= V4L2_STD_PAL_DK;
+
 	}
 	return tmpTunerStd;
 }
 
-int CFrontEnd::getPara(frontend_para_set_t *fpara)
+int CFrontEnd::getPara(int *mode, int *freq, int *para1, int *para2)
 {
-	int mode;
-	int ret1, ret2;
 
 	struct dvb_frontend_parameters para;
 	memset(&para, 0, sizeof(struct dvb_frontend_parameters));
-	if((ret1 = AM_FEND_GetPara(mFrontDevID, &para)) < 0) {
-		LOGD("%s,getPara  faiture\n", __FUNCTION__ );
-		return -1;
+	/*if((ret1=AM_FEND_GetPara(mFrontDevID, &para))<0) {
+	    LOGD("%s,getPara  faiture\n", __FUNCTION__ );
+	    return -1;
 
-		//fpara->mode = fend_mode ;
+	    //fpara->mode = fend_mode ;
 
-	}
+	}*/
+	*mode = mCurMode;
+	*freq = mCurFreq;
+	*para1 = mCurPara1;
+	*para2 = mCurPara2;
 	return 0;
 }
 
@@ -309,20 +347,24 @@ int CFrontEnd::getStrength()
 
 int CFrontEnd::formatATVFreq(int tmp_freq)
 {
-	int tmp_val = 25;
-	int ATV_1MHZ = 1000000;
-	int ATV_10KHZ = 10000;
-
-	tmp_freq = (tmp_freq / ATV_1MHZ) * ATV_1MHZ + tmp_val * ATV_10KHZ;
-
-	return tmp_freq;
+	const int ATV_1MHZ = 1000000;
+	const int ATV_50KHZ = 50 * 1000;
+	const int ATV_25KHZ = 25 * 1000;
+	int mastar = (tmp_freq / ATV_50KHZ) * ATV_50KHZ;
+	int follow = tmp_freq % ATV_50KHZ;
+	if (follow >= ATV_25KHZ) {
+		follow = ATV_50KHZ;
+	} else {
+		follow = 0;
+	}
+	return mastar + follow;
 }
 
 int CFrontEnd::printVideoStdStr(int compStd, char strBuffer[], int buff_size)
 {
 	memset(strBuffer, 0, buff_size);
 	int videoStd = stdAndColorToVideoEnum(compStd);
-	switch(videoStd) {
+	switch (videoStd) {
 	case CC_ATV_VIDEO_STD_AUTO:
 		strcpy(strBuffer, "AUTO");
 		break;
@@ -347,7 +389,7 @@ int CFrontEnd::printAudioStdStr(int compStd, char strBuffer[], int buff_size)
 {
 	memset(strBuffer, 0, buff_size);
 	int audioStd = stdAndColorToAudioEnum(compStd);
-	switch(audioStd) {
+	switch (audioStd) {
 	case CC_ATV_AUDIO_STD_DK:
 		strcpy(strBuffer, "DK");
 		break;
@@ -402,7 +444,7 @@ int CFrontEnd::setCvbsAmpOut(int tmp)
 {
 	int rc = AM_SUCCESS;
 	rc = AM_FEND_SetCvbsAmpOut(mFrontDevID, tmp);
-	if(rc == AM_SUCCESS) {
+	if (rc == AM_SUCCESS) {
 		LOGD("%s, sucessful!", __FUNCTION__);
 		rc =  0;
 	} else {
@@ -417,7 +459,7 @@ int CFrontEnd::setThreadDelay(int delay)
 	int rc = AM_SUCCESS;
 
 	rc = AM_FEND_SetThreadDelay(mFrontDevID, delay);
-	if(rc == AM_SUCCESS) {
+	if (rc == AM_SUCCESS) {
 		LOGD("frontend_setThreadDelay sucessful!\n");
 		return 0;
 	} else {
@@ -441,7 +483,7 @@ int CFrontEnd::lock(int frequency, int symbol_rate, int modulation, int bandwidt
 		return -1;
 	fparam.frequency = frequency;
 
-	switch(finfo.type) {
+	switch (finfo.type) {
 
 	case FE_QAM:
 	default:
@@ -476,7 +518,7 @@ int CFrontEnd::lock(int frequency, int symbol_rate, int modulation, int bandwidt
 
 	rt =  AM_FEND_Lock(FE_DEV_ID, &fparam, &status);
 
-	if((!rt) && (status & FE_HAS_LOCK)) {
+	if ((!rt) && (status & FE_HAS_LOCK)) {
 		LOGD("frontend_lock sucessful!\n");
 		return true;
 	} else {
@@ -495,6 +537,11 @@ int CFrontEnd::getInfo()
 	return 0;
 }
 
+int CFrontEnd::setTunerAfc(int afc)
+{
+	AM_FEND_SetAfc(FE_DEV_ID, afc);
+	return 0;
+}
 
 int CFrontEnd::getStatus()
 {
@@ -525,6 +572,7 @@ int CFrontEnd::stdEnumToCvbsFmt (int videoStd, int audioStd)
 	tvin_sig_fmt_e cvbs_fmt = TVIN_SIG_FMT_NULL;
 
 	if ( videoStd == CC_ATV_VIDEO_STD_PAL ) {
+		cvbs_fmt = TVIN_SIG_FMT_CVBS_PAL_I;
 		if ( audioStd == CC_ATV_AUDIO_STD_DK ) {
 			cvbs_fmt = TVIN_SIG_FMT_CVBS_PAL_I;
 		} else if ( audioStd == CC_ATV_AUDIO_STD_I ) {
@@ -535,6 +583,7 @@ int CFrontEnd::stdEnumToCvbsFmt (int videoStd, int audioStd)
 			cvbs_fmt = TVIN_SIG_FMT_CVBS_PAL_M;
 		}
 	} else if ( videoStd == CC_ATV_VIDEO_STD_NTSC ) {
+		cvbs_fmt = TVIN_SIG_FMT_CVBS_NTSC_M;
 		if ( audioStd == CC_ATV_AUDIO_STD_DK ) {
 			cvbs_fmt = TVIN_SIG_FMT_CVBS_NTSC_M;
 		} else if ( audioStd == CC_ATV_AUDIO_STD_I ) {
@@ -556,8 +605,6 @@ int CFrontEnd::stdEnumToCvbsFmt (int videoStd, int audioStd)
 		} else if ( audioStd == CC_ATV_AUDIO_STD_L ) {
 			cvbs_fmt = TVIN_SIG_FMT_CVBS_SECAM;
 		}
-	} else if(CC_ATV_VIDEO_STD_AUTO == videoStd) {
-		cvbs_fmt = TVIN_SIG_FMT_NULL;
 	}
 	return cvbs_fmt;
 }
@@ -565,4 +612,55 @@ int CFrontEnd::stdEnumToCvbsFmt (int videoStd, int audioStd)
 int CFrontEnd::ClearAnalogFrontEnd()
 {
 	return this->setPara ( FE_ANALOG, 44250000, V4L2_COLOR_STD_PAL | V4L2_STD_PAL_DK, 0 );
+}
+
+/*to control afc function*/
+int CFrontEnd::SetAnalogFrontEndTimerSwitch(int onOff)
+{
+	FILE *fp = NULL;
+	int ret = -1;
+
+	fp = fopen ( "/sys/module/aml_fe/parameters/aml_timer_en", "w" );
+
+	if ( fp == NULL ) {
+		LOGW ( "Open /sys/module/aml_fe/parameters/aml_timer_en error(%s)!\n", strerror ( errno ) );
+		return -1;
+	}
+	if (onOff)
+		ret = fprintf(fp, "%s", "1");
+	else
+		ret = fprintf(fp, "%s", "0");
+	if ( ret < 0 ) {
+		LOGW ( "set aml_timer_en error(%s)!\n", strerror ( errno ) );
+	}
+	LOGD("SetAnalogFrontEndTimerSwitch %d", onOff);
+	fclose ( fp );
+	fp = NULL;
+
+	return ret;
+}
+
+int CFrontEnd::SetAnalogFrontEndSearhSlowMode(int onOff)
+{
+	FILE *fp = NULL;
+	int ret = -1;
+
+	fp = fopen ( "/sys/module/aml_fe/parameters/slow_mode", "w" );
+
+	if ( fp == NULL ) {
+		LOGW ( "Open /sys/module/aml_fe/parameters/slow_mode error(%s)!\n", strerror ( errno ) );
+		return -1;
+	}
+	if (onOff)
+		ret = fprintf(fp, "%s", "1");
+	else
+		ret = fprintf(fp, "%s", "0");
+	if ( ret < 0 ) {
+		LOGW ( "set aml_timer_en error(%s)!\n", strerror ( errno ) );
+	}
+	LOGD("SetAnalogFrontEndSearhSlowMode %d", onOff);
+	fclose ( fp );
+	fp = NULL;
+
+	return ret;
 }

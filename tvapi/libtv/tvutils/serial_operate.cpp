@@ -78,7 +78,7 @@ bool  CTv2d4GHeadSetDetect::threadLoop()
 	int HeadsetConnectState = false;
 
 	int curdeviceID = -1;
-	for(int deviceID = 0; deviceID < 5; deviceID++) {
+	for (int deviceID = 0; deviceID < 5; deviceID++) {
 		sprintf(device, "/dev/hidraw%d", deviceID);
 		LOGD(" thread  device =%s ", device  );
 		if ((hidraw_fd = open(device, O_RDWR)) < 0  ) {
@@ -103,12 +103,12 @@ bool  CTv2d4GHeadSetDetect::threadLoop()
 		}
 		close(hidraw_fd);
 	}
-	if(curdeviceID ==  -1)
+	if (curdeviceID ==  -1)
 		return 0;
 
 	sprintf(device, "/dev/hidraw%d", curdeviceID);
 	LOGD(" thread  device =%s ", device  );
-	if( (hidraw_fd = open(device,  O_RDWR | O_NONBLOCK) ) < 0 ) {
+	if ( (hidraw_fd = open(device,  O_RDWR | O_NONBLOCK) ) < 0 ) {
 		printf("cann't open path:%s!!!\n", device);
 		return 0;
 	}
@@ -123,13 +123,13 @@ bool  CTv2d4GHeadSetDetect::threadLoop()
 		//LOGD("while 2.4G %s ", __FUNCTION__);
 
 		memset(buf, 0x0, 32);
-		for(int ritem = 0; ritem < ritemcounts ; ritem++ ) {
+		for (int ritem = 0; ritem < ritemcounts ; ritem++ ) {
 			read_size = read(hidraw_fd, buf, 32);
 			//for (int i = 0; i < 32; i++)
 			//ALOGD("read_size %d ", read_size);
-			if(debug) {
+			if (debug) {
 				count ++;
-				if(count == 3000) {
+				if (count == 3000) {
 					LOGD("%02x %02x %02x %02x %02x %02x ", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
 					count = 0;
 				}
@@ -139,14 +139,14 @@ bool  CTv2d4GHeadSetDetect::threadLoop()
 			}
 
 			checkvalue[countcheck] = buf[4] & 0x1f;
-			if(countcheck == 299) {
+			if (countcheck == 299) {
 				int checkcountvalue = 0;
-				for(int icheck = 0; icheck <  countcheck ; icheck++ )
+				for (int icheck = 0; icheck <  countcheck ; icheck++ )
 					checkcountvalue  += checkvalue[icheck];
 				// LOGD("checkcountvalue = %d",checkcountvalue);
-				if(checkcountvalue <=	5 * 4) {
-					if(HeadsetConnectState == true) {
-						if(debug) {
+				if (checkcountvalue <=   5 * 4) {
+					if (HeadsetConnectState == true) {
+						if (debug) {
 							LOGD("headset connect   false");
 							LOGD("headset connect   false");
 						}
@@ -155,9 +155,9 @@ bool  CTv2d4GHeadSetDetect::threadLoop()
 						//usleep(1000 * 200);
 					}
 					HeadsetConnectState = false;
-				} else if(checkcountvalue >=	200 * 4) {
-					if(HeadsetConnectState == false) {
-						if(debug) {
+				} else if (checkcountvalue >=    200 * 4) {
+					if (HeadsetConnectState == false) {
+						if (debug) {
 							LOGD("headset connect	 true");
 							LOGD("headset connect	 true");
 						}
@@ -171,31 +171,31 @@ bool  CTv2d4GHeadSetDetect::threadLoop()
 			countcheck ++;
 
 			// bit 0: headset mic in/off; bit 1:headset on/off; bit 2: headphone on/off; bit 3: soundbar on/off ;bit 4: subwoofer on/off
-			/* 	else if (buf[4] & 0x1f)
+			/*  else if (buf[4] & 0x1f)
 			{
-			if(HeadsetConnectState == false)
+			if (HeadsetConnectState == false)
 			{
-				  if(debug)
-				  {
-					 ALOGD("headset connect   true");
-					 ALOGD("headset connect   true");
-				  }
-				  android::TvService::getIntance()->SendDtvStats(1,0,0,0,0,0);
-				  //usleep(1000 * 200);
+			      if (debug)
+			      {
+			         ALOGD("headset connect   true");
+			         ALOGD("headset connect   true");
+			      }
+			      android::TvService::getIntance()->SendDtvStats(1,0,0,0,0,0);
+			      //usleep(1000 * 200);
 			}
 			HeadsetConnectState = true;
 			}
 			else
 			{
-			if(HeadsetConnectState == true)
+			if (HeadsetConnectState == true)
 			{
-				  if(debug)
-				  {
-					   ALOGD("headset connect	false");
-					   ALOGD("headset connect	false");
-				  }
-				  android::TvService::getIntance()->SendDtvStats(2,0,0,0,0,0);
-				  //usleep(1000 * 200);
+			      if (debug)
+			      {
+			           ALOGD("headset connect   false");
+			           ALOGD("headset connect   false");
+			      }
+			      android::TvService::getIntance()->SendDtvStats(2,0,0,0,0,0);
+			      //usleep(1000 * 200);
 			}
 			 HeadsetConnectState = false;
 			}*/
@@ -203,10 +203,10 @@ bool  CTv2d4GHeadSetDetect::threadLoop()
 		{
 			//added for fbc thermal setting
 			tvThermal_cnt++;
-			if(tvThermal_cnt == 300) {   //60 sec
+			if (tvThermal_cnt == 300) {  //60 sec
 				tvThermal_cnt = 0;
 				fd = open("/sys/class/thermal/thermal_zone0/temp", O_RDONLY);
-				if(fd < 0) {
+				if (fd < 0) {
 					LOGE("ERROR: failed to open file error: %d\n", errno);
 				} else {
 					read(fd, data, sizeof(data));

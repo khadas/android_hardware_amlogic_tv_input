@@ -18,39 +18,6 @@
 #include "CTvSettingCfg.h"
 #include "TvKeyData.h"
 
-#define CC_MAX_KEY_DATA_SIZE                    (2048)
-#define CC_MAX_FILE_PATH                        (256)
-
-#define CC_MAC_LEN                              (6)
-#define CC_HDCP_KEY_TOTAL_SIZE                  (368)
-#define CC_HDCP_KEY_HEAD_SIZE                   (40)
-#define CC_HDCP_KEY_CONTENT_SIZE                (CC_HDCP_KEY_TOTAL_SIZE - CC_HDCP_KEY_HEAD_SIZE)
-
-#define CC_CUSTOMER_HDMI_EDID_TOTAL_SIZE        (SSM_HDMI_EDID_SIZE + 4)
-
-#define CS_MAC_ADDRESS_STARTWRK_EN_CFG          "ssm.macaddr.startwork.en"
-#define CS_BARCODE_LEN_CFG                      "ssm.barcode.len"
-
-#define CS_HDCP_KEY_EN_CFG                      "ssm.handle.hdcpkey.en"
-#define CS_HDCP_KEY_DEMO_EN_CFG                 "ssm.handle.hdcpkey.demo.en"
-#define CS_HDCP_KEY_FILE_PATH_CFG               "ssm.handle.hdcpkey.file.path"
-#define CS_HDCP_KEY_FILE_OFFSET_CFG             "ssm.handle.hdcpkey.file.offset"
-#define CS_HDCP_KEY_HEADER_EN_CFG               "ssm.handle.hdcpkey.header.en"
-
-
-#define CS_HDMI_EDID_EN_CFG                     "ssm.handle.hdmi.edid.en"
-#define CS_HDMI_EDID_USE_CFG                    "ssm.handle.hdmi.edid.use"
-#define CS_HDMI_EDID_FILE_PATH_CFG              "ssm.handle.hdmi.edid.file.path"
-#define CS_HDMI_PORT1_EDID_FILE_PATH_CFG        "ssm.handle.hdmi.port1.edid.file.path"
-#define CS_HDMI_PORT2_EDID_FILE_PATH_CFG        "ssm.handle.hdmi.port2.edid.file.path"
-#define CS_HDMI_PORT3_EDID_FILE_PATH_CFG        "ssm.handle.hdmi.port3.edid.file.path"
-#define CS_HDMI_EDID_FILE_OFFSET_CFG            "ssm.handle.hdmi.edid.file.offset"
-
-#define CS_RGBOGO_FILE_PATH_CFG                 "ssm.rgbogo.file.path"
-#define CS_RGBOGO_FILE_OFFSET_CFG               "ssm.rgbogo.file.offset"
-
-#define CS_AUDIO_NOLINEPOINTS_FILE_PATH_CFG     "ssm.audio.nolinepoints.file.path"
-#define CS_AUDIO_NOLINEPOINTS_FILE_OFFSET_CFG   "ssm.audio.nolinepoints.file.offset"
 
 static unsigned char mHDCPKeyDefHeaderBuf[CC_HDCP_KEY_HEAD_SIZE] = {
 	//40 bytes
@@ -97,31 +64,6 @@ static unsigned char mDefHDCPKeyContentBuf[CC_HDCP_KEY_CONTENT_SIZE] = {
 	0x34, 0x1C, 0x58, 0x13, 0x31, 0xD2, 0x4A, 0xEC, // 320~327
 };
 
-static int CreateMacAddressStartWorkThread();
-
-static int GetSSMHandleHDCPKeyEnableCFG();
-static int GetSSMHandleHDCPKeyHeaderEnableCFG();
-static int GetSSMHandleHDCPKeyDemoEnableCFG();
-static int SSMSetDefaultHDCPKey(unsigned char hdcp_key_buf[]);
-static int RealHandleHDCPKey(unsigned char hdcp_key_buf[]);
-static int GetHDCPKeyFromFile(int rd_off, int rd_size,
-							  unsigned char data_buf[]);
-static int SaveHDCPKeyToFile(int wr_off, int wr_size, unsigned char data_buf[]);
-
-static int GetHDMIEdidFromFile(int rd_off, int rd_size, int port,
-							   unsigned char data_buf[]);
-static int RealHandleHDMIEdid(unsigned char hdmi_edid_buf[]);
-static int GetSSMHandleHDMIEdidByCustomerEnableCFG();
-static int AppendEdidPrefixCode(unsigned char customer_hdmi_edid_buf[],
-								unsigned char hdmi_edid_buf[]);
-
-static int GetRGBOGOFromFile(int rd_off, int rd_size, unsigned char data_buf[]);
-static int SaveRGBOGOToFile(int wr_off, int wr_size, unsigned char data_buf[]);
-
-static int GetAudioNoLinePointsDataFromFile(int offset, int size,
-		unsigned char data_buf[]);
-static int SaveAudioNoLinePointsDataToFile(int offset, int size,
-		unsigned char data_buf[]);
 
 static int TransStringToHex(int data_cnt, char data_buf[],
 							unsigned char hex_buf[])
@@ -158,12 +100,10 @@ static int TransToHexString(int hex_cnt, char data_buf[],
 	return 2 * hex_cnt;
 }
 
-int ReadKeyData(const char *key_name, unsigned int rd_data_len, unsigned char data_buf[])
+int ReadKeyData(const char *key_name, unsigned char data_buf[])
 {
 	FILE *dev_fp = NULL;
 	int i = 0, rd_cnt = 0;
-	char tmp_ori_buf[CC_MAX_KEY_DATA_SIZE];
-	unsigned char tmp_tran_buf[CC_MAX_KEY_DATA_SIZE];
 
 	dev_fp = fopen(CS_KEY_DATA_NAME_DEV_PATH, "w");
 	if (dev_fp == NULL) {
@@ -184,21 +124,13 @@ int ReadKeyData(const char *key_name, unsigned int rd_data_len, unsigned char da
 		return -1;
 	}
 
-	memset((void *)tmp_ori_buf, 0, CC_MAX_KEY_DATA_SIZE);
-	memset((void *)tmp_tran_buf, 0, CC_MAX_KEY_DATA_SIZE);
-	fscanf(dev_fp, "%s", tmp_ori_buf);
+	fscanf(dev_fp, "%s", data_buf);
 
-	rd_cnt = strlen(tmp_ori_buf);
-	rd_cnt = TransStringToHex(rd_cnt, tmp_ori_buf, tmp_tran_buf);
+	rd_cnt = strlen((char *)data_buf);
 
 	fclose(dev_fp);
 	dev_fp = NULL;
 
-	if (rd_cnt != rd_data_len) {
-		return 0;
-	}
-
-	memcpy(data_buf, tmp_tran_buf, rd_cnt);
 	return rd_cnt;
 }
 
@@ -243,19 +175,34 @@ int KeyData_ReadMacAddress(unsigned char data_buf[])
 {
 	int i = 0, rd_size = 0;
 	int data_i_buf[CC_MAC_LEN] = { 0, 0, 0, 0, 0, 0 };
+	unsigned char rd_buf[128] = { 0 };
 	unsigned char tmp_buf[128] = { 0 };
 
-	rd_size = ReadKeyData(CS_MAC_KEY_NAME, 17, tmp_buf);
+	memset((void *)rd_buf, 0 , 128);
+	rd_size = ReadKeyData(CS_MAC_KEY_NAME, rd_buf);
+	LOGD("%s, rd_size = %d\n", __FUNCTION__, rd_size);
+
+#if ANDROID_PLATFORM_SDK_VERSION == 19
+	memcpy((void *)tmp_buf, (void *)rd_buf, 128);
+	rd_size = TransStringToHex(rd_size, (char *)rd_buf, tmp_buf);
+#endif
+
+#if ANDROID_PLATFORM_SDK_VERSION >= 21
+	memcpy((void *)tmp_buf, (void *)rd_buf, 128);
+#endif
+
 	if (rd_size == 17) {
 		sscanf((char *) tmp_buf, "%02x:%02x:%02x:%02x:%02x:%02x",
 			   &data_i_buf[0], &data_i_buf[1], &data_i_buf[2], &data_i_buf[3],
 			   &data_i_buf[4], &data_i_buf[5]);
-		for (i = 0; i < sizeof(data_i_buf); i++) {
+		for (i = 0; i < CC_MAC_LEN; i++) {
 			data_buf[i] = data_i_buf[i] & 0xFF;
 		}
+
+		return KeyData_GetMacAddressDataLen();
 	}
 
-	return KeyData_GetMacAddressDataLen();
+	return 0;
 }
 
 int KeyData_SaveMacAddress(unsigned char data_buf[])
@@ -267,7 +214,15 @@ int KeyData_SaveMacAddress(unsigned char data_buf[])
 	sprintf((char *) hex_buf, "%02x:%02x:%02x:%02x:%02x:%02x", data_buf[0],
 			data_buf[1], data_buf[2], data_buf[3], data_buf[4], data_buf[5]);
 
+#if ANDROID_PLATFORM_SDK_VERSION == 19
+	memset((void *)tmp_buf, 0, 128);
 	TransToHexString(strlen((char *) hex_buf), tmp_buf, hex_buf);
+#endif
+
+#if ANDROID_PLATFORM_SDK_VERSION >= 21
+	memset((void *)tmp_buf, 0, 128);
+	memcpy(tmp_buf, (const char *)hex_buf, strlen((char *) hex_buf));
+#endif
 
 	wr_size = strlen(tmp_buf);
 	tmp_ret = WriteKeyData(CS_MAC_KEY_NAME, wr_size, tmp_buf);
@@ -300,26 +255,50 @@ int KeyData_GetBarCodeDataLen()
 int KeyData_ReadBarCode(unsigned char data_buf[])
 {
 	int rd_size = 0, tmp_len = 0;
-	unsigned char tmp_buf[CC_MAX_KEY_DATA_SIZE] = { 0 };
+	unsigned char rd_buf[CC_MAX_KEY_DATA_SIZE] = { 0 };
 
 	tmp_len = KeyData_GetBarCodeDataLen();
-	rd_size = ReadKeyData(CS_BARCODE_KEY_NAME, tmp_len, tmp_buf);
+	rd_size = ReadKeyData(CS_BARCODE_KEY_NAME, rd_buf);
 	LOGD("%s, rd_size = %d\n", __FUNCTION__, rd_size);
-	if (rd_size == tmp_len) {
-		memcpy(data_buf, tmp_buf, tmp_len);
-	}
 
-	return rd_size;
+#if ANDROID_PLATFORM_SDK_VERSION == 19
+	unsigned char tmp_buf[CC_MAX_KEY_DATA_SIZE] = { 0 };
+
+	memcpy((void *)tmp_buf, (void *)rd_buf, CC_MAX_KEY_DATA_SIZE);
+	rd_size = TransStringToHex(rd_size, (char *)rd_buf, tmp_buf);
+
+	if (rd_size == tmp_len) {
+		memcpy(data_buf, tmp_buf, rd_size);
+		return rd_size;
+	}
+#endif
+
+#if ANDROID_PLATFORM_SDK_VERSION >= 21
+	if (rd_size == tmp_len) {
+		memcpy(data_buf, rd_buf, rd_size);
+		return rd_size;
+	}
+#endif
+
+	return 0;
 }
 
 int KeyData_SaveBarCode(unsigned char data_buf[])
 {
 	int tmp_len = 0, wr_size = 0;
-	char tmp_buf[512] = { 0 };
+	char tmp_buf[CC_MAX_KEY_DATA_SIZE] = { 0 };
 
 	tmp_len = KeyData_GetBarCodeDataLen();
 
+#if ANDROID_PLATFORM_SDK_VERSION == 19
+	memset((void *)tmp_buf, 0, CC_MAX_KEY_DATA_SIZE);
 	TransToHexString(tmp_len, tmp_buf, data_buf);
+#endif
+
+#if ANDROID_PLATFORM_SDK_VERSION >= 21
+	memset((void *)tmp_buf, 0, CC_MAX_KEY_DATA_SIZE);
+	memcpy(tmp_buf, (const char *)data_buf, strlen((char *) data_buf));
+#endif
 
 	wr_size = strlen(tmp_buf);
 	tmp_len = WriteKeyData(CS_BARCODE_KEY_NAME, wr_size, tmp_buf);
@@ -333,35 +312,28 @@ int KeyData_SaveBarCode(unsigned char data_buf[])
 int SSMReadHDCPKey(unsigned char hdcp_key_buf[])
 {
 	int tmp_ret = 0, rd_size = 0;
-	unsigned char tmp_buf[CC_HDCP_KEY_TOTAL_SIZE] = { 0 };
+	unsigned char rd_buf[CC_MAX_KEY_DATA_SIZE] = { 0 };
+	unsigned char tmp_buf[CC_MAX_KEY_DATA_SIZE] = { 0 };
 
 	tmp_ret = GetHDCPKeyFromFile(0, CC_HDCP_KEY_TOTAL_SIZE, hdcp_key_buf);
 	if (tmp_ret < 0) {
-		rd_size = ReadKeyData(CS_RX_HDCP_KEY_NAME, CC_HDCP_KEY_TOTAL_SIZE, tmp_buf);
+		rd_size = ReadKeyData(CS_RX_HDCP_KEY_NAME, rd_buf);
 		LOGD("%s, rd_size = %d\n", __FUNCTION__, rd_size);
+
+		memcpy((void *)tmp_buf, (void *)rd_buf, CC_MAX_KEY_DATA_SIZE);
+		rd_size = TransStringToHex(rd_size, (char *)rd_buf, tmp_buf);
+
 		if (rd_size == CC_HDCP_KEY_TOTAL_SIZE) {
 			memcpy(hdcp_key_buf, tmp_buf, CC_HDCP_KEY_TOTAL_SIZE);
+			return rd_size;
 		}
 
-		return rd_size;
+		return 0;
 	}
 
 	return CC_HDCP_KEY_TOTAL_SIZE;
 }
 
-int SSMReadHDCPKeyExcludingHeader(unsigned char hdcp_key_buf[])
-{
-	int tmp_ret = 0, rd_size = 0;
-	unsigned char tmp_buf[CC_HDCP_KEY_CONTENT_SIZE] = { 0 };
-
-	tmp_ret = GetHDCPKeyFromFile(0, CC_HDCP_KEY_CONTENT_SIZE, hdcp_key_buf);
-	if (tmp_ret < 0) {
-		LOGD("%s, GetHDCPKeyFromFile error = %d\n", __FUNCTION__, tmp_ret);
-		return tmp_ret;
-	}
-
-	return CC_HDCP_KEY_CONTENT_SIZE;
-}
 
 
 int SSMSaveHDCPKey(unsigned char hdcp_key_buf[])
@@ -371,12 +343,15 @@ int SSMSaveHDCPKey(unsigned char hdcp_key_buf[])
 
 	tmp_ret = SaveHDCPKeyToFile(0, CC_HDCP_KEY_TOTAL_SIZE, hdcp_key_buf);
 	if (tmp_ret < 0) {
+		memset((void *)tmp_buf, 0, CC_MAX_KEY_DATA_SIZE);
 		TransToHexString(CC_HDCP_KEY_TOTAL_SIZE, tmp_buf, hdcp_key_buf);
 
 		wr_size = strlen(tmp_buf);
 		tmp_ret = WriteKeyData(CS_RX_HDCP_KEY_NAME, wr_size, tmp_buf);
 		if (tmp_ret != wr_size) {
 			tmp_ret = -1;
+		} else {
+			tmp_ret = 0;
 		}
 	}
 
@@ -385,25 +360,13 @@ int SSMSaveHDCPKey(unsigned char hdcp_key_buf[])
 
 int SSMSetHDCPKey()
 {
+
 	int i = 0;
 	unsigned char hdcp_key_buf[CC_HDCP_KEY_TOTAL_SIZE];
-	unsigned char *hdcp_key_head_ptr = NULL;
 
 	if (GetSSMHandleHDCPKeyEnableCFG() == 1) {
 		if (GetSSMHandleHDCPKeyDemoEnableCFG() == 1) {
 			return SSMSetDefaultHDCPKey(hdcp_key_buf);
-		} else if (GetSSMHandleHDCPKeyHeaderEnableCFG() == 1) {
-			LOGD("%s, handle hdcp key excluding header.\n", __FUNCTION__);
-			//copy header
-			hdcp_key_head_ptr = mHDCPKeyDefHeaderBuf;
-			memcpy(hdcp_key_buf, hdcp_key_head_ptr, CC_HDCP_KEY_HEAD_SIZE);
-			//load content and copy, then set
-			unsigned char hdcp_key_content_buf[CC_HDCP_KEY_CONTENT_SIZE];
-			if (SSMReadHDCPKeyExcludingHeader(hdcp_key_content_buf) == CC_HDCP_KEY_CONTENT_SIZE) {
-				memcpy(hdcp_key_buf + 40, hdcp_key_content_buf, CC_HDCP_KEY_CONTENT_SIZE);
-				LOGD("%s, using ssm's hdcp key.\n", __FUNCTION__);
-				return RealHandleHDCPKey(hdcp_key_buf);
-			}
 		} else {
 			if (SSMReadHDCPKey(hdcp_key_buf) == CC_HDCP_KEY_TOTAL_SIZE) {
 				LOGD("%s, using ssm's hdcp key.\n", __FUNCTION__);
@@ -446,10 +409,8 @@ int SSMSetHDMIEdid(int port)
 			LOGD("%s, begin to write hdmi edid:0x%x, 0x%x, 0x%x, 0x%x.\n",
 				 __FUNCTION__, hdmi_edid_buf[8], hdmi_edid_buf[9],
 				 hdmi_edid_buf[10], hdmi_edid_buf[255]);
-			if (AppendEdidPrefixCode(customer_hdmi_edid_buf, hdmi_edid_buf)
-					== 0)
-				;
-			return RealHandleHDMIEdid(customer_hdmi_edid_buf);
+			if ( AppendEdidPrefixCode(customer_hdmi_edid_buf, hdmi_edid_buf) == 0 )
+				return RealHandleHDMIEdid(customer_hdmi_edid_buf);
 		}
 	}
 
@@ -491,7 +452,7 @@ int KeyData_ReadProjectID()
 	int rd_size = 0, tmp_val = 0;
 	unsigned char tmp_buf[64] = { 0 };
 
-	rd_size = ReadKeyData(CS_PROJECT_ID_KEY_NAME, 4, tmp_buf);
+	rd_size = ReadKeyData(CS_PROJECT_ID_KEY_NAME, tmp_buf);
 	LOGD("%s, rd_size = %d\n", __FUNCTION__, rd_size);
 	if (rd_size == 4) {
 		tmp_val = 0;
@@ -772,7 +733,7 @@ static int KillMacAddressStartWorkThread()
 	return 0;
 }
 
-static int CreateMacAddressStartWorkThread()
+int CreateMacAddressStartWorkThread()
 {
 	unsigned int macAddrLow = 0, macAddrHigh = 0;
 	pthread_attr_t attr;
@@ -828,7 +789,7 @@ static int CreateMacAddressStartWorkThread()
 /**************************** end mac address static functions ****************************/
 
 /**************************** start hdcp key static functions ****************************/
-static int GetSSMHandleHDCPKeyEnableCFG()
+int GetSSMHandleHDCPKeyEnableCFG()
 {
 	const char *config_value;
 
@@ -847,7 +808,7 @@ static int GetSSMHandleHDCPKeyEnableCFG()
 	return strtoul(config_value, NULL, 10);
 }
 
-static int GetSSMHandleHDCPKeyDemoEnableCFG()
+int GetSSMHandleHDCPKeyDemoEnableCFG()
 {
 	const char *config_value;
 
@@ -866,27 +827,8 @@ static int GetSSMHandleHDCPKeyDemoEnableCFG()
 	return strtoul(config_value, NULL, 10);
 }
 
-static int GetSSMHandleHDCPKeyHeaderEnableCFG()
-{
-	const char *config_value;
 
-	config_value = config_get_str("TV", CS_HDCP_KEY_HEADER_EN_CFG, "null");
-#if 1
-	LOGD("%s, get \"%s\" is \"%s\".\n", __FUNCTION__, CS_HDCP_KEY_HEADER_EN_CFG,
-		 config_value);
-#endif
-	if (strcmp(config_value, "null") == 0) {
-		LOGD(
-			"%s, get config \"%s\" is \"%s\", return 0 to not enable handle hdcp key header.\n",
-			__FUNCTION__, CS_HDCP_KEY_HEADER_EN_CFG, config_value);
-		return 0;
-	}
-
-	return strtoul(config_value, NULL, 10);
-}
-
-
-static int SSMSetDefaultHDCPKey(unsigned char hdcp_key_buf[])
+int SSMSetDefaultHDCPKey(unsigned char hdcp_key_buf[])
 {
 	int i = 0;
 
@@ -903,7 +845,7 @@ static int SSMSetDefaultHDCPKey(unsigned char hdcp_key_buf[])
 	return RealHandleHDCPKey(hdcp_key_buf);
 }
 
-static int RealHandleHDCPKey(unsigned char hdcp_key_buf[])
+int RealHandleHDCPKey(unsigned char hdcp_key_buf[])
 {
 	int i = 0, dev_fd = -1;
 
@@ -933,7 +875,7 @@ static int RealHandleHDCPKey(unsigned char hdcp_key_buf[])
 /**************************** end hdcp key static functions ****************************/
 
 /**************************** start hdmi edid static functions ****************************/
-static int GetSSMHandleHDMIEdidByCustomerEnableCFG()
+int GetSSMHandleHDMIEdidByCustomerEnableCFG()
 {
 	const char *config_value;
 
@@ -951,7 +893,7 @@ static int GetSSMHandleHDMIEdidByCustomerEnableCFG()
 
 	return strtoul(config_value, NULL, 10);
 }
-static int RealHandleHDMIEdid(unsigned char customer_hdmi_edid_buf[])
+int RealHandleHDMIEdid(unsigned char customer_hdmi_edid_buf[])
 {
 	int i = 0, dev_fd = -1;
 
@@ -979,8 +921,8 @@ static int RealHandleHDMIEdid(unsigned char customer_hdmi_edid_buf[])
 	return 0;
 }
 
-static int AppendEdidPrefixCode(unsigned char customer_hdmi_edid_buf[],
-								unsigned char hdmi_edid_buf[])
+int AppendEdidPrefixCode(unsigned char customer_hdmi_edid_buf[],
+						 unsigned char hdmi_edid_buf[])
 {
 	if (customer_hdmi_edid_buf == NULL || hdmi_edid_buf == NULL) {
 		LOGE("%s, Append hdmi edid's prefixCode ERROR(%s)!!\n", "TV",
@@ -1250,8 +1192,8 @@ static int HandleRWData(RWDataInfo *data_info)
 	return RealRWData(&tmpInfo);
 }
 
-static int GetRGBOGOFromFile(int rd_off, int rd_size,
-							 unsigned char data_buf[])
+int GetRGBOGOFromFile(int rd_off, int rd_size,
+					  unsigned char data_buf[])
 {
 	RWDataInfo tmpInfo;
 
@@ -1268,7 +1210,7 @@ static int GetRGBOGOFromFile(int rd_off, int rd_size,
 	return HandleRWData(&tmpInfo);
 }
 
-static int SaveRGBOGOToFile(int wr_off, int wr_size, unsigned char data_buf[])
+int SaveRGBOGOToFile(int wr_off, int wr_size, unsigned char data_buf[])
 {
 	RWDataInfo tmpInfo;
 
@@ -1285,8 +1227,8 @@ static int SaveRGBOGOToFile(int wr_off, int wr_size, unsigned char data_buf[])
 	return HandleRWData(&tmpInfo);
 }
 
-static int GetAudioNoLinePointsDataFromFile(int rd_off, int rd_size,
-		unsigned char data_buf[])
+int GetAudioNoLinePointsDataFromFile(int rd_off, int rd_size,
+									 unsigned char data_buf[])
 {
 	RWDataInfo tmpInfo;
 
@@ -1303,8 +1245,8 @@ static int GetAudioNoLinePointsDataFromFile(int rd_off, int rd_size,
 	return HandleRWData(&tmpInfo);
 }
 
-static int SaveAudioNoLinePointsDataToFile(int wr_off, int wr_size,
-		unsigned char data_buf[])
+int SaveAudioNoLinePointsDataToFile(int wr_off, int wr_size,
+									unsigned char data_buf[])
 {
 	RWDataInfo tmpInfo;
 
@@ -1321,8 +1263,8 @@ static int SaveAudioNoLinePointsDataToFile(int wr_off, int wr_size,
 	return HandleRWData(&tmpInfo);
 }
 
-static int GetHDCPKeyFromFile(int rd_off, int rd_size,
-							  unsigned char data_buf[])
+int GetHDCPKeyFromFile(int rd_off, int rd_size,
+					   unsigned char data_buf[])
 {
 	RWDataInfo tmpInfo;
 
@@ -1339,8 +1281,8 @@ static int GetHDCPKeyFromFile(int rd_off, int rd_size,
 	return HandleRWData(&tmpInfo);
 }
 
-static int SaveHDCPKeyToFile(int wr_off, int wr_size,
-							 unsigned char data_buf[])
+int SaveHDCPKeyToFile(int wr_off, int wr_size,
+					  unsigned char data_buf[])
 {
 	RWDataInfo tmpInfo;
 
@@ -1357,8 +1299,8 @@ static int SaveHDCPKeyToFile(int wr_off, int wr_size,
 	return HandleRWData(&tmpInfo);
 }
 
-static int GetHDMIEdidFromFile(int rd_off, int rd_size, int port,
-							   unsigned char data_buf[])
+int GetHDMIEdidFromFile(int rd_off, int rd_size, int port,
+						unsigned char data_buf[])
 {
 	RWDataInfo tmpInfo;
 

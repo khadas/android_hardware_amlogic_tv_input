@@ -88,6 +88,16 @@ typedef struct ve_hist_s {
 	int height;
 	int ave;
 } ve_hist_t;
+/*typedef struct ve_dnlp_table_s {
+    unsigned int en;
+    unsigned int method;
+    unsigned int cliprate;
+    unsigned int lowrange;
+    unsigned int hghrange;
+    unsigned int lowalpha;
+    unsigned int midalpha;
+    unsigned int hghalpha;
+} ve_dnlp_table_t;*/
 typedef struct ve_dnlp_table_s {
 	unsigned int en;
 	unsigned int method;
@@ -97,6 +107,19 @@ typedef struct ve_dnlp_table_s {
 	unsigned int lowalpha;
 	unsigned int midalpha;
 	unsigned int hghalpha;
+	unsigned int adj_level;
+	unsigned int new_adj_level;
+	unsigned int new_mvreflsh;
+	unsigned int new_gmma_rate;
+	unsigned int new_lowalpha;
+	unsigned int new_hghalpha;
+	unsigned int new_sbgnbnd;
+	unsigned int new_sendbnd;
+	unsigned int new_clashBgn;
+	unsigned int new_clashEnd;
+	unsigned int new_cliprate;
+	unsigned int new_mtdbld_rate;
+	unsigned int new_blkgma_rate;
 } ve_dnlp_table_t;
 typedef struct ve_hsvs_s {
 	unsigned char en;

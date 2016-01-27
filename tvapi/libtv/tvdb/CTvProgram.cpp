@@ -29,18 +29,18 @@ CTvProgram::~CTvProgram()
 {
 	//free mem
 	// video
-	if(mpVideo != NULL) delete mpVideo;
+	if (mpVideo != NULL) delete mpVideo;
 	// audios
 	int size = mvAudios.size();
-	for(int i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 		delete mvAudios[i];
 	// subtitles
 	size = mvSubtitles.size();
-	for(int i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 		delete mvSubtitles[i];
 	// teletexts
 	size = mvTeletexts.size();
-	for(int i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 		delete mvTeletexts[i];
 }
 
@@ -163,37 +163,38 @@ int CTvProgram::CreateFromCursor(CTvDatabase::Cursor &c)
 	Vector<String8> vfmt ;
 	Vector<String8> vlang;
 
-	tmp = strtok(strPids.lockBuffer(strPids.length()), " ");
+	char *pSave;
+	tmp = strtok_r(strPids.lockBuffer(strPids.length()), " ", &pSave);
 	while (tmp != NULL) {
 		vpid.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+		tmp = strtok_r(NULL, " ", &pSave);
 	}
 	strPids.unlockBuffer();
 
-	tmp = strtok(strFmts.lockBuffer(strFmts.length()), " ");
+	tmp = strtok_r(strFmts.lockBuffer(strFmts.length()), " ", &pSave);
 	while (tmp != NULL) {
 		vfmt.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+		tmp = strtok_r(NULL, " ", &pSave);
 	}
 	strFmts.unlockBuffer();
 
-	tmp = strtok(strLangs.lockBuffer(strLangs.length()), " ");
+	tmp = strtok_r(strLangs.lockBuffer(strLangs.length()), " ", &pSave);
 
 	while (tmp != NULL) {
 		vlang.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+		tmp = strtok_r(NULL, " ", &pSave);
 	}
 	strLangs.unlockBuffer();
 
 	//check empty aud_langs
-	for(i = vlang.size(); i < vpid.size(); i++) {
+	for (i = vlang.size(); i < vpid.size(); i++) {
 		sprintf(tmp_buf, "Audio%d", i + 1);
 		vlang.push_back(String8(tmp_buf));
 		LOGE("%s, aud_langs is empty, add dummy data (%s).\n", "TV", tmp_buf);
 	}
 
 	//String8 l(vlang[i]);
-	for(i = 0; i < vpid.size(); i++) {
+	for (i = 0; i < vpid.size(); i++) {
 		int i_pid = atoi(vpid[i]);
 		int i_fmt = atoi(vfmt[i]);
 		mvAudios.push_back(new Audio(i_pid, vlang[i], i_fmt));
@@ -222,36 +223,36 @@ int CTvProgram::CreateFromCursor(CTvDatabase::Cursor &c)
 	col = c.getColumnIndex("sub_langs");
 	strLangs = c.getString(col);
 
-	tmp = strtok(strPids.lockBuffer(strPids.length()), " ");
+	tmp = strtok_r(strPids.lockBuffer(strPids.length()), " ", &pSave);
 	while (tmp != NULL) {
 		vpid.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+		tmp = strtok_r(NULL, " ", &pSave);
 	}
 	strPids.unlockBuffer();
 
-	tmp = strtok(strCids.lockBuffer(strCids.length()), " ");
+	tmp = strtok_r(strCids.lockBuffer(strCids.length()), " ", &pSave);
 	while (tmp != NULL) {
 		vcid.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+		tmp = strtok_r(NULL, " ", &pSave);
 	}
 	strCids.unlockBuffer();
 
-	tmp = strtok(strAids.lockBuffer(strAids.length()), " ");
+	tmp = strtok_r(strAids.lockBuffer(strAids.length()), " ", &pSave);
 	while (tmp != NULL) {
 		vaid.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+		tmp = strtok_r(NULL, " ", &pSave);
 	}
 	strAids.unlockBuffer();
 
-	tmp = strtok(strLangs.lockBuffer(strLangs.length()), " ");
+	tmp = strtok_r(strLangs.lockBuffer(strLangs.length()), " ", &pSave);
 	while (tmp != NULL) {
 		vlang.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+		tmp = strtok_r(NULL, " ", &pSave);
 	}
 	strLangs.unlockBuffer();
 
 	//Subtitle
-	for(int i = 0; i < vpid.size(); i++) {
+	for (int i = 0; i < vpid.size(); i++) {
 		this->mvSubtitles.push_back(new Subtitle(
 										atoi(vpid[i]),
 										String8(vlang[i]), Subtitle::TYPE_DVB_SUBTITLE,
@@ -259,7 +260,8 @@ int CTvProgram::CreateFromCursor(CTvDatabase::Cursor &c)
 										atoi(vaid[i])));
 	}
 
-	/* parse teletexts */
+	/*
+	parse teletexts
 	int ttx_count = 0, ttx_sub_count = 0;
 	String8 str_ttx_pids, str_ttx_types, str_mag_nos, str_page_nos, str_ttx_langs;
 	Vector<String8> v_ttx_pids, v_ttx_types, v_mag_nos, v_page_nos, v_ttx_langs;
@@ -278,58 +280,59 @@ int CTvProgram::CreateFromCursor(CTvDatabase::Cursor &c)
 	col = c.getColumnIndex("ttx_langs");
 	str_ttx_langs = c.getString(col);
 
-	tmp = strtok(str_ttx_pids.lockBuffer(str_ttx_pids.length()), " ");
+	tmp = strtok_r(str_ttx_pids.lockBuffer(str_ttx_pids.length()), " ", &pSave);
 	while (tmp != NULL) {
-		v_ttx_pids.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+	    v_ttx_pids.push_back(String8(tmp));
+	    tmp = strtok_r(NULL, " ", &pSave);
 	}
 	str_ttx_pids.unlockBuffer();
 
-	tmp = strtok(str_ttx_types.lockBuffer(str_ttx_types.length()), " ");
+	tmp = strtok_r(str_ttx_types.lockBuffer(str_ttx_types.length()), " ", &pSave);
 	while (tmp != NULL) {
-		v_ttx_types.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+	    v_ttx_types.push_back(String8(tmp));
+	    tmp = strtok_r(NULL, " ", &pSave);
 	}
 	str_ttx_types.unlockBuffer();
 
-	tmp = strtok(str_mag_nos.lockBuffer(str_mag_nos.length()), " ");
+	tmp = strtok_r(str_mag_nos.lockBuffer(str_mag_nos.length()), " ", &pSave);
 	while (tmp != NULL) {
-		v_mag_nos.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+	    v_mag_nos.push_back(String8(tmp));
+	    tmp = strtok_r(NULL, " ", &pSave);
 	}
 	str_mag_nos.unlockBuffer();
 
-	tmp = strtok(str_page_nos.lockBuffer(str_page_nos.length()), " ");
+	tmp = strtok_r(str_page_nos.lockBuffer(str_page_nos.length()), " ", &pSave);
 	while (tmp != NULL) {
-		v_page_nos.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+	    v_page_nos.push_back(String8(tmp));
+	    tmp = strtok_r(NULL, " ", &pSave);
 	}
 	str_page_nos.unlockBuffer();
 
-	tmp = strtok(str_ttx_langs.lockBuffer(str_ttx_langs.length()), " ");
+	tmp = strtok_r(str_ttx_langs.lockBuffer(str_ttx_langs.length()), " ", &pSave);
 	while (tmp != NULL) {
-		v_ttx_langs.push_back(String8(tmp));
-		tmp = strtok(NULL, " ");
+	    v_ttx_langs.push_back(String8(tmp));
+	    tmp = strtok_r(NULL, " ", &pSave);
 	}
 	str_ttx_langs.unlockBuffer();
 
 
-	for(int i = 0; i < v_ttx_pids.size(); i++) {
-		int ttype = atoi(v_ttx_types[i]);
-		if (ttype == 0x2 || ttype == 0x5) {
-			this->mvSubtitles.push_back(new Subtitle(
-											atoi(v_ttx_pids[i].string()),
-											String8(v_ttx_langs[i]), Subtitle::TYPE_DTV_TELETEXT,
-											atoi(v_mag_nos[i]),
-											atoi(v_page_nos[i])));
-		} else {
-			this->mvTeletexts.push_back(new Teletext(
-											atoi(v_ttx_pids[i]),
-											String8(v_ttx_langs[i]),
-											atoi(v_mag_nos[i]),
-											atoi(v_page_nos[i])));
-		}
+	for (int i = 0; i < v_ttx_pids.size(); i++) {
+	    int ttype = atoi(v_ttx_types[i]);
+	    if (ttype == 0x2 || ttype == 0x5) {
+	        this->mvSubtitles.push_back(new Subtitle(
+	                                        atoi(v_ttx_pids[i].string()),
+	                                        String8(v_ttx_langs[i]), Subtitle::TYPE_DTV_TELETEXT,
+	                                        atoi(v_mag_nos[i]),
+	                                        atoi(v_page_nos[i])));
+	    } else {
+	        this->mvTeletexts.push_back(new Teletext(
+	                                        atoi(v_ttx_pids[i]),
+	                                        String8(v_ttx_langs[i]),
+	                                        atoi(v_mag_nos[i]),
+	                                        atoi(v_page_nos[i])));
+	    }
 	}
+	*/
 	return 0;
 }
 
@@ -363,7 +366,7 @@ CTvProgram::CTvProgram(int channelID, int type, int num, int skipFlag)
 		CTvDatabase::Cursor c ;
 		selectProgramInChannelByNumber(channelID, num, c);
 
-		if(c.moveToFirst()) {
+		if (c.moveToFirst()) {
 			/*Construct*/
 			CreateFromCursor(c);
 		} else {
@@ -391,7 +394,7 @@ CTvProgram::CTvProgram(int channelID, int type, int num, int skipFlag)
 
 			CTvDatabase::Cursor cr;
 			selectProgramInChannelByNumber(channelID, num, cr);
-			if(cr.moveToFirst()) {
+			if (cr.moveToFirst()) {
 				/*Construct*/
 				CreateFromCursor(cr);
 			} else {
@@ -421,7 +424,7 @@ CTvProgram::CTvProgram(int channelID, int type, int major, int minor, int skipFl
 		CTvDatabase::Cursor c ;
 		selectProgramInChannelByNumber(channelID, major, minor, c);
 
-		if(c.moveToFirst()) {
+		if (c.moveToFirst()) {
 			/*Construct*/
 			CreateFromCursor(c);
 		} else {
@@ -449,7 +452,7 @@ CTvProgram::CTvProgram(int channelID, int type, int major, int minor, int skipFl
 
 			CTvDatabase::Cursor cr;
 			selectProgramInChannelByNumber(channelID, major, minor, cr);
-			if(cr.moveToFirst()) {
+			if (cr.moveToFirst()) {
 				/*Construct*/
 				CreateFromCursor(cr);
 			} else {
@@ -474,7 +477,7 @@ int CTvProgram::selectByID(int id, CTvProgram &prog)
 	String8 sql;
 	sql = String8("select * from srv_table where srv_table.db_id = ") + String8::format("%d", id);
 	CTvDatabase::GetTvDb()->select(sql.string(), c) ;
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		prog.CreateFromCursor(c);
 	} else {
 		c.close();
@@ -521,9 +524,9 @@ int CTvProgram::selectByNumber(int type, int num, CTvProgram &prog)
 	String8 cmd;
 
 	cmd = String8("select * from srv_table where ");
-	if(type != TYPE_UNKNOWN) {
-		if(type == TYPE_DTV) {
-			cmd += String8("(service_type = ") + String8::format("%d", TYPE_TV) + String8(" or service_type = ") + String8::format("%d", TYPE_RADIO) + String8(") and ");
+	if (type != TYPE_UNKNOWN) {
+		if (type == TYPE_DTV) {
+			cmd += String8("(service_type = ") + String8::format("%d", TYPE_DTV) + String8(" or service_type = ") + String8::format("%d", TYPE_RADIO) + String8(") and ");
 		} else {
 			cmd += String8("service_type = ") + String8::format("%d", type) + String8(" and ");
 		}
@@ -534,7 +537,7 @@ int CTvProgram::selectByNumber(int type, int num, CTvProgram &prog)
 	CTvDatabase::Cursor c;
 	CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		prog.CreateFromCursor(c);
 	} else {
 		c.close();
@@ -553,8 +556,8 @@ int CTvProgram::selectByNumber(int type, int major, int minor, CTvProgram &prog,
 	String8 cmd;
 
 	cmd = String8("select * from srv_table where ");
-	if(type != TYPE_UNKNOWN) {
-		if(type == TYPE_DTV) {
+	if (type != TYPE_UNKNOWN) {
+		if (type == TYPE_DTV) {
 			cmd += String8("(service_type = ") + String8::format("%d", TYPE_TV) + String8(" or service_type = ") + String8::format("%d", TYPE_RADIO) + String8(") and ");
 		} else {
 			cmd += String8("service_type = ") + String8::format("%d", type) + String8(" and ");
@@ -595,7 +598,7 @@ int CTvProgram::selectByNumber(int type, int major, int minor, CTvProgram &prog,
 	CTvDatabase::Cursor c;
 	CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		prog.CreateFromCursor(c);
 	} else {
 		c.close();
@@ -619,9 +622,9 @@ int CTvProgram::selectByChannel(int channelID, int type, Vector<sp<CTvProgram> >
 	String8 cmd = String8("select * from srv_table ");
 
 
-	if(type == TYPE_DTV) {
+	if (type == TYPE_DTV) {
 		cmd += String8("where (service_type = ") + String8::format("%d", TYPE_TV) + String8(" or service_type = ") + String8::format("%d", TYPE_RADIO) + String8(") ");
-	} else if(type != TYPE_UNKNOWN) {
+	} else if (type != TYPE_UNKNOWN) {
 		cmd += String8("where service_type = ") + String8::format("%d", type) + String8(" ");
 	}
 
@@ -632,10 +635,10 @@ int CTvProgram::selectByChannel(int channelID, int type, Vector<sp<CTvProgram> >
 
 	LOGD("selectByChannel select ret = %d", ret);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		do {
 			out.add(new CTvProgram(c));
-		} while(c.moveToNext());
+		} while (c.moveToNext());
 	}
 	c.close();
 
@@ -671,20 +674,24 @@ int CTvProgram::selectByType(int type, int skip, Vector<sp<CTvProgram> > &out)
 		cmd += String8("where service_type = ") + String8::format("%d", type) + String8(" ");
 	}
 
-	if(skip == PROGRAM_SKIP_NO || skip == PROGRAM_SKIP_YES)
+	if (skip == PROGRAM_SKIP_NO || skip == PROGRAM_SKIP_YES)
 		cmd += String8(" and skip = ") + String8::format("%d", skip) + String8(" ");
 
-	cmd += String8(" order by chan_order");
+	if (type == TYPE_DTV || type == TYPE_RADIO) {
+		cmd += String8(" order by db_ts_id");
+	} else {
+		cmd += String8(" order by chan_order");
+	}
 
 	CTvDatabase::Cursor c;
 	int ret = CTvDatabase::GetTvDb()->select(cmd, c);
 
-	LOGD("selectByChannel select ret = %d", ret);
+	LOGD("selectByType select ret = %d", ret);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		do {
 			out.add(new CTvProgram(c));
-		} while(c.moveToNext());
+		} while (c.moveToNext());
 	}
 	c.close();
 
@@ -703,7 +710,7 @@ int CTvProgram::selectByChanID(int type, int skip, Vector < sp < CTvProgram > > 
 		cmd += String8("where service_type = ") + String8::format("%d", type) + String8(" ");
 	}
 
-	if(skip == PROGRAM_SKIP_NO || skip == PROGRAM_SKIP_YES)
+	if (skip == PROGRAM_SKIP_NO || skip == PROGRAM_SKIP_YES)
 		cmd += String8(" and skip = ") + String8::format("%d", PROGRAM_SKIP_NO) +
 			   String8(" or skip = ") + String8::format("%d", PROGRAM_SKIP_YES) + String8(" ");
 
@@ -712,10 +719,10 @@ int CTvProgram::selectByChanID(int type, int skip, Vector < sp < CTvProgram > > 
 	CTvDatabase::Cursor c;
 	int ret = CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		do {
 			out.add(new CTvProgram(c));
-		} while(c.moveToNext());
+		} while (c.moveToNext());
 	}
 	c.close();
 
@@ -768,15 +775,15 @@ int CTvProgram::getCurrentAudio(String8 defaultLang)
 	int ret = CTvDatabase::GetTvDb()->select(cmd, c);
 	LOGD("getCurrentAudio a size = %d", mvAudios.size());
 	int id = 0;
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		id = c.getInt(0);
 		LOGD("getCurrentAudio a id = %d", id);
 		if (id < 0 && mvAudios.size() > 0) {
 			LOGD("getCurrentAudio defaultLang.isEmpty() =%s= %d", defaultLang.string(), defaultLang.isEmpty());
-			if(!defaultLang.isEmpty()) {
-				for(int i = 0; i < mvAudios.size(); i++) {
+			if (!defaultLang.isEmpty()) {
+				for (int i = 0; i < mvAudios.size(); i++) {
 					LOGD("getCurrentAudio a mvAudios[i] = %d", mvAudios[i]);
-					if(mvAudios[i]->getLang() == defaultLang) {
+					if (mvAudios[i]->getLang() == defaultLang) {
 						id = i;
 						break;
 					}
@@ -795,11 +802,44 @@ int CTvProgram::getCurrentAudio(String8 defaultLang)
 	return id;
 }
 
+int CTvProgram::getAudioChannel()
+{
+	return audioTrack;
+}
+
+int CTvProgram::updateAudioChannel(int progId, int ch)
+{
+	String8 cmd;
+
+	cmd = String8("update srv_table set aud_track =") + "\'" + String8::format("%d", ch) + "\'"
+		  + String8(" where srv_table.db_id = ") + String8::format("%d", progId);
+
+	return CTvDatabase::GetTvDb()->exeSql(cmd.string());
+}
+
+int CTvProgram::getSubtitleIndex(int progId)
+{
+	CTvDatabase::Cursor c;
+	String8 cmd = String8("select current_sub from srv_table where db_id = ") + String8::format("%d", progId);
+	int ret = CTvDatabase::GetTvDb()->select(cmd, c);
+	if (c.moveToFirst()) {
+		return c.getInt(0);
+	} else {
+		return -1;
+	}
+}
+
+int CTvProgram::setSubtitleIndex(int progId, int index)
+{
+	String8 cmd = String8("update srv_table set current_sub = ") + String8::format("%d", index) + String8(" where db_id = ") + String8::format("%d", progId);
+	return CTvDatabase::GetTvDb()->exeSql(cmd.string());
+}
+
 int CTvProgram::getCurrAudioTrackIndex()
 {
 	int audTrackIdx = -1;
 
-	if(-1 == currAudTrackIndex) { // no set field "current_aud"
+	if (-1 == currAudTrackIndex) { // no set field "current_aud"
 		audTrackIdx = getCurrentAudio(String8("eng"));
 		setCurrAudioTrackIndex(this->id, audTrackIdx);
 	} else {

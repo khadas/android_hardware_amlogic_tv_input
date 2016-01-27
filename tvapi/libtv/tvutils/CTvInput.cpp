@@ -1,4 +1,7 @@
 #include "CTvInput.h"
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <CTvLog.h>
 #include <utils/Timers.h>
@@ -7,7 +10,7 @@ CTvInput::CTvInput()
 {
 	mKeyEventFd_IR = open(KEY_EVENT_0, O_RDWR);
 	mKeyEventFd = open(KEY_EVENT_1, O_RDWR);
-	if(mKeyEventFd < 0 || mKeyEventFd_IR < 0) {
+	if (mKeyEventFd < 0 || mKeyEventFd_IR < 0) {
 		LOGD( "could not open /dev/input/event1\n ");
 		return  ;
 	}
@@ -33,7 +36,7 @@ void CTvInput::sendkeyEvent(const int &type, const int &code, const int &value)
 	event.code = code ;
 	event.value = value;
 	ret = write(mKeyEventFd, &event, sizeof(event));
-	if(ret < sizeof(event)) {
+	if (ret < sizeof(event)) {
 		LOGD("sendkeyEvent :write event failed, %s\n", strerror(errno));
 		return  ;
 	}
@@ -49,7 +52,7 @@ void CTvInput::sendIRkeyEvent(const int &type, const int &code, const int &value
 	event.code = code ;
 	event.value = value;
 	ret = write(mKeyEventFd_IR, &event, sizeof(event));
-	if(ret < sizeof(event)) {
+	if (ret < sizeof(event)) {
 		LOGD("sendIRkeyEvent :write event failed, %s\n", strerror(errno));
 		return  ;
 	}
@@ -121,9 +124,9 @@ bool  CTvInput::threadLoop()
 {
 	int sleeptime = 100;//ms
 
-	while(!exitPending()) { //requietexit() or requietexitWait() not call
+	while (!exitPending()) { //requietexit() or requietexitWait() not call
 		LOGD("threadLoop0 when = %lld", mWhenTimeRepeatKeyStartToSend);
-		while(mRepeatKeyCode < 0 || mRepeatKeydisTime < 0) { //msg queue is empty
+		while (mRepeatKeyCode < 0 || mRepeatKeydisTime < 0) { //msg queue is empty
 			mLock.lock();
 			mSendKeyCondition.wait(mLock);//first unlock,when return,lock again,so need,call unlock
 			mLock.unlock();
@@ -133,18 +136,22 @@ bool  CTvInput::threadLoop()
 		do {
 			disToSend = mWhenTimeRepeatKeyStartToSend - getNowMs();
 			LOGD("dis when = %lld", disToSend);
-			if(disToSend <= 0) break;
+			if (disToSend <= 0) break;
 
 			mLock.lock();
 			mSendKeyCondition.waitRelative(mLock, disToSend);//first unlock,when return,lock again,so need,call unlock
 			mLock.unlock();
-		} while(disToSend > 0); //
+		} while (disToSend > 0); //
 		LOGD("threadLoop2 when = %lld ", mWhenTimeRepeatKeyStartToSend);
-		if(mTimeoutCount < 30) {
+		if (mTimeoutCount < 30) {
 			LOGD("mTimeoutCount = %d \n", mTimeoutCount);
 
 			mTimeoutCount++;
-			sendkeyCode(mRepeatKeyCode);
+			if (mRepeatKeyCode == 955) {
+				sendkeyCode_Down(mRepeatKeyCode);
+			} else {
+				sendkeyCode(mRepeatKeyCode);
+			}
 		} else {
 			LOGD("mTimeoutCount = %d,so stop sending long press msg.\n", mTimeoutCount);
 		}

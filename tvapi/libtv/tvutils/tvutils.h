@@ -1,6 +1,7 @@
 #ifndef __TV_MISC_H__
 #define __TV_MISC_H__
 
+#include "../tv/CFbcCommunication.h"
 #define CC_MIN_ADC_CHANNEL_VAL              (0)
 #define CC_MAX_ADC_CHANNEL_VAL              (5)
 
@@ -18,6 +19,7 @@ extern int *GetFileAttrIntValueStr(const char *fp);
 extern int ReadADCSpecialChannelValue(int adc_channel_num);
 extern int Tv_MiscRegs(const char *cmd);
 
+extern int TvMisc_SetLVDSSSC(int val);
 extern int TvMisc_SetUserCounterTimeOut(int timeout);
 extern int TvMisc_SetUserCounter(int count);
 extern int TvMisc_SetUserPetResetEnable(int enable);
@@ -49,8 +51,7 @@ extern void monitor_info_set_name ( unsigned char *edidbuf );
 extern void monitor_info_set_imagesize ( unsigned char *edidbuf );
 extern void monitor_info_edid_checksum ( unsigned char *edidbuf );
 extern int reboot_sys_by_fbc_edid_info();
-extern int reboot_sys_by_fbc_uart_panel_info();
-extern int GetPlatformHaveFBCFlag();
+extern int reboot_sys_by_fbc_uart_panel_info(CFbcCommunication *fbc = NULL);
 extern int GetPlatformHaveDDFlag();
 
 #define CC_PROJECT_INFO_ITEM_MAX_LEN  (64)
@@ -65,7 +66,9 @@ typedef struct project_info_s {
 } project_info_t;
 
 extern unsigned int CalCRC32(unsigned int crc, const unsigned char *ptr, unsigned int buf_len);
-extern int GetProjectInfo(project_info_t *proj_info_ptr);
+extern int GetProjectInfo(project_info_t *proj_info_ptr, CFbcCommunication *fbcIns = NULL);
+extern int getBootEnv(const char* key, char* value, char* def_val);
+extern void setBootEnv(const char* key, const char* value);
 
 //extern void SSMRewriteEdidInfo ( unsigned char *edidbuf );
 //extern int HandleEdid ( int op_type, int op_direct, unsigned char edid_buf[], unsigned char def_buf[] );
@@ -85,35 +88,16 @@ typedef struct aml_debug_bit_s {
 	unsigned int len;
 } aml_debug_bit_t;
 
-/*ioctl for reg*/
-#define AMLDBG_IOC_CBUS_REG_RD      _IOR(AML_DBG_REGS_IOC_MAGIC, 0x01, struct aml_debug_reg_s)
-#define AMLDBG_IOC_CBUS_REG_WR      _IOW(AML_DBG_REGS_IOC_MAGIC, 0x02, struct aml_debug_reg_s)
-#define AMLDBG_IOC_APB_REG_RD       _IOR(AML_DBG_REGS_IOC_MAGIC, 0x03, struct aml_debug_reg_s)
-#define AMLDBG_IOC_APB_REG_WR       _IOW(AML_DBG_REGS_IOC_MAGIC, 0x04, struct aml_debug_reg_s)
-#define AMLDBG_IOC_AXI_REG_RD       _IOR(AML_DBG_REGS_IOC_MAGIC, 0x05, struct aml_debug_reg_s)
-#define AMLDBG_IOC_AXI_REG_WR       _IOW(AML_DBG_REGS_IOC_MAGIC, 0x06, struct aml_debug_reg_s)
-#define AMLDBG_IOC_AHB_REG_RD       _IOR(AML_DBG_REGS_IOC_MAGIC, 0x07, struct aml_debug_reg_s)
-#define AMLDBG_IOC_AHB_REG_WR       _IOW(AML_DBG_REGS_IOC_MAGIC, 0x08, struct aml_debug_reg_s)
-#define AMLDBG_IOC_MPEG_REG_RD      _IOR(AML_DBG_REGS_IOC_MAGIC, 0x09, struct aml_debug_reg_s)
-#define AMLDBG_IOC_MPEG_REG_WR      _IOW(AML_DBG_REGS_IOC_MAGIC, 0x0a, struct aml_debug_reg_s)
+template<typename T1, typename T2>
+int ArrayCopy(T1 dst_buf[], T2 src_buf[], int copy_size)
+{
+	int i = 0;
 
-/*ioctl for bit*/
-#define AMLDBG_IOC_CBUS_BIT_RD      _IOR(AML_DBG_REGS_IOC_MAGIC, 0x21, aml_debug_bit_t)
-#define AMLDBG_IOC_CBUS_BIT_WR      _IOW(AML_DBG_REGS_IOC_MAGIC, 0x22, aml_debug_bit_t)
-#define AMLDBG_IOC_APB_BIT_RD       _IOR(AML_DBG_REGS_IOC_MAGIC, 0x23, aml_debug_bit_t)
-#define AMLDBG_IOC_APB_BIT_WR       _IOW(AML_DBG_REGS_IOC_MAGIC, 0x24, aml_debug_bit_t)
-#define AMLDBG_IOC_AXI_BIT_RD       _IOR(AML_DBG_REGS_IOC_MAGIC, 0x25, aml_debug_bit_t)
-#define AMLDBG_IOC_AXI_BIT_WR       _IOW(AML_DBG_REGS_IOC_MAGIC, 0x26, aml_debug_bit_t)
-#define AMLDBG_IOC_AHB_BIT_RD       _IOR(AML_DBG_REGS_IOC_MAGIC, 0x27, aml_debug_bit_t)
-#define AMLDBG_IOC_AHB_BIT_WR       _IOW(AML_DBG_REGS_IOC_MAGIC, 0x28, aml_debug_bit_t)
-#define AMLDBG_IOC_MPEG_BIT_RD      _IOR(AML_DBG_REGS_IOC_MAGIC, 0x29, aml_debug_bit_t)
-#define AMLDBG_IOC_MPEG_BIT_WR      _IOW(AML_DBG_REGS_IOC_MAGIC, 0x30, aml_debug_bit_t)
+	for (i = 0; i < copy_size; i++) {
+		dst_buf[i] = src_buf[i];
+	}
 
-/*ioctl for gamma*/
-#define AMLDBG_IOC_SGR_WR           _IOW(AML_DBG_REGS_IOC_MAGIC, 0X15, int)
-#define AMLDBG_IOC_SGG_WR           _IOW(AML_DBG_REGS_IOC_MAGIC, 0X16, int)
-#define AMLDBG_IOC_SGB_WR           _IOW(AML_DBG_REGS_IOC_MAGIC, 0X17, int)
+	return 0;
+};
 
-#define AMLDBG_IOC_AAPB_REG_RD       _IOR(AML_DBG_REGS_IOC_MAGIC, 0x18, struct aml_debug_reg_s)
-#define AMLDBG_IOC_AAPB_REG_WR       _IOW(AML_DBG_REGS_IOC_MAGIC, 0x19, struct aml_debug_reg_s)
 #endif  //__TV_MISC_H__

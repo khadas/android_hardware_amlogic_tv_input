@@ -23,7 +23,7 @@ CSqlite::CSqlite()
 
 CSqlite::~CSqlite()
 {
-	if(mHandle > 0) {
+	if (mHandle > 0) {
 		sqlite3_close(mHandle);
 		mHandle = NULL;
 	}
@@ -33,7 +33,7 @@ bool CSqlite::integrityCheck()
 {
 	char *err;
 	int rval = sqlite3_exec(mHandle, "PRAGMA integrity_check;", sqlite3_exec_callback, NULL, &err);
-	if(rval != SQLITE_OK) {
+	if (rval != SQLITE_OK) {
 		LOGD(" val = %d  msg = %s!\n", rval, sqlite3_errmsg(mHandle));
 		return false;
 	} else {
@@ -65,7 +65,7 @@ int CSqlite::openDb(const char *path)
 int CSqlite::closeDb()
 {
 	int rval = 0;
-	if(mHandle != NULL) {
+	if (mHandle != NULL) {
 		rval = sqlite3_close(mHandle);
 		mHandle = NULL;
 	}
@@ -110,7 +110,7 @@ void CSqlite::insert()
 bool CSqlite::exeSql(const char *sql)
 {
 	char *errmsg;
-	if(sql == NULL) return false;
+	if (sql == NULL) return false;
 	if (sqlite3_exec(mHandle, sql, NULL, NULL, &errmsg) != SQLITE_OK) {
 		LOGD("exeSql=: %s error=%s", sql, errmsg ? errmsg : "Unknown");
 		if (errmsg)

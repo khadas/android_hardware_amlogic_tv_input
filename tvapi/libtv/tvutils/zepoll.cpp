@@ -3,7 +3,7 @@
 
 Epoll::Epoll(int _max, int maxevents): max(_max),
 	epoll_fd(-1),
-	epoll_timeout(0),
+	epoll_timeout(-1),
 	epoll_maxevents(maxevents),
 	backEvents(0)
 {

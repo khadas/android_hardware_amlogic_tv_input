@@ -72,13 +72,13 @@ CTvDimension::CTvDimension()
 }
 CTvDimension::~CTvDimension()
 {
-	if(lockValues != NULL) {
+	if (lockValues != NULL) {
 		delete []lockValues;
 	}
-	if(textValues != NULL) {
+	if (textValues != NULL) {
 		delete []textValues;
 	}
-	if(abbrevValues != NULL) {
+	if (abbrevValues != NULL) {
 		delete []abbrevValues;
 	}
 }
@@ -94,7 +94,7 @@ int CTvDimension::getUSPGAllLockStatus(String8 abbrev)
 	String8 dm5Abbrev[len - 1];
 	dm5.getAbbrev(dm5Abbrev);
 	for (j = 0; j < len - 1; j++) {
-		if(dm5Abbrev[j] == abbrev) {
+		if (dm5Abbrev[j] == abbrev) {
 			return dm5.getLockStatus(j + 1);
 		}
 	}
@@ -104,7 +104,7 @@ int CTvDimension::getUSPGAllLockStatus(String8 abbrev)
 	String8 dm0Abbrev[len - 1];
 	dm0.getAbbrev(dm0Abbrev);
 	for (j = 0; j < len - 1; j++) {
-		if(dm0Abbrev[j] == abbrev) {
+		if (dm0Abbrev[j] == abbrev) {
 			return dm0.getLockStatus(j + 1);
 		}
 	}
@@ -160,7 +160,7 @@ void CTvDimension::selectByID(CTvDimension &dm, int id)
 	CTvDatabase::Cursor c;
 	int ret = CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		dm.createFromCursor(c);
 		LOGD("%s, %d  success", "TV", __LINE__);
 	} else {
@@ -184,7 +184,7 @@ void CTvDimension::selectByRatingRegion(CTvDimension &dm, int ratingRegionID)
 	CTvDatabase::Cursor c;
 	int ret = CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		dm.createFromCursor(c);
 		LOGD("%s, %d  success", "TV", __LINE__);
 	} else {
@@ -209,7 +209,7 @@ int CTvDimension::selectByIndex(CTvDimension &dm, int ratingRegionID, int index)
 	CTvDatabase::Cursor c;
 	int ret = CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		dm.createFromCursor(c);
 		LOGD("%s, %d  success", "TV", __LINE__);
 	} else {
@@ -236,7 +236,7 @@ void CTvDimension::selectByName(CTvDimension &dm, int ratingRegionID, String8 di
 	CTvDatabase::Cursor c;
 	CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		LOGD("%s, %d  success", "TV", __LINE__);
 		dm.createFromCursor(c);
 	} else {
@@ -331,7 +331,7 @@ int *CTvDimension::getLockStatus()
 		} else {
 			int *lock = new int[len - 1];
 			//System.arraycopy(lockValues, 1, l, 0, l.length);
-			for(int i = 0; i < len - 1; i++)
+			for (int i = 0; i < len - 1; i++)
 				lock[i] = lockValues[1 + i];
 			return lock;
 		}
@@ -388,7 +388,7 @@ int CTvDimension::getAbbrev(String8 abb[])
 	/* the first rating_value must be not visible to user */
 	int len = getDefinedValue();
 	if (len > 1) {
-		for(int i = 0; i < len - 1; i++)
+		for (int i = 0; i < len - 1; i++)
 			abb[i] = abbrevValues[i + 1];
 		return 0;
 	} else {
@@ -417,7 +417,7 @@ int CTvDimension::getText(String8 tx[])
 {
 	int len = getDefinedValue();
 	if (len > 1) {
-		for(int i = 0; i < len - 1; i++)
+		for (int i = 0; i < len - 1; i++)
 			tx[i] = textValues[i + 1];
 		return 0;
 	} else {
@@ -570,69 +570,69 @@ void CTvDimension::builtinAtscDimensions()
 
 	/* Add U.S. Rating region 0x1 */
 	const char *abbrev0[] = {"", "None", "TV-G", "TV-PG", "TV-14", "TV-MA"};
-	const char *text0[]	 = {"", "None", "TV-G", "TV-PG", "TV-14", "TV-MA"};
-	int	 lock0[]	 = { -1,   -1,    0,	   0,	   0,	  0};
+	const char *text0[]  = {"", "None", "TV-G", "TV-PG", "TV-14", "TV-MA"};
+	int  lock0[]     = { -1,   -1,    0,       0,      0,     0};
 	const char *abbrev1[] = {"", "D", "TV-G", "TV-PG", "TV-14", "TV-MA"};
-	const char *text1[]	 = {"", "D", "TV-G", "TV-PG", "TV-14", "TV-MA"};
-	int	 lock1[]	 = { -1, -1,    -1,		0,		0,	   -1};
+	const char *text1[]  = {"", "D", "TV-G", "TV-PG", "TV-14", "TV-MA"};
+	int  lock1[]     = { -1, -1,    -1,     0,      0,     -1};
 	const char *abbrev2[] = {"", "L", "TV-G", "TV-PG", "TV-14", "TV-MA"};
-	const char *text2[]	 = {"", "L", "TV-G", "TV-PG", "TV-14", "TV-MA"};
-	int	 lock2[]	 = { -1, -1,    -1,		0,		0,		0};
+	const char *text2[]  = {"", "L", "TV-G", "TV-PG", "TV-14", "TV-MA"};
+	int  lock2[]     = { -1, -1,    -1,     0,      0,      0};
 	const char *abbrev3[] = {"", "S", "TV-G", "TV-PG", "TV-14", "TV-MA"};
-	const char *text3[]	 = {"", "S", "TV-G", "TV-PG", "TV-14", "TV-MA"};
-	int	 lock3[]	 = { -1, -1,    -1,		0,		0,		0};
+	const char *text3[]  = {"", "S", "TV-G", "TV-PG", "TV-14", "TV-MA"};
+	int  lock3[]     = { -1, -1,    -1,     0,      0,      0};
 	const char *abbrev4[] = {"", "V", "TV-G", "TV-PG", "TV-14", "TV-MA"};
-	const char *text4[]	 = {"", "V", "TV-G", "TV-PG", "TV-14", "TV-MA"};
-	int	 lock4[]	 = { -1, -1,    -1,		0,		0,		0};
+	const char *text4[]  = {"", "V", "TV-G", "TV-PG", "TV-14", "TV-MA"};
+	int  lock4[]     = { -1, -1,    -1,     0,      0,      0};
 	const char *abbrev5[] = {"", "TV-Y", "TV-Y7"};
-	const char *text5[]	 = {"", "TV-Y", "TV-Y7"};
-	int	 lock5[]	 = { -1,  0, 	  0};
+	const char *text5[]  = {"", "TV-Y", "TV-Y7"};
+	int  lock5[]     = { -1,  0,      0};
 	const char *abbrev6[] = {"", "FV", "TV-Y7"};
-	const char *text6[]	 = {"", "FV", "TV-Y7"};
-	int	 lock6[]	 = { -1, -1, 	  0};
+	const char *text6[]  = {"", "FV", "TV-Y7"};
+	int  lock6[]     = { -1, -1,      0};
 	const char *abbrev7[] = {"", "N/A", "G", "PG", "PG-13", "R", "NC-17", "X", "NR"};
-	const char *text7[]	 = {"", "MPAA Rating Not Applicable", "Suitable for AllAges",
+	const char *text7[]  = {"", "MPAA Rating Not Applicable", "Suitable for AllAges",
 							"Parental GuidanceSuggested", "Parents Strongly Cautioned",
 							"Restricted, under 17 must be accompanied by adult",
 							"No One 17 and Under Admitted", "No One 17 and Under Admitted",
 							"no Rated by MPAA"
 						   };
-	int	 lock7[]	 = { -1, -1, 0, 0, 0, 0, 0, 0, 0};
+	int  lock7[]     = { -1, -1, 0, 0, 0, 0, 0, 0, 0};
 	/*Extra for 'All' */
 	const char *abbrevall[] = {"TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14", "TV-MA"};
 	const char *textall[]   = {"TV-Y", "TV-Y7", "TV-G", "TV-PG", "TV-14", "TV-MA"};
-	int	 lockall[]   = {0,	 0, 	 0, 	 0, 	 0, 	0};
+	int  lockall[]   = {0,   0,      0,      0,      0,     0};
 
 	insertNewDimension(CTvDimension::REGION_US, String8("US (50 states + possessions)"),
-					   String8("Entire Audience"),	0, lock0, abbrev0, text0, sizeof(lock0) / sizeof(int));
+					   String8("Entire Audience"),  0, lock0, abbrev0, text0, sizeof(lock0) / sizeof(int));
 	insertNewDimension(CTvDimension::REGION_US, String8("US (50 states + possessions)"),
-					   String8("Dialogue"), 		1, lock1, abbrev1, text1, sizeof(lock1) / sizeof(int));
+					   String8("Dialogue"),         1, lock1, abbrev1, text1, sizeof(lock1) / sizeof(int));
 	insertNewDimension(CTvDimension::REGION_US, String8("US (50 states + possessions)"),
-					   String8("Language"), 		2, lock2, abbrev2, text2, sizeof(lock2) / sizeof(int));
+					   String8("Language"),         2, lock2, abbrev2, text2, sizeof(lock2) / sizeof(int));
 	insertNewDimension(CTvDimension::REGION_US, String8("US (50 states + possessions)"),
-					   String8("Sex"),				3, lock3, abbrev3, text3, sizeof(lock3) / sizeof(int));
+					   String8("Sex"),              3, lock3, abbrev3, text3, sizeof(lock3) / sizeof(int));
 	insertNewDimension(CTvDimension::REGION_US, String8("US (50 states + possessions)"),
-					   String8("Violence"), 		4, lock4, abbrev4, text4, sizeof(lock4) / sizeof(int));
+					   String8("Violence"),         4, lock4, abbrev4, text4, sizeof(lock4) / sizeof(int));
 	insertNewDimension(CTvDimension::REGION_US, String8("US (50 states + possessions)"),
-					   String8("Children"), 		5, lock5, abbrev5, text5, sizeof(lock5) / sizeof(int));
+					   String8("Children"),         5, lock5, abbrev5, text5, sizeof(lock5) / sizeof(int));
 	insertNewDimension(CTvDimension::REGION_US, String8("US (50 states + possessions)"),
 					   String8("Fantasy violence"), 6, lock6, abbrev6, text6, sizeof(lock6) / sizeof(int));
 	insertNewDimension(CTvDimension::REGION_US, String8("US (50 states + possessions)"),
-					   String8("MPAA"), 			7, lock7, abbrev7, text7, sizeof(lock7) / sizeof(int));
+					   String8("MPAA"),             7, lock7, abbrev7, text7, sizeof(lock7) / sizeof(int));
 	insertNewDimension(CTvDimension::REGION_US, String8("US (50 states + possessions)"),
-					   String8("All"),			   -1, lockall, abbrevall, textall, sizeof(lockall) / sizeof(int));
+					   String8("All"),             -1, lockall, abbrevall, textall, sizeof(lockall) / sizeof(int));
 	/* Add Canadian Rating region 0x2 */
-	const char *cabbrev0[] = {"E",	  "C",		 "C8+", "G", 	 "PG", "14+", "18+"};
+	const char *cabbrev0[] = {"E",    "C",       "C8+", "G",     "PG", "14+", "18+"};
 	const char *ctext0[]   = {"Exempt", "Children", "8+", "General", "PG", "14+", "18+"};
-	int	 clock0[]   = {0, 	  0,		 0,    0,		 0,   0,	0};
-	const char *cabbrev1[] = {"E",		 "G",		 "8 ans+", "13 ans+", "16 ans+", "18 ans+"};
-	const char *ctext1[]   = {"Exempt??es", "Pour tous", "8+",    "13+",	 "16+",    "18+"};
-	int	 clock1[]   = {0, 		 0, 		 0, 	  0,		0,		  0};
+	int  clock0[]   = {0,     0,         0,    0,        0,   0,    0};
+	const char *cabbrev1[] = {"E",       "G",        "8 ans+", "13 ans+", "16 ans+", "18 ans+"};
+	const char *ctext1[]   = {"Exempt??es", "Pour tous", "8+",    "13+",     "16+",    "18+"};
+	int  clock1[]   = {0,        0,          0,       0,        0,        0};
 
 	insertNewDimension(CTvDimension::REGION_CANADA, String8("Canada"),
 					   String8("Canadian English Language Rating"), 0, clock0, cabbrev0, ctext0, sizeof(clock0) / sizeof(int));
 	insertNewDimension(CTvDimension::REGION_CANADA, String8("Canada"),
-					   String8("Codes francais du Canada"),		 1, clock1, cabbrev1, ctext1, sizeof(clock1) / sizeof(int));
+					   String8("Codes francais du Canada"),      1, clock1, cabbrev1, ctext1, sizeof(clock1) / sizeof(int));
 }
 
 int CTvDimension::isDimensionTblExist()

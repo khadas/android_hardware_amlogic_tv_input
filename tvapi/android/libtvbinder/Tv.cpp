@@ -26,7 +26,7 @@ const sp<ITvService> &Tv::getTvService()
 				break;
 			ALOGW("TvService not published, waiting...");
 			usleep(500000); // 0.5 s
-		} while(true);
+		} while (true);
 		if (mDeathNotifier == NULL) {
 			mDeathNotifier = new DeathNotifier();
 		}
@@ -55,7 +55,7 @@ sp<Tv> Tv::create(const sp<ITv> &tv)
 	if (tv->connect(c) == NO_ERROR) {
 		c->mStatus = NO_ERROR;
 		c->mTv = tv;
-		tv->asBinder()->linkToDeath(c);
+		IInterface::asBinder(tv)->linkToDeath(c);
 	}
 	return c;
 }
@@ -79,7 +79,7 @@ sp<Tv> Tv::connect()
 		c->mTv = cs->connect(c);
 	}
 	if (c->mTv != 0) {
-		c->mTv->asBinder()->linkToDeath(c);
+		IInterface::asBinder(c->mTv)->linkToDeath(c);
 		c->mStatus = NO_ERROR;
 	} else {
 		c.clear();
@@ -92,7 +92,7 @@ void Tv::disconnect()
 	ALOGD("disconnect");
 	if (mTv != 0) {
 		mTv->disconnect();
-		mTv->asBinder()->unlinkToDeath(this);
+		IInterface::asBinder(mTv)->unlinkToDeath(this);
 		mTv = 0;
 	}
 }
@@ -139,11 +139,11 @@ status_t Tv::createSubtitle(const sp<IMemory> &share_mem)
 	return c->createSubtitle(share_mem);
 }
 
-status_t 	Tv::createVideoFrame(const sp<IMemory> &share_mem)
+status_t    Tv::createVideoFrame(const sp<IMemory> &share_mem, int iSourceMode, int iCapVideoLayerOnly)
 {
 	sp <ITv> c = mTv;
 	if (c == 0) return NO_INIT;
-	return c->createVideoFrame(share_mem);
+	return c->createVideoFrame(share_mem, iSourceMode, iCapVideoLayerOnly);
 }
 
 

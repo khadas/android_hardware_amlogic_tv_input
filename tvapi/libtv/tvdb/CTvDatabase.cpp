@@ -61,27 +61,28 @@ int CTvDatabase::isFreqListExist()
 int CTvDatabase::UnInitTvDb()
 {
 	AM_DB_UnSetup();
+	closeDb();
 	return 0;
 }
 int CTvDatabase::InitTvDb(const char *path)
 {
-	if(path != NULL) {
-		if(Tv_Utils_IsFileExist(path) == 0 && config_get_int("TV", "tv_db_created", 0) == 1) { //exist or created
+	if (path != NULL) {
+		if (Tv_Utils_IsFileExist(path) == 0 && config_get_int("TV", "tv_db_created", 0) == 1) { //exist or created
 			LOGD("tv db file(%s) exist and created, open it", path);
-			if(openDb(path)  < 0 ) {
+			if (openDb(path)  < 0 ) {
 				LOGD("db(%s) open fail", path);
 				return -1;
 			}
 			//setup and path set
 			AM_DB_Setup((char *)path, getHandle());
-			if(isFreqListExist() == false) {
+			if (isFreqListExist() == false) {
 				importXmlToDB("/etc/tv_default.xml");
 				LOGD("scan region table is NULL, so import freq XML again\n");
 			}
 		} else {
-			if(Tv_Utils_IsFileExist(path) == 0) { // if just exist, create flag not set, delete it
+			if (Tv_Utils_IsFileExist(path) == 0) { // if just exist, create flag not set, delete it
 				LOGD("tv db file (%s) exist, but delete it", path);
-				if(unlink(path) != 0) {
+				if (unlink(path) != 0) {
 					LOGD("delete tv db file(%s) err=%s", path, strerror(errno));
 				}
 			}
@@ -131,7 +132,7 @@ int CTvDatabase::getChannelParaList(char *path, Vector<sp<ChannelPara> > &vcp)
 	TiXmlElement *RootElement = myDocument.RootElement();
 	//dvbc
 	TiXmlElement *channel_list_element = RootElement->FirstChildElement("channel_list");
-	for(TiXmlElement *channel_entry = channel_list_element->FirstChildElement("channel_entry") ; channel_entry != NULL; channel_entry = channel_entry->NextSiblingElement("channel_entry")) {
+	for (TiXmlElement *channel_entry = channel_list_element->FirstChildElement("channel_entry") ; channel_entry != NULL; channel_entry = channel_entry->NextSiblingElement("channel_entry")) {
 		sp<ChannelPara> pCp = new ChannelPara();
 		channel_entry->Attribute("frequency", &(pCp->freq));
 		channel_entry->Attribute("modulation", &(pCp->modulation));
@@ -186,13 +187,13 @@ int CTvDatabase::importXmlToDB(const char *xmlPath)
 	TiXmlElement *RootElement = myDocument.RootElement();
 	beginTransaction();//-----------------------------------------------
 	//list-->entry
-	for(TiXmlElement *channel_list_element = RootElement->FirstChildElement("channel_list"); channel_list_element != NULL; channel_list_element = channel_list_element->NextSiblingElement("channel_list")) {
+	for (TiXmlElement *channel_list_element = RootElement->FirstChildElement("channel_list"); channel_list_element != NULL; channel_list_element = channel_list_element->NextSiblingElement("channel_list")) {
 		//LOGD("showboz-----channel_list =%d", channel_list_element);
 		const char *channel_name = channel_list_element->Attribute("name");
 		const char *channel_fe_type = channel_list_element->Attribute("fe_type");
 		//LOGD("showboz-----channel_list name = %s type=%s", channel_name, channel_fe_type);
 
-		for(TiXmlElement *channel_entry = channel_list_element->FirstChildElement("channel_entry") ; channel_entry != NULL; channel_entry = channel_entry->NextSiblingElement("channel_entry")) {
+		for (TiXmlElement *channel_entry = channel_list_element->FirstChildElement("channel_entry") ; channel_entry != NULL; channel_entry = channel_entry->NextSiblingElement("channel_entry")) {
 			int freq, symb, channelNum;
 			String8 cmd = String8("insert into region_table(name,fe_type,frequency,symbol_rate,modulation,bandwidth,ofdm_mode,logical_channel_num)");
 			cmd += String8("values('") + channel_name + String8("',") + String8::format("%d", StringToIndex(feTypes, channel_fe_type)) + String8(",");
@@ -234,7 +235,7 @@ int CTvDatabase::insert256AtvProgForSkyworth()
 		insert_srv += String8::format("'%d'", i);
 		insert_srv += String8(" , '4', '-1', ");
 		insert_srv += String8::format("'%d'", i);
-		insert_srv += String8(", 'xxxATV Program', '-1', '3', '-1', '-1', '-1', '-1', '50', '1', '-1', '-1', '-1', '0', '-1', '-1', '-1', 'Audio1', '0', '-1', ' ', ' ', ' ', ' ', ' ', '-1', ' ', ' ', ' ', ' ', ' ', '-1', '1', '0', '0', '-1', '-1', '-1', '1', ");
+		insert_srv += String8(", 'xxxATV Program', '-1', '3', '-1', '-1', '-1', '-1', '50', '1', '-1', '-1', '-1', '0', '-1', '-1', '-1', 'Audio1', '0', '-1', ' ', ' ', ' ', ' ', ' ', '-1', ' ', ' ', ' ', ' ', ' ', '-1', '1', '0', '0', '-1', '-1', '-1', '-1', ");
 		insert_srv += String8::format("'%d'", i);
 		insert_srv += String8(" , '0', '0', '0', '-1', '255', '0', '0', '0', '0', '0', '0', '255') ");
 		exeSql(insert_srv.string());
@@ -245,14 +246,14 @@ int CTvDatabase::insert256AtvProgForSkyworth()
 
 void CTvDatabase::deleteTvDb()
 {
-	if(mpDb != NULL) {
+	if (mpDb != NULL) {
 		delete mpDb;
 		mpDb = NULL;
 	}
 }
 CTvDatabase *CTvDatabase::GetTvDb()
 {
-	if(mpDb == NULL) {
+	if (mpDb == NULL) {
 		mpDb = new CTvDatabase();
 	}
 	return mpDb;

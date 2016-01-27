@@ -1,6 +1,7 @@
 #include "CAv.h"
 #define LOG_TAG "CAv"
 #include "../tvutils/tvutils.h"
+#include "../tvconfig/tvconfig.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -64,7 +65,7 @@ int CAv::Close()
 	int iRet;
 	iRet = AM_AV_Close ( mTvPlayDevId );
 	iRet = AM_AOUT_Close ( mTvPlayDevId );
-	if(mFdAmVideo > 0) {
+	if (mFdAmVideo > 0) {
 		close(mFdAmVideo);
 		mFdAmVideo = -1;
 	}
@@ -125,7 +126,7 @@ int CAv::DisableVideoBlackout()
 int CAv::DisableVideoWithBlueColor()
 {
 	LOGD("DisableVideoWithBlueColor");
-	if(mCurVideoLayerMuteState == 1 && mCurDisableVideoColor == DISABLE_VIDEO_COLOR_BLUE) {
+	if (mCurVideoLayerMuteState == 1 && mCurDisableVideoColor == DISABLE_VIDEO_COLOR_BLUE) {
 		LOGD("video is disable with blue, return");
 		return 0;
 	}
@@ -138,7 +139,7 @@ int CAv::DisableVideoWithBlueColor()
 int CAv::DisableVideoWithBlackColor()
 {
 	LOGD("DisableVideoWithBlackColor");
-	if(mCurVideoLayerMuteState == 1 && mCurDisableVideoColor == DISABLE_VIDEO_COLOR_BLACK) {
+	if (mCurVideoLayerMuteState == 1 && mCurDisableVideoColor == DISABLE_VIDEO_COLOR_BLACK) {
 		LOGD("video is disable with black, return");
 		return 0;
 	}
@@ -151,28 +152,106 @@ int CAv::DisableVideoWithBlackColor()
 int CAv::EnableVideoAuto()
 {
 	LOGD("EnableVideo");
-	if(mCurVideoLayerMuteState == 0) {
+	if (mCurVideoLayerMuteState == 0) {
 		LOGD("video is enable, return");
 		return 0;
 	}
 	mCurVideoLayerMuteState = 0;
 	SetVideoScreenColor ( 0, 16, 128, 128 ); // Show black with vdin0, postblending disabled
-	return ClearVideoBuffer();//disable video 2
+	ClearVideoBuffer();//disable video 2
+	return 0;
 }
 
 //just enable video
 int CAv::EnableVideoNow()
 {
 	LOGD("EnableVideoNow");
-	if(mCurVideoLayerMuteState == 0) {
+	const char *config_value = NULL;
+	if (mCurVideoLayerMuteState == 0) {
 		LOGD("video is enable, return");
 		return 0;
 	}
 	mCurVideoLayerMuteState = 0;
-	SetVideoScreenColor ( 3, 16, 128, 128 ); // Show blue with vdin0, postblending disabled
+	config_value = config_get_str ( "TV", "tvin.bluescreen.color", "null" );
+	if ( strcmp ( config_value, "black" ) == 0 ) {
+	} else {
+		SetVideoScreenColor ( 0, 16, 128, 128 ); // Show blue with vdin0, postblending disabled
+	}
 	return AM_AV_EnableVideo(mTvPlayDevId);
 }
 
+int CAv::WaittingVideoPlaying(int minFrameCount , int waitTime )
+{
+	//EnableVideoNow();
+	static const int COUNT_FOR_TIME = 20;
+	int times = waitTime / COUNT_FOR_TIME;
+	int ret = -1;
+	int i = 0;
+	for (i = 0; i < times; i++) {
+		if (videoIsPlaying(minFrameCount)) {
+			ret = 0;
+			break;
+		}
+	}
+	if (i == times) {
+		LOGD("EnableVideoWhenVideoPlaying time out!!!!!!!!!!!!!");
+		ret =  -2;
+	}
+	return ret;
+}
+
+int CAv::EnableVideoWhenVideoPlaying(int minFrameCount, int waitTime)
+{
+	int ret = WaittingVideoPlaying(minFrameCount, waitTime);
+	if (ret == 0) { //ok to playing
+		EnableVideoNow();
+	}
+	return ret;
+}
+
+bool CAv::videoIsPlaying(int minFrameCount)
+{
+	int value[3];
+	value[0] = getVideoFrameCount();
+	usleep(20 * 1000);
+	value[1] = getVideoFrameCount();
+	//usleep(20*1000);
+	//value[2] = getVideoFrameCount();
+	LOGD("---videoIsPlaying  framecount =%d = %d = %d", value[0], value[1], value[2]);
+	if (value[1] >=  minFrameCount && (value[1] > value[0])) return true;
+	else return false;
+}
+
+int CAv::getVideoFrameCount()
+{
+	char buf[32];
+	int fd = -1;
+	fd = open(PATH_FRAME_COUNT, O_RDWR);
+	if (fd < 0) {
+		LOGW("Open %s error(%s)!\n", PATH_FRAME_COUNT, strerror(errno));
+		return -1;
+	}
+	read(fd, buf, sizeof(buf));
+	int value = 0;
+	sscanf ( buf, "%d", &value );
+	close ( fd );
+	return value;
+}
+
+tvin_sig_fmt_t CAv::getVideoResolutionToFmt()
+{
+	tvin_sig_fmt_e sig_fmt = TVIN_SIG_FMT_HDMI_1920X1080P_60HZ;
+	int height = CFile::getFileAttrValue(PATH_VIDEO_HEIGHT);
+	LOGD("---------getVideoResolutionToFmt -------- height = %d", height);
+	if (height <= 576) {
+		sig_fmt = TVIN_SIG_FMT_HDMI_720X480P_60HZ;
+	} else if (height >576 && height <= 1088) {
+		sig_fmt = TVIN_SIG_FMT_HDMI_1920X1080P_60HZ;
+	} else {
+		sig_fmt = TVIN_SIG_FMT_HDMI_3840_2160_00HZ;
+	}
+	return sig_fmt;
+}
 //call disable video 2
 int CAv::ClearVideoBuffer()
 {
@@ -337,7 +416,7 @@ void CAv::av_evt_callback ( long dev_no, int event_type, void *param, void *user
 int CAv::set3DMode(VIDEO_3D_MODE_T mode, int LR_switch, int mode_3D_TO_2D)
 {
 	unsigned int cmd = MODE_3D_DISABLE;
-	switch(mode) {
+	switch (mode) {
 	case VIDEO_3D_MODE_DISABLE:
 		cmd = MODE_3D_DISABLE;
 		break;
@@ -361,21 +440,34 @@ int CAv::set3DMode(VIDEO_3D_MODE_T mode, int LR_switch, int mode_3D_TO_2D)
 		break;
 	}
 
-	if(LR_switch == 1) {
+	if (LR_switch == 1) {
 		cmd = cmd | MODE_3D_LR_SWITCH;
 	}
 
-	if(mode_3D_TO_2D == 1) {
+	if (mode_3D_TO_2D == 1) {
 		cmd = cmd | MODE_3D_TO_2D_L;
 	}
 
-	if(mode_3D_TO_2D == 2) {
+	if (mode_3D_TO_2D == 2) {
 		cmd = cmd | MODE_3D_TO_2D_R;
 	}
 	LOGD("set 3d mode fd = %d cmd = 0x%x", mFdAmVideo, cmd);
 	int ret = ioctl(mFdAmVideo, AMSTREAM_IOC_SET_3D_TYPE , cmd);
-	if(ret < 0) {
+	if (ret < 0) {
 		LOGE("set3DMode error ( %s )", strerror ( errno ));
 	}
+	return 0;
+}
+
+int CAv::setLookupPtsForDtmb(int enable)
+{
+	FILE *fp = fopen ( PATH_MEPG_DTMB_LOOKUP_PTS_FLAG, "w" );
+	LOGD ( "setLookupPtsForDtmb %d ##" , enable);
+	if ( fp == NULL ) {
+		LOGE ( "Open %s error(%s)!\n", PATH_MEPG_DTMB_LOOKUP_PTS_FLAG, strerror ( errno ) );
+		return -1;
+	}
+	fprintf ( fp, "%d", enable );
+	fclose ( fp );
 	return 0;
 }

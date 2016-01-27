@@ -96,22 +96,22 @@ int CSerialPort::set_Parity (int fd, int databits, int stopbits, int parity)
 	switch (parity) {
 	case 'n':
 	case 'N':
-		options.c_cflag &= ~PARENB;	/* Clear parity enable */
-		options.c_iflag &= ~INPCK;	/* Enable parity checking */
+		options.c_cflag &= ~PARENB; /* Clear parity enable */
+		options.c_iflag &= ~INPCK;  /* Enable parity checking */
 		break;
 	case 'o':
 	case 'O':
 		options.c_cflag |= (PARODD | PARENB);
-		options.c_iflag |= INPCK;	/* Disnable parity checking */
+		options.c_iflag |= INPCK;   /* Disnable parity checking */
 		break;
 	case 'e':
 	case 'E':
-		options.c_cflag |= PARENB;	/* Enable parity */
+		options.c_cflag |= PARENB;  /* Enable parity */
 		options.c_cflag &= ~PARODD;
-		options.c_iflag |= INPCK;	/* Disnable parity checking */
+		options.c_iflag |= INPCK;   /* Disnable parity checking */
 		break;
 	case 'S':
-	case 's':			/*as no parity */
+	case 's':           /*as no parity */
 		options.c_cflag &= ~PARENB;
 		options.c_cflag &= ~CSTOPB;
 		break;
@@ -136,7 +136,7 @@ int CSerialPort::set_Parity (int fd, int databits, int stopbits, int parity)
 		options.c_iflag |= INPCK;
 	tcflush (fd, TCIFLUSH);
 	options.c_cc[VTIME] = 150;
-	options.c_cc[VMIN] = 0;	/* Update the options and do it NOW */
+	options.c_cc[VMIN] = 0; /* Update the options and do it NOW */
 	//qd to set raw mode, which is copied from web
 	options.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP
 						 | INLCR | IGNCR | ICRNL | IXON);
@@ -163,12 +163,12 @@ int CSerialPort::set_opt(int speed, int db, int sb, char pb, int overtime, bool 
 {
 	int i = 0;
 	struct termios old_cfg, new_cfg;
-	if(mFd <= 0) {
+	if (mFd <= 0) {
 		LOGE("not open dev, when set opt");
 		return -1;
 	}
 	//first get it
-	if(tcgetattr(mFd, &old_cfg) != 0) {
+	if (tcgetattr(mFd, &old_cfg) != 0) {
 		LOGE("get serial attr error mFd = %d(%s)!\n", mFd, strerror(errno));
 		return -1;
 	}

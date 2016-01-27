@@ -17,9 +17,9 @@ int main(int argc, char **argv)
 	fbc.run();
 	LOGD("------------------2----------------------");
 
-	while(go) {
+	while (go) {
 		scanf("%d", &cmd);
-		switch(cmd) {
+		switch (cmd) {
 		case 1:
 			go = 0;
 			fbc.closeAll();

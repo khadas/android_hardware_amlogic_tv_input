@@ -14,7 +14,7 @@ static char mpFilePath[256] = {0};
 static CIniFile *pIniFile = NULL;
 int tv_config_load(const char *file_name)
 {
-	if(pIniFile != NULL)
+	if (pIniFile != NULL)
 		delete pIniFile;
 
 	pIniFile = new CIniFile();
@@ -25,7 +25,7 @@ int tv_config_load(const char *file_name)
 
 int tv_config_unload()
 {
-	if(pIniFile != NULL)
+	if (pIniFile != NULL)
 		delete pIniFile;
 	return 0;
 }

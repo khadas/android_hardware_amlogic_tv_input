@@ -36,9 +36,9 @@ typedef enum atv_video_std_s {
 
 //from kernel
 /*COLOR MODULATION TYPE*/
-static const   v4l2_std_id  V4L2_COLOR_STD_PAL  =	((v4l2_std_id)0x04000000);
+static const   v4l2_std_id  V4L2_COLOR_STD_PAL  =   ((v4l2_std_id)0x04000000);
 static const   v4l2_std_id  V4L2_COLOR_STD_NTSC = ((v4l2_std_id)0x08000000);
-static const   v4l2_std_id  V4L2_COLOR_STD_SECAM =	((v4l2_std_id)0x10000000);
+static const   v4l2_std_id  V4L2_COLOR_STD_SECAM =  ((v4l2_std_id)0x10000000);
 //virtual
 static const   v4l2_std_id  V4L2_COLOR_STD_AUTO  =    ((v4l2_std_id)0x02000000);
 
@@ -85,14 +85,18 @@ public:
 	int Close();
 	int setMode(int mode);
 	int fineTune(int freq);
-	int formatATVFreq(int freq);
+	static int formatATVFreq(int freq);
 	int GetTSSource(AM_DMX_Source_t *src);
-	int setPara(int frequency, int symbol_rate, int modulation, int bandwidth);
+	int setPara(int mode, int freq, int para1, int para2);
 	int ClearAnalogFrontEnd();
 	int autoLoadFE();
+	int SetAnalogFrontEndTimerSwitch(int onOff);
+	int SetAnalogFrontEndSearhSlowMode(int onOff);
 
 	static int stdAndColorToAudioEnum(int std);
 	static int stdAndColorToVideoEnum(int std);
+	static bool stdIsColorAuto(int std);
+	static int addColorAutoFlag(int std);
 	static int printVideoStdStr(int videoStd, char strBuffer[], int buff_size);
 	static int printAudioStdStr(int audioStd, char strBuffer[], int buff_size);
 	static v4l2_std_id enumToStdAndColor(int videoStd, int audioStd);
@@ -141,8 +145,9 @@ public:
 	int getStrength();
 	int setCvbsAmpOut(int amp);
 	int setThreadDelay(int delay) ;
-	int getPara(frontend_para_set_t *fpara);
+	int getPara(int *mode, int *freq, int *para1, int *para2);
 	int lock(int frequency, int symbol_rate, int modulation, int bandwidth);
+	int setTunerAfc(int afc);
 private:
 	int mFrontDevID;
 	int mDemuxDevID;
@@ -151,6 +156,10 @@ private:
 	IObserver *mpObserver;
 	FEEvent mCurSigEv;
 	int mCurMode;
+	int mCurFreq;
+	int mCurPara1;
+	int mCurPara2;
+	bool mbFEOpened;
 	static void dmd_fend_callback(long dev_no, int event_type, void *param, void *user_data);
 };
 #endif // ANDROID_FRONTEND_H

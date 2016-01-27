@@ -27,7 +27,7 @@ public:
 		virtual status_t unlock();
 		virtual status_t processCmd(const Parcel &p, Parcel *r);
 		virtual status_t createSubtitle(const sp<IMemory> &share_mem);
-		virtual status_t createVideoFrame(const sp<IMemory> &share_mem);
+		virtual status_t createVideoFrame(const sp<IMemory> &share_mem, int iSourceMode, int iCapVideoLayerOnly);
 
 		// our client...
 		const sp<ITvClient> &getTvClient() const
@@ -53,8 +53,16 @@ public:
 		int mCurProgIndex;
 		CTv *mpTv;
 		bool mIsStartTv;
+		sp<IMemory> mSubBmpBuf;
 	};//end client
 
+    static void instantiate();
+    static TvService* mTvService;
+    static TvService* getIntance() {
+        if (mTvService == NULL)
+            mTvService = new TvService();
+        return mTvService;
+    }
 	virtual sp<ITv> connect(const sp<ITvClient> &tvClient);
 
 	virtual void onTvEvent(const CTvEv &ev);
@@ -62,18 +70,18 @@ public:
 
 	Client *mpStartTvClient;
 	wp<Client> mpScannerClient;
-	static void instantiate(CTv *pTv);
+	wp<Client> mpSubClient;
 	Vector< wp<Client> > m_v_Clients;
 
 private:
-	TvService(CTv *pTv);
+    TvService();
 	virtual ~TvService();
 	virtual status_t onTransact(uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags);
 	volatile int32_t mUsers;
 	virtual void incUsers();
 	virtual void decUsers();
 	mutable Mutex mServiceLock;
-	CTv *mpTv;
+	static CTv *mpTv;
 	CTvScreenCapture mCapVidFrame;
 
 };

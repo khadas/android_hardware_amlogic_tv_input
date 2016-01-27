@@ -1,6 +1,9 @@
 #include "CMsgQueue.h"
 #include <CTvLog.h>
 #include <utils/Timers.h>
+
+#define LOG_TAG "CMsgQueueThread"
+
 CMessage::CMessage()
 {
 	mDelayMs = 0;
@@ -14,7 +17,6 @@ CMessage::~CMessage()
 
 CMsgQueueThread::CMsgQueueThread()
 {
-
 }
 
 CMsgQueueThread::~CMsgQueueThread()
@@ -31,13 +33,11 @@ void CMsgQueueThread::sendMsg(CMessage &msg)
 {
 	CMutex::Autolock _l(mLockQueue);
 	msg.mWhenMs = getNowMs() + msg.mDelayMs;//
-
 	int i = 0;
-	while(i < m_v_msg.size() && m_v_msg[i].mWhenMs <= msg.mWhenMs) i++;//find the index that will insert(i)
+	while (i < m_v_msg.size() && m_v_msg[i].mWhenMs <= msg.mWhenMs) i++; //find the index that will insert(i)
 	m_v_msg.insertAt(msg, i);//insert at index i
 	CMessage msg1 = m_v_msg[0];
-	LOGD("sendmsg now2 = %lld i = %d", getNowMs(), i);
-	LOGD("sendmsg now3 = %lld msg1 when = %lld", getNowMs(), msg1.mWhenMs);
+	LOGD("sendmsg now = %lld msg[0] when = %lld", getNowMs(), msg1.mWhenMs);
 	//
 	//if(i == 0)// is empty or new whenMS  is  at  index 0, low all ms in list.  so ,need to  wakeup loop,  to get new delay time.
 	mGetMsgCondition.signal();
@@ -54,8 +54,14 @@ void CMsgQueueThread::removeMsg(CMessage &msg)
 		}
 	}
 	//some msg removeed
-	if(beforeSize > m_v_msg.size())
+	if (beforeSize > m_v_msg.size())
 		mGetMsgCondition.signal();
+}
+
+void CMsgQueueThread::clearMsg()
+{
+	CMutex::Autolock _l(mLockQueue);
+	m_v_msg.clear();
 }
 
 int CMsgQueueThread::startMsgQueue()
@@ -68,10 +74,9 @@ int CMsgQueueThread::startMsgQueue()
 bool  CMsgQueueThread::threadLoop()
 {
 	int sleeptime = 100;//ms
-
-	while(!exitPending()) { //requietexit() or requietexitWait() not call
+	while (!exitPending()) { //requietexit() or requietexitWait() not call
 		mLockQueue.lock();
-		while(m_v_msg.size() == 0) { //msg queue is empty
+		while (m_v_msg.size() == 0) { //msg queue is empty
 			mGetMsgCondition.wait(mLockQueue);//first unlock,when return,lock again,so need,call unlock
 		}
 		mLockQueue.unlock();
@@ -79,7 +84,7 @@ bool  CMsgQueueThread::threadLoop()
 		CMessage msg;
 		nsecs_t delayMs = 0, nowMS = 0;
 		do { //wait ,until , the lowest time msg's whentime is low nowtime, to go on
-			if(m_v_msg.size() <= 0) {
+			if (m_v_msg.size() <= 0) {
 				LOGD("msg size is 0, break");
 				break;
 			}
@@ -89,7 +94,7 @@ bool  CMsgQueueThread::threadLoop()
 
 			delayMs = msg.mWhenMs - getNowMs();
 			LOGD("threadLoop now = %lld mswhen = %lld delayMs = %lld msg type = %d", getNowMs(), msg.mWhenMs, delayMs, msg.mType);
-			if(delayMs > 0) {
+			if (delayMs > 0) {
 				mLockQueue.lock();//get msg ,first lock.
 				int ret = mGetMsgCondition.waitRelative(mLockQueue, delayMs);
 				mLockQueue.unlock();
@@ -97,9 +102,9 @@ bool  CMsgQueueThread::threadLoop()
 			} else {
 				break;
 			}
-		} while(true); //msg[0], timeout
+		} while (true); //msg[0], timeout
 
-		if(m_v_msg.size() > 0) {
+		if (m_v_msg.size() > 0) {
 			mLockQueue.lock();//
 			msg = m_v_msg[0];
 			m_v_msg.removeAt(0);

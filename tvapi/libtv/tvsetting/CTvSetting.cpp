@@ -17,7 +17,7 @@
 #include "CTvSetting.h"
 
 #include "../tvconfig/tvconfig.h"
-#include "../audio/audio_api.h"
+#include "../tvutils/tvutils.h"
 
 #include "../tv/CTvLog.h"
 #define CC_DEF_CHARACTER_CHAR_VAL                   (0x8A)
@@ -51,6 +51,15 @@ bool CTvSettingunLoad()
 	return true;
 }
 
+int CTvSettingdoSuspend()
+{
+	return mpCurDevice->CloseDevice();
+}
+
+int CTvSettingdoResume()
+{
+	return mpCurDevice->OpenDevice();
+}
 template<typename T>
 static int SSMWriteNTypes(int offset, int data_len, T *data_buf)
 {
@@ -138,8 +147,8 @@ int SSMSaveFlash_N_N310_N311(int offset, int data_len, int *data_buf)
 
 	ptr = new unsigned char[data_len];
 
-	if(ptr != NULL) {
-		for(i = 0; i < data_len; i++) {
+	if (ptr != NULL) {
+		for (i = 0; i < data_len; i++) {
 			ptr[i] = data_buf[i];
 		}
 	} else {
@@ -149,7 +158,7 @@ int SSMSaveFlash_N_N310_N311(int offset, int data_len, int *data_buf)
 		return -1;
 	}
 
-	if(SSMWriteNTypes(offset, data_len, ptr) < 0) {
+	if (SSMWriteNTypes(offset, data_len, ptr) < 0) {
 		delete ptr;
 		ptr = NULL;
 
@@ -169,7 +178,7 @@ int SSMReadFlash_N_N310_N311(int offset, int data_len, int *data_buf)
 
 	ptr = new unsigned char[data_len];
 
-	if(ptr != NULL) {
+	if (ptr != NULL) {
 		if (SSMReadNTypes(offset, data_len, ptr) < 0) {
 			delete ptr;
 			ptr = NULL;
@@ -183,7 +192,7 @@ int SSMReadFlash_N_N310_N311(int offset, int data_len, int *data_buf)
 		return -1;
 	}
 
-	for(i = 0; i < data_len; i++) {
+	for (i = 0; i < data_len; i++) {
 		data_buf[i] = ptr[i];
 	}
 
@@ -195,7 +204,7 @@ int SSMReadFlash_N_N310_N311(int offset, int data_len, int *data_buf)
 int EEPWriteOneByte(int offset, unsigned char *data_buf)
 {
 	int fd = 0;
-	const char *device_path = config_get_str("SETTING", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
+	const char *device_path = config_get_str("TV", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
 	pthread_mutex_lock(&ssm_r_w_op_mutex);
 
 	LOGD ( "~~~EEPWriteOneByte~~~##offset %d##rw_val %s##" , offset, data_buf);
@@ -237,7 +246,7 @@ int EEPReadOneByte(int offset , unsigned char *data_buf)
 {
 	int fd = 0;
 	//const char* device_type = config_get_str("SETTING", "peripheral.eeprom.device", "disable");
-	const char *device_path = config_get_str("SETTING", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
+	const char *device_path = config_get_str("TV", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
 
 	pthread_mutex_lock(&ssm_r_w_op_mutex);
 
@@ -275,7 +284,7 @@ int EEPReadOneByte(int offset , unsigned char *data_buf)
 int EEPWriteNByte(int offset, int data_len, unsigned char *data_buf)
 {
 	int fd = 0;
-	const char *device_path = config_get_str("SETTING", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
+	const char *device_path = config_get_str("TV", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
 	pthread_mutex_lock(&ssm_r_w_op_mutex);
 
 	LOGD ( "~~~EEPWriteNByte~~~##offset %d##data_len %d##" , offset, data_len);
@@ -315,7 +324,7 @@ int EEPWriteNByte(int offset, int data_len, unsigned char *data_buf)
 int EEPReadNByte(int offset, int data_len, unsigned char *data_buf)
 {
 	int fd = 0;
-	const char *device_path = config_get_str("SETTING", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
+	const char *device_path = config_get_str("TV", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
 	pthread_mutex_lock(&ssm_r_w_op_mutex);
 
 	if (data_buf == NULL) {
@@ -354,9 +363,9 @@ int EEPReadNByte(int offset, int data_len, unsigned char *data_buf)
 int SSMSaveEEP_One_N310_N311(int offset, int rw_val)
 {
 	unsigned char tmp_val = rw_val;
-	const char *device_config = config_get_str("SETTING", "peripheral.eeprom.device", "disable");
+	const char *device_config = config_get_str("TV", "peripheral.eeprom.device", "disable");
 
-	if(strcmp(device_config, "enable") != 0) {
+	if (strcmp(device_config, "enable") != 0) {
 		LOGD ( "~~~ SSMSaveEEP_One ~~~##peripheral.eeprom.device error##");
 		return -1;
 	}
@@ -368,9 +377,9 @@ int SSMSaveEEP_One_N310_N311(int offset, int rw_val)
 int SSMReadEEP_One_N310_N311(int offset)
 {
 	unsigned char tmp_val = 0;
-	const char *device_config = config_get_str("SETTING", "peripheral.eeprom.device", "disable");
+	const char *device_config = config_get_str("TV", "peripheral.eeprom.device", "disable");
 
-	if(strcmp(device_config, "enable") != 0) {
+	if (strcmp(device_config, "enable") != 0) {
 		LOGD ( "~~~ SSMReadEEP_One ~~~##peripheral.eeprom.device error##");
 		return -1;
 	}
@@ -387,17 +396,17 @@ int SSMSaveEEP_N_N310_N311(int offset, int data_len, int *data_buf)
 {
 	int i = 0;
 	unsigned char *ptr = NULL;
-	const char *device_config = config_get_str("SETTING", "peripheral.eeprom.device", "disable");
+	const char *device_config = config_get_str("TV", "peripheral.eeprom.device", "disable");
 
-	if(strcmp(device_config, "enable") != 0) {
+	if (strcmp(device_config, "enable") != 0) {
 		LOGD ( "~~~ SSMSaveEEP_N ~~~##peripheral.eeprom.device error##");
 		return -1;
 	}
 
 	ptr = new unsigned char[data_len];
 
-	if(ptr != NULL) {
-		for(i = 0; i < data_len; i++) {
+	if (ptr != NULL) {
+		for (i = 0; i < data_len; i++) {
 			ptr[i] = data_buf[i];
 		}
 	} else {
@@ -407,7 +416,7 @@ int SSMSaveEEP_N_N310_N311(int offset, int data_len, int *data_buf)
 		return -1;
 	}
 
-	if(EEPWriteNByte(offset, data_len, ptr) < 0) {
+	if (EEPWriteNByte(offset, data_len, ptr) < 0) {
 		delete ptr;
 		ptr = NULL;
 
@@ -424,15 +433,15 @@ int SSMReadEEP_N_N310_N311(int offset, int data_len, int *data_buf)
 {
 	int i = 0;
 	unsigned char *ptr = NULL;
-	const char *device_config = config_get_str("SETTING", "peripheral.eeprom.device", "disable");
+	const char *device_config = config_get_str("TV", "peripheral.eeprom.device", "disable");
 
-	if(strcmp(device_config, "enable") != 0) {
+	if (strcmp(device_config, "enable") != 0) {
 		LOGD ( "~~~ SSMReadEEP_N ~~~##peripheral.eeprom.device error##");
 		return -1;
 	}
 	ptr = new unsigned char[data_len];
 
-	if(ptr != NULL) {
+	if (ptr != NULL) {
 		if (EEPReadNByte(offset, data_len, ptr) < 0) {
 			delete ptr;
 			ptr = NULL;
@@ -446,7 +455,7 @@ int SSMReadEEP_N_N310_N311(int offset, int data_len, int *data_buf)
 		return -1;
 	}
 
-	for(i = 0; i < data_len; i++) {
+	for (i = 0; i < data_len; i++) {
 		data_buf[i] = ptr[i];
 	}
 
@@ -459,7 +468,7 @@ int SSMReadEEP_N_N310_N311(int offset, int data_len, int *data_buf)
 int MiscSSMRestoreDefault()
 {
 	SSMSaveFactoryBurnMode(0);
-	SSMSavePowerOnOffChannel(0);
+	SSMSavePowerOnOffChannel(1);
 	SSMSaveSystemLanguage(0);
 	SSMSaveAgingMode(0);
 	SSMSavePanelType(0);
@@ -1419,12 +1428,13 @@ int GetSSMCfgBufferData(const char *key_str, int *buf_item_count, int radix,
 	memset((void *)data_str, 0, sizeof(data_str));
 	strncpy(data_str, config_value, sizeof(data_str) - 1);
 
-	token = strtok(data_str, strDelimit);
+	char *pSave;
+	token = strtok_r(data_str, strDelimit, &pSave);
 	while (token != NULL) {
 		if (cfg_item_count < *buf_item_count) {
 			data_buf[cfg_item_count] = strtol(token, NULL, radix);
 
-			token = strtok(NULL, strDelimit);
+			token = strtok_r(NULL, strDelimit, &pSave);
 			cfg_item_count += 1;
 		} else {
 			LOGE("%s, we get data count more than desire count (%d)!!!\n",
@@ -1963,14 +1973,14 @@ int SSMReadDDRSSC(unsigned char *rw_val)
 	return SSMReadNTypes(VPP_DATA_POS_DDR_SSC_START, 1, rw_val);
 }
 
-int SSMSaveLVDSSSC(unsigned char rw_val)
+int SSMSaveLVDSSSC(unsigned char *rw_val)
 {
-	return SSMWriteNTypes(VPP_DATA_POS_LVDS_SSC_START, 1, &rw_val);
+	return SSMWriteNTypes(VPP_DATA_POS_LVDS_SSC_START, 2, rw_val);
 }
 
 int SSMReadLVDSSSC(unsigned char *rw_val)
 {
-	return SSMReadNTypes(VPP_DATA_POS_LVDS_SSC_START, 1, rw_val);
+	return SSMReadNTypes(VPP_DATA_POS_LVDS_SSC_START, 2, rw_val);
 }
 
 int SSMSaveDreamPanel(unsigned char rw_val)
@@ -2106,6 +2116,29 @@ int SSMSaveAudioSRSDialogClaritySwitch(int8_t rw_val)
 	return SSMWriteNTypes(SSM_AUD_SRS_DIALOG_CLARITY_SWITCH, 1, &rw_val);
 }
 
+int SSMSaveAudioDbxTvValue(int son_value, int vol_value, int sur_value)
+{
+	int8_t rw_val = son_value;
+	SSMWriteNTypes(SSM_AUD_DBX_TV_SON, 1, &rw_val);
+	rw_val = vol_value;
+	SSMWriteNTypes(SSM_AUD_DBX_TV_VAL, 1, &rw_val);
+	rw_val = sur_value;
+	SSMWriteNTypes(SSM_AUD_DBX_TV_SUR, 1, &rw_val);
+	return 0;
+}
+
+int SSMReadAudioDbxTvValue(int *son_value, int *vol_value, int *sur_value)
+{
+	unsigned char rw_val;
+	SSMReadNTypes(SSM_AUD_DBX_TV_SON, 1, &rw_val);
+	*son_value = rw_val;
+	SSMReadNTypes(SSM_AUD_DBX_TV_VAL, 1, &rw_val);
+	*vol_value = rw_val;
+	SSMReadNTypes(SSM_AUD_DBX_TV_SUR, 1, &rw_val);
+	*sur_value = rw_val;
+	return 0;
+}
+
 int SSMReadAudioSRSDialogClaritySwitch(int8_t *rw_val)
 {
 	return SSMReadNTypes(SSM_AUD_SRS_DIALOG_CLARITY_SWITCH, 1, rw_val);
@@ -2201,6 +2234,25 @@ int SSMReadAudioEQGain(int offset, int size, int8_t tmp_buf[])
 	return SSMReadNTypes(SSM_AUD_EQ_GAIN, size, tmp_buf);
 }
 
+int SSMSaveAudioAVOutMuteVal(int8_t rw_val)
+{
+	return SSMWriteNTypes(SSM_AUD_AVOUT_MUTE, 1, &rw_val);
+}
+
+int SSMReadAudioAVOutMuteVal(int8_t *rw_val)
+{
+	return SSMReadNTypes(SSM_AUD_AVOUT_MUTE, 1, rw_val);
+}
+
+int SSMSaveAudioSPIDFMuteVal(int8_t rw_val)
+{
+	return SSMWriteNTypes(SSM_AUD_SPIDF_MUTE, 1, &rw_val);
+}
+
+int SSMReadAudioSPIDFMuteVal(int8_t *rw_val)
+{
+	return SSMReadNTypes(SSM_AUD_SPIDF_MUTE, 1, rw_val);
+}
 int SSMSaveBlackoutEnable(int8_t enable)
 {
 	return SSMWriteNTypes(SSM_RW_BLACKOUT_ENABLE_START, 1, &enable);
@@ -2209,4 +2261,186 @@ int SSMSaveBlackoutEnable(int8_t enable)
 int SSMReadBlackoutEnable(int8_t *enable)
 {
 	return SSMReadNTypes(SSM_RW_BLACKOUT_ENABLE_START, 1, enable);
+}
+int SSMSaveFBCN310BackLightVal(int rw_val)
+{
+	unsigned char tmp_val = rw_val;
+
+	return SSMWriteNTypes(VPP_DATA_POS_FBC_N310_BACKLIGHT_START , 1, &tmp_val);
+}
+
+int SSMReadFBCN310BackLightVal(int *rw_val)
+{
+	int tmp_ret = 0;
+	unsigned char tmp_val = 0;
+
+	tmp_ret = SSMReadNTypes(VPP_DATA_POS_FBC_N310_BACKLIGHT_START, 1, &tmp_val);
+	*rw_val = tmp_val;
+
+	return tmp_ret;
+}
+
+int SSMSaveFBCN310ColorTempVal(int rw_val)
+{
+	unsigned char tmp_val = rw_val;
+
+	return SSMWriteNTypes(VPP_DATA_POS_FBC_N310_COLORTEMP_START , 1, &tmp_val);
+}
+
+int SSMReadFBCN310ColorTempVal(int *rw_val)
+{
+	int tmp_ret = 0;
+	unsigned char tmp_val = 0;
+
+	tmp_ret = SSMReadNTypes(VPP_DATA_POS_FBC_N310_COLORTEMP_START, 1, &tmp_val);
+	*rw_val = tmp_val;
+
+	return tmp_ret;
+}
+
+int SSMSaveFBCN310LightsensorVal(int rw_val)
+{
+	unsigned char tmp_val = rw_val;
+
+	return SSMWriteNTypes(VPP_DATA_POS_FBC_N310_LIGHTSENSOR_START , 1, &tmp_val);
+}
+
+int SSMReadFBCN310LightsensorVal(int *rw_val)
+{
+	int tmp_ret = 0;
+	unsigned char tmp_val = 0;
+
+	tmp_ret = SSMReadNTypes(VPP_DATA_POS_FBC_N310_LIGHTSENSOR_START, 1, &tmp_val);
+	*rw_val = tmp_val;
+
+	return tmp_ret;
+}
+
+int SSMSaveFBCN310Dream_PanelVal(int rw_val)
+{
+	unsigned char tmp_val = rw_val;
+
+	return SSMWriteNTypes(VPP_DATA_POS_FBC_N310_DREAMPANEL_START , 1, &tmp_val);
+}
+
+int SSMReadFBCN310Dream_PanelVal(int *rw_val)
+{
+	int tmp_ret = 0;
+	unsigned char tmp_val = 0;
+
+	tmp_ret = SSMReadNTypes(VPP_DATA_POS_FBC_N310_DREAMPANEL_START, 1, &tmp_val);
+	*rw_val = tmp_val;
+
+	return tmp_ret;
+}
+
+int SSMSaveFBCN310MULT_PQVal(int rw_val)
+{
+	unsigned char tmp_val = rw_val;
+
+	return SSMWriteNTypes(VPP_DATA_POS_FBC_N310_MULTI_PQ_START , 1, &tmp_val);
+}
+
+int SSMReadFBCN310MULT_PQVal(int *rw_val)
+{
+	int tmp_ret = 0;
+	unsigned char tmp_val = 0;
+
+	tmp_ret = SSMReadNTypes(VPP_DATA_POS_FBC_N310_MULTI_PQ_START, 1, &tmp_val);
+	*rw_val = tmp_val;
+
+	return tmp_ret;
+}
+
+int SSMSaveFBCN310MEMCVal(int rw_val)
+{
+	unsigned char tmp_val = rw_val;
+
+	return SSMWriteNTypes(VPP_DATA_POS_FBC_N310_MEMC_START , 1, &tmp_val);
+}
+
+int SSMReadFBCN310MEMCVal(int *rw_val)
+{
+	int tmp_ret = 0;
+	unsigned char tmp_val = 0;
+
+	tmp_ret = SSMReadNTypes(VPP_DATA_POS_FBC_N310_MEMC_START, 1, &tmp_val);
+	*rw_val = tmp_val;
+
+	return tmp_ret;
+}
+
+int SSMSaveN311_VbyOne_Spread_Spectrum_Val(int rw_val)
+{
+	unsigned char tmp_val = rw_val;
+
+	return SSMWriteNTypes(VPP_DATA_POS_N311_VBYONE_SPREAD_SPECTRUM_START , 1, &tmp_val);
+}
+
+int SSMReadN311_VbyOne_Spread_Spectrum_Val(int *rw_val)
+{
+	int tmp_ret = 0;
+	unsigned char tmp_val = 0;
+
+	tmp_ret = SSMReadNTypes(VPP_DATA_POS_N311_VBYONE_SPREAD_SPECTRUM_START, 1, &tmp_val);
+	*rw_val = tmp_val;
+
+	return tmp_ret;
+}
+int SSMSaveN311_Bluetooth_Vol(int rw_val)
+{
+	unsigned char tmp_val = rw_val;
+
+	return SSMWriteNTypes(VPP_DATA_POS_N311_BLUETOOTH_VAL_START , 1, &tmp_val);
+}
+
+int SSMReadN311_Bluetooth_Vol(void)
+{
+	int tmp_ret = 0;
+	unsigned char tmp_val = 0;
+
+	tmp_ret = SSMReadNTypes(VPP_DATA_POS_N311_BLUETOOTH_VAL_START, 1, &tmp_val);
+
+	if (tmp_ret < 0) {
+		return 0;
+	}
+
+	return tmp_val;
+}
+int SSMSave_DRC_ONOFF_Val(int rw_val)
+{
+	unsigned char tmp_val = rw_val;
+
+	return  SSMWriteNTypes(SSM_AUD_DRC_ONOFF , 1, &tmp_val);
+
+}
+int SSMRead_DRC_ONOFF_Val(void)
+{
+	unsigned char tmp_val = 0;
+	int tmp_ret = 0;
+
+	tmp_ret = SSMReadNTypes(SSM_AUD_DRC_ONOFF, 1, &tmp_val);
+
+	if (tmp_ret < 0) {
+		return 0;
+	}
+
+	return tmp_val;
+
+}
+
+int SSMSave_PANEL_ID_Val(int rw_val)
+{
+	unsigned char tmp_val = rw_val;
+	return  SSMWriteNTypes(SSM_RW_PANEL_ID_START , 1, &tmp_val);
+}
+int SSMRead_PANEL_ID_Val(void)
+{
+	unsigned char tmp_val = 0;
+	int tmp_ret = 0;
+	tmp_ret = SSMReadNTypes(SSM_RW_PANEL_ID_START, 1, &tmp_val);
+	if (tmp_ret < 0) {
+		return 0;
+	}
+	return tmp_val;
 }

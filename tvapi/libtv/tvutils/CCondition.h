@@ -73,7 +73,7 @@ inline int CCondition::waitRelative(CMutex &mutex, long msec)
 	clock_gettime(CLOCK_REALTIME, &ts);
 	ts.tv_sec += _sec;
 	ts.tv_nsec += _nsec;
-	if(ts.tv_nsec > _nanoSec) {
+	if (ts.tv_nsec > _nanoSec) {
 		ts.tv_nsec %= _nanoSec;
 		ts.tv_sec++;
 	}

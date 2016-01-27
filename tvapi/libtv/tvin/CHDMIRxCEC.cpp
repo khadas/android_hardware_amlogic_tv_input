@@ -15,7 +15,7 @@ CTvin::CHDMIRxCEC::CHDMIRxCEC(CTvin *pTvin)
 {
 	int i = 0;
 
-	for(i = 0; i < CC_REQUEST_LIST_SIZE; i++) {
+	for (i = 0; i < CC_REQUEST_LIST_SIZE; i++) {
 		ClrReplyListItem(&mReplyList[i]);
 		memset((void *) &mMsgBuf[i], 0, sizeof(struct _cec_msg));
 	}
@@ -27,7 +27,7 @@ CTvin::CHDMIRxCEC::CHDMIRxCEC(CTvin *pTvin)
 	mpObserver = NULL;
 	mpTvin = pTvin;
 
-	for(i = 0; i < CC_SOURCE_DEV_REFRESH_CNT; i++) {
+	for (i = 0; i < CC_SOURCE_DEV_REFRESH_CNT; i++) {
 		mSourceDevLogicAddrBuf[i] = -1;
 		mSourceDevRefreshBuf[i] = -1;
 	}
@@ -149,8 +149,8 @@ int CTvin::CHDMIRxCEC::PrintMessage(const char *func_name, int data_type, struct
 	LOGD("%s, msg_len = %d\n", func_name, msg->msg_len);
 	LOGD("%s, msg addr 0x%02X\n", func_name, msg->addr);
 	LOGD("%s, msg cmd 0x%02X\n", func_name, msg->cmd);
-	for(int i = 0; i < msg->msg_len - 2; i++) {
-		if(data_type == 0) {
+	for (int i = 0; i < msg->msg_len - 2; i++) {
+		if (data_type == 0) {
 			LOGD("%s, msg data[%d] = 0x%02X\n", func_name, i, msg->msg_data[i]);
 		} else {
 			LOGD("%s, msg data[%d] = %c\n", func_name, i, msg->msg_data[i]);
@@ -162,7 +162,7 @@ int CTvin::CHDMIRxCEC::PrintMessage(const char *func_name, int data_type, struct
 
 int CTvin::CHDMIRxCEC::ClrReplyListItem(HDMIRxRequestReplyItem *reply_item)
 {
-	if(reply_item == NULL) {
+	if (reply_item == NULL) {
 		return -1;
 	}
 
@@ -178,17 +178,17 @@ int CTvin::CHDMIRxCEC::ClrReplyListItem(HDMIRxRequestReplyItem *reply_item)
 
 int CTvin::CHDMIRxCEC::CopyMessageData(unsigned char data_buf[], unsigned char msg_data[], int msg_len)
 {
-	if(data_buf == NULL) {
+	if (data_buf == NULL) {
 		return 0;
 	}
 
 	memset((void *)data_buf, 0, CC_CEC_STREAM_SIZE);
 
-	if(msg_len > CC_CEC_STREAM_SIZE) {
+	if (msg_len > CC_CEC_STREAM_SIZE) {
 		return 0;
 	}
 
-	if(msg_len <= 2) {
+	if (msg_len <= 2) {
 		return 0;
 	}
 
@@ -217,7 +217,7 @@ int CTvin::CHDMIRxCEC::processRefreshSrcDevice(int source_input)
 	mSourceDevLogicAddrBuf[1] = E_LA_TV;
 	mSourceDevLogicAddrBuf[2] = E_LA_TV;
 
-	for(i = 0; i < CC_SOURCE_DEV_REFRESH_CNT; i++) {
+	for (i = 0; i < CC_SOURCE_DEV_REFRESH_CNT; i++) {
 		if (mSourceDevRefreshBuf[i] < 0) {
 			continue;
 		}
@@ -278,7 +278,7 @@ int CTvin::CHDMIRxCEC::GetMessage(struct _cec_msg msg_buf[])
 	if (msg_cnt > 0) {
 		LOGD("%s, msg_cnt = %d\n", __FUNCTION__, msg_cnt);
 
-		for(i = 0; i < msg_cnt; i++) {
+		for (i = 0; i < msg_cnt; i++) {
 			ioctl(m_cec_dev_fd, HDMI_IOC_CEC_GET_MSG, &msg_buf[i]);
 			PrintMessage(__FUNCTION__, 0, &msg_buf[i]);
 		}
@@ -341,7 +341,7 @@ int CTvin::CHDMIRxCEC::sendMessageAndWaitReply(struct _cec_msg *msg, struct _cec
 	mReplyList[tmp_ind].WaitReplyCondition.waitRelative(mReplyLock[tmp_ind], timeout);//wait reply
 	mReplyLock[tmp_ind].unlock();
 
-	if(mReplyList[tmp_ind].DataFlag == 1) {
+	if (mReplyList[tmp_ind].DataFlag == 1) {
 		PrintMessage(__FUNCTION__, 0, &mReplyList[tmp_ind].msg);
 		*reply_msg = mReplyList[tmp_ind].msg;
 	} else {
@@ -415,7 +415,7 @@ int CTvin::CHDMIRxCEC::SendGiveCECVersionMessage(int source_input, unsigned char
 		return -1;
 	}
 
-	if(data_buf == NULL) {
+	if (data_buf == NULL) {
 		return -1;
 	}
 
@@ -439,7 +439,7 @@ int CTvin::CHDMIRxCEC::SendGiveDeviceVendorIDMessage(int source_input, unsigned 
 		return -1;
 	}
 
-	if(data_buf == NULL) {
+	if (data_buf == NULL) {
 		return -1;
 	}
 
@@ -463,7 +463,7 @@ int CTvin::CHDMIRxCEC::SendGiveOSDNameMessage(int source_input, unsigned char da
 		return -1;
 	}
 
-	if(data_buf == NULL) {
+	if (data_buf == NULL) {
 		return -1;
 	}
 
@@ -487,7 +487,7 @@ int CTvin::CHDMIRxCEC::SendGivePhysicalAddressMessage(int source_input, int logi
 		return -1;
 	}
 
-	if(physical_addr == NULL) {
+	if (physical_addr == NULL) {
 		return -1;
 	}
 
@@ -518,7 +518,7 @@ int CTvin::CHDMIRxCEC::SendSetMenuLanguageMessage(int source_input, unsigned cha
 		return -1;
 	}
 
-	if(data_buf == NULL) {
+	if (data_buf == NULL) {
 		return -1;
 	}
 
@@ -581,7 +581,7 @@ int CTvin::CHDMIRxCEC::addToRequestList(HDMIRxRequestReplyItem *reply_item)
 
 	mListLock.lock();
 
-	for(i = 0; i < CC_REQUEST_LIST_SIZE; i++) {
+	for (i = 0; i < CC_REQUEST_LIST_SIZE; i++) {
 		if (mReplyList[i].WaitFlag == 0) {
 			mReplyList[i] = *reply_item;
 			mListLock.unlock();
@@ -599,7 +599,7 @@ int CTvin::CHDMIRxCEC::processData(int msg_cnt)
 	int i = 0, j = 0;
 	CECMsgStream msg_stream;
 
-	for(i = 0; i < msg_cnt; i++) {
+	for (i = 0; i < msg_cnt; i++) {
 		for (j = 0; j < CC_REQUEST_LIST_SIZE; j++) {
 			if (mReplyList[j].WaitFlag) {
 				if (mMsgBuf[i].cmd == mReplyList[j].WaitCmd && ((mMsgBuf[i].addr & 0xF0) >> 4) == mReplyList[j].WaitLogicAddr) {
@@ -629,7 +629,7 @@ bool CTvin::CHDMIRxCEC::threadLoop()
 
 	mState = STATE_RUNNING;
 
-	while(!exitPending()) { //requietexit() or requietexitWait() not call
+	while (!exitPending()) { //requietexit() or requietexitWait() not call
 		while (mRequestPause) {
 			mLock.lock();
 			mState = STATE_PAUSE;

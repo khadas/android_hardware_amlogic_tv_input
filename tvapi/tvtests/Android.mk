@@ -12,11 +12,11 @@ LOCAL_SHARED_LIBRARIES := \
 	libnativehelper \
 	libandroid_runtime \
 	liblog
-    
+
 LOCAL_C_INCLUDES += \
     bionic/libc/include \
 	$(LOCAL_PATH)/../ \
-	$(LOCAL_PATH)/../android    
+	$(LOCAL_PATH)/../android
 
 LOCAL_MODULE:= tvtest
 
@@ -37,12 +37,12 @@ LOCAL_SHARED_LIBRARIES := \
 	libandroid_runtime \
 	liblog \
 	libtv
-    
+
 LOCAL_C_INCLUDES += \
     bionic/libc/include \
 	$(LOCAL_PATH)/../ \
 	$(LOCAL_PATH)/../libtv\
-	$(LOCAL_PATH)/../android    
+	$(LOCAL_PATH)/../android
 
 LOCAL_MODULE:= comm_test
 

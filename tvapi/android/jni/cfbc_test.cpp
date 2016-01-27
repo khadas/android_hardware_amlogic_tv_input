@@ -6,7 +6,7 @@ int main(int argc, char **argv)
 {
 	int idx = 0, send_buf[128], recv_buf[128], cmd_value = 1, run_flag = 0, run_cnt = 0, cmd_type = 0, read_flag = 0;
 	printf("run begin.......\n");
-	if(argc < 4) {
+	if (argc < 4) {
 		printf("usage:./libcfbc_jni cmd_type cmd_value run_cnt(all hex mode)\n");
 		return 0;
 	}
@@ -20,9 +20,9 @@ int main(int argc, char **argv)
 	cfbcHandle->run();
 	sleep(0.2);
 
-	switch(cmd_type) {
+	switch (cmd_type) {
 	default:
-		for(idx = 0; idx < run_cnt; idx++) {
+		for (idx = 0; idx < run_cnt; idx++) {
 			memset(send_buf, 0, sizeof(send_buf));
 			memset(recv_buf, 0, sizeof(recv_buf));
 			send_buf[0] = cmd_type;

@@ -39,7 +39,7 @@ public:
 	void SetRecordFileName(char *name);
 	void StartRecord(int id);
 	void StopRecord();
-	void SetRecCurTsOrCurProgram(int sel);	// 1: all program in the Ts; 0:current program
+	void SetRecCurTsOrCurProgram(int sel);  // 1: all program in the Ts; 0:current program
 
 
 

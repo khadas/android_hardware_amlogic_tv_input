@@ -20,6 +20,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES:= \
+    main.cpp \
     TvService.cpp
 
 LOCAL_SHARED_LIBRARIES := \
@@ -74,8 +75,9 @@ LOCAL_C_INCLUDES += \
     $(AM_LIBPLAYER_PATH)/amcodec/include \
     $(AM_LIBPLAYER_PATH)/amffmpeg \
     $(AM_LIBPLAYER_PATH)/amplayer
+LOCAL_C_INCLUDES += hardware/amlogic/audio/libTVaudio
+LOCAL_CFLAGS += -DTARGET_BOARD_$(strip $(TVAPI_TARGET_BOARD_VERSION))
 
+LOCAL_MODULE:= tvserver
 
-LOCAL_MODULE:= libtvserver
-
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_EXECUTABLE)

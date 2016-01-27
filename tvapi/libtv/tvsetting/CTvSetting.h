@@ -20,6 +20,8 @@ extern "C" {
 bool CTvSettingLoad();
 bool CTvSettingunLoad();
 
+int CTvSettingdoSuspend();
+int CTvSettingdoResume();
 int MiscSSMRestoreDefault();
 int MiscSSMFacRestoreDefault();
 int ReservedSSMRestoreDefault();
@@ -194,7 +196,7 @@ int SSMSaveBP(unsigned char rw_val);
 int SSMReadBP(unsigned char *rw_val);
 int SSMSaveDDRSSC(unsigned char rw_val);
 int SSMReadDDRSSC(unsigned char *rw_val);
-int SSMSaveLVDSSSC(unsigned char rw_val);
+int SSMSaveLVDSSSC(unsigned char *rw_val);
 int SSMReadLVDSSSC(unsigned char *rw_val);
 int SSMSaveDreamPanel(unsigned char rw_val);
 int SSMReadDreamPanel(unsigned char *rw_val);
@@ -241,9 +243,35 @@ int SSMSaveAudioEQModeVal(int8_t rw_val);
 int SSMReadAudioEQModeVal(int8_t *rw_val);
 int SSMSaveAudioEQGain(int offset, int size, int8_t tmp_buf[]);
 int SSMReadAudioEQGain(int offset, int size, int8_t tmp_buf[]);
+int SSMSaveAudioDbxTvValue(int son_value, int vol_value, int sur_value);
+int SSMReadAudioDbxTvValue(int *son_value, int *vol_value, int *sur_value);
+int SSMSaveAudioAVOutMuteVal(int8_t rw_val);
+int SSMReadAudioAVOutMuteVal(int8_t *rw_val);
+int SSMSaveAudioSPIDFMuteVal(int8_t rw_val);
+int SSMReadAudioSPIDFMuteVal(int8_t *rw_val);
 
 int SSMSaveBlackoutEnable(int8_t enable);
 int SSMReadBlackoutEnable(int8_t *enable);
+int SSMSaveFBCN310BackLightVal(int rw_val);
+int SSMReadFBCN310BackLightVal(int *rw_val);
+int SSMSaveFBCN310ColorTempVal(int rw_val);
+int SSMReadFBCN310ColorTempVal(int *rw_val);
+int SSMSaveFBCN310LightsensorVal(int rw_val);
+int SSMReadFBCN310LightsensorVal(int *rw_val);
+int SSMSaveFBCN310Dream_PanelVal(int rw_val);
+int SSMReadFBCN310Dream_PanelVal(int *rw_val);
+int SSMSaveFBCN310MULT_PQVal(int rw_val);
+int SSMReadFBCN310MULT_PQVal(int *rw_val);
+int SSMSaveFBCN310MEMCVal(int rw_val);
+int SSMReadFBCN310MEMCVal(int *rw_val) ;
+int SSMSaveN311_VbyOne_Spread_Spectrum_Val(int rw_val);
+int SSMReadN311_VbyOne_Spread_Spectrum_Val(int *rw_val);
+int SSMSaveN311_Bluetooth_Vol(int rw_val);
+int SSMReadN311_Bluetooth_Vol(void) ;
+int SSMSave_DRC_ONOFF_Val(int rw_val);
+int SSMRead_DRC_ONOFF_Val(void);
+int SSMSave_PANEL_ID_Val(int rw_val);
+int SSMRead_PANEL_ID_Val(void);
 #ifdef __cplusplus
 }
 #endif

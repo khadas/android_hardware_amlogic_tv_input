@@ -16,8 +16,6 @@
 #include <cutils/android_reboot.h>
 #include "../tvconfig/tvconfig.h"
 #include "../tvsetting/CTvSetting.h"
-#include "../audio/audio_api.h"
-#include "../tv/CFbcCommunication.h"
 #include <cutils/properties.h>
 #include <dirent.h>
 using namespace android;
@@ -261,6 +259,22 @@ int Tv_MiscRegs(const char *cmd)
 	fclose(fp);
 	//#endif
 
+	return 0;
+}
+
+int TvMisc_SetLVDSSSC(int val)
+{
+	FILE *fp;
+
+	fp = fopen("/sys/class/lcd/ss", "w");
+
+	if (fp != NULL) {
+		fprintf(fp, "%d", val);
+		fclose(fp);
+	} else {
+		LOGE("open /sys/class/lcd/ss ERROR(%s)!!\n", strerror(errno));
+		return -1;
+	}
 	return 0;
 }
 
@@ -855,10 +869,10 @@ int *GetFileAttrIntValueStr(const char *fp)
 		return NULL;
 	}
 
-	if(read(fd, temp_str, sizeof(temp_str)) > 0) {
+	if (read(fd, temp_str, sizeof(temp_str)) > 0) {
 		LOGD("%s,temp_str = %s\n", "TV", temp_str);
 		p = strtok(temp_str, " ");
-		while(p != NULL) {
+		while (p != NULL) {
 			sscanf(p, "%d", &temp[i]);
 			p = strtok(NULL, " ");
 			i = i + 1;
@@ -1419,40 +1433,44 @@ int reboot_sys_by_fbc_edid_info()
 	property_get("ubootenv.var.lcd_reverse", lcd_reverse_prop_value, "null" );
 
 	fd = open("/sys/class/amhdmitx/amhdmitx0/edid_info", O_RDWR);
-	if(fd < 0) {
+	if (fd < 0) {
 		LOGW("open edid node error\n");
 		return -1;
 	}
 	ret = read(fd, fbc_edid_info, edid_info_len);
-	if(ret < 0) {
+	if (ret < 0) {
 		LOGW("read edid node error\n");
 		return -1;
 	}
 
-	if((0xfb == fbc_edid_info[250]) && (0x0c == fbc_edid_info[251])) {
+	if ((0xfb == fbc_edid_info[250]) && (0x0c == fbc_edid_info[251])) {
 		LOGD("RX is FBC!");
 		// set outputmode env
 		ret = 0;//is Fbc
-		switch(fbc_edid_info[252] & 0x0f) {
+		switch (fbc_edid_info[252] & 0x0f) {
 		case 0x0:
-			if(0 != strcmp(outputmode_prop_value, "1080p")) {
-				if(0 == env_different_as_cur) {
+			if (0 != strcmp(outputmode_prop_value, "1080p") &&
+					0 != strcmp(outputmode_prop_value, "1080p50hz")
+			   ) {
+				if (0 == env_different_as_cur) {
 					env_different_as_cur = 1;
 				}
 				property_set("ubootenv.var.outputmode", "1080p");
 			}
 			break;
 		case 0x1:
-			if(0 != strcmp(outputmode_prop_value, "4k2k60hz420")) {
-				if(0 == env_different_as_cur) {
+			if (0 != strcmp(outputmode_prop_value, "4k2k60hz420") &&
+					0 != strcmp(outputmode_prop_value, "4k2k50hz420")
+			   ) {
+				if (0 == env_different_as_cur) {
 					env_different_as_cur = 1;
 				}
 				property_set("ubootenv.var.outputmode", "4k2k60hz420");
 			}
 			break;
 		case 0x2:
-			if(0 != strcmp(outputmode_prop_value, "1366*768")) {
-				if(0 == env_different_as_cur) {
+			if (0 != strcmp(outputmode_prop_value, "1366*768")) {
+				if (0 == env_different_as_cur) {
 					env_different_as_cur = 1;
 				}
 				property_set("ubootenv.var.outputmode", "1366*768");
@@ -1466,18 +1484,18 @@ int reboot_sys_by_fbc_edid_info()
 		//switch((fbc_edid_info[252]>>4)&0x0f)
 
 		// set lcd_reverse env
-		switch(fbc_edid_info[253]) {
+		switch (fbc_edid_info[253]) {
 		case 0x0:
-			if(0 != strcmp(lcd_reverse_prop_value, "0")) {
-				if(0 == env_different_as_cur) {
+			if (0 != strcmp(lcd_reverse_prop_value, "0")) {
+				if (0 == env_different_as_cur) {
 					env_different_as_cur = 1;
 				}
 				property_set("ubootenv.var.lcd_reverse", "0");
 			}
 			break;
 		case 0x1:
-			if(0 != strcmp(lcd_reverse_prop_value, "1")) {
-				if(0 == env_different_as_cur) {
+			if (0 != strcmp(lcd_reverse_prop_value, "1")) {
+				if (0 == env_different_as_cur) {
 					env_different_as_cur = 1;
 				}
 				property_set("ubootenv.var.lcd_reverse", "1");
@@ -1490,19 +1508,18 @@ int reboot_sys_by_fbc_edid_info()
 	close(fd);
 	fd = -1;
 	//ret = -1;
-	if(1 == env_different_as_cur) {
+	if (1 == env_different_as_cur) {
 		LOGW("env change , reboot system\n");
 		system("reboot");
 	}
 	return ret;
 }
 
-int reboot_sys_by_fbc_uart_panel_info()
+int reboot_sys_by_fbc_uart_panel_info(CFbcCommunication *fbc)
 {
 	int ret = -1;
 	char outputmode_prop_value[256];
 	char lcd_reverse_prop_value[256];
-	CFbcCommunication *fbc = GetSingletonFBC();
 	int env_different_as_cur = 0;
 	int panel_reverse = -1;
 	int panel_outputmode = -1;
@@ -1516,7 +1533,7 @@ int reboot_sys_by_fbc_uart_panel_info()
 	}
 
 	fbc->cfbc_Get_FBC_Get_PANel_INFO(COMM_DEV_SERIAL, panel_model);
-	if(0 == panel_model[0]) {
+	if (0 == panel_model[0]) {
 		LOGD("device is not fbc\n");
 		return -1;
 	}
@@ -1530,27 +1547,31 @@ int reboot_sys_by_fbc_uart_panel_info()
 	fbc->cfbc_Get_FBC_PANEL_OUTPUT(COMM_DEV_SERIAL, &panel_outputmode);
 	LOGD("panel_reverse = %d, panel_outputmode = %d\n", panel_reverse, panel_outputmode);
 	LOGD("panel_output prop = %s, panel reverse prop = %s\n", outputmode_prop_value, lcd_reverse_prop_value);
-	switch(panel_outputmode) {
+	switch (panel_outputmode) {
 	case 0x0:
-		if(0 != strcmp(outputmode_prop_value, "1080p")) {
+		if (0 != strcmp(outputmode_prop_value, "1080p") &&
+				0 != strcmp(outputmode_prop_value, "1080p50hz")
+		   ) {
 			LOGD("panel_output changed to 1080p\n");
-			if(0 == env_different_as_cur) {
+			if (0 == env_different_as_cur) {
 				env_different_as_cur = 1;
 			}
 			property_set("ubootenv.var.outputmode", "1080p");
 		}
 		break;
 	case 0x1:
-		if(0 != strcmp(outputmode_prop_value, "4k2k60hz420")) {
-			if(0 == env_different_as_cur) {
+		if (0 != strcmp(outputmode_prop_value, "4k2k60hz420") &&
+				0 != strcmp(outputmode_prop_value, "4k2k50hz420")
+		   ) {
+			if (0 == env_different_as_cur) {
 				env_different_as_cur = 1;
 			}
 			property_set("ubootenv.var.outputmode", "4k2k60hz420");
 		}
 		break;
 	case 0x2:
-		if(0 != strcmp(outputmode_prop_value, "1366*768")) {
-			if(0 == env_different_as_cur) {
+		if (0 != strcmp(outputmode_prop_value, "1366*768")) {
+			if (0 == env_different_as_cur) {
 				env_different_as_cur = 1;
 			}
 			property_set("ubootenv.var.outputmode", "1366*768");
@@ -1564,19 +1585,19 @@ int reboot_sys_by_fbc_uart_panel_info()
 	//switch((fbc_edid_info[252]>>4)&0x0f)
 
 	// set lcd_reverse env
-	switch(panel_reverse) {
+	switch (panel_reverse) {
 	case 0x0:
-		if(0 != strcmp(lcd_reverse_prop_value, "0")) {
+		if (0 != strcmp(lcd_reverse_prop_value, "0")) {
 			LOGD("panel_reverse changed to 0\n");
-			if(0 == env_different_as_cur) {
+			if (0 == env_different_as_cur) {
 				env_different_as_cur = 1;
 			}
 			property_set("ubootenv.var.lcd_reverse", "0");
 		}
 		break;
 	case 0x1:
-		if(0 != strcmp(lcd_reverse_prop_value, "1")) {
-			if(0 == env_different_as_cur) {
+		if (0 != strcmp(lcd_reverse_prop_value, "1")) {
+			if (0 == env_different_as_cur) {
 				env_different_as_cur = 1;
 			}
 			property_set("ubootenv.var.lcd_reverse", "1");
@@ -1587,7 +1608,7 @@ int reboot_sys_by_fbc_uart_panel_info()
 	}
 
 	ret = -1;
-	if(1 == env_different_as_cur) {
+	if (1 == env_different_as_cur) {
 		LOGW("env change , reboot system\n");
 		system("reboot");
 	}
@@ -1636,17 +1657,7 @@ static pid_t pidof(const char *name)
 	return -1;
 }
 
-int GetPlatformHaveFBCFlag()
-{
-	const char *config_value;
 
-	config_value = config_get_str("TV", "platform.havefbc", "true");
-	if (strcmp(config_value, "true") == 0) {
-		return 1;
-	}
-
-	return 0;
-}
 
 int GetPlatformHaveDDFlag()
 {
@@ -1700,7 +1711,7 @@ unsigned int CalCRC32(unsigned int crc, const unsigned char *ptr, unsigned int b
 											  0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c, 0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c
 											};
 	unsigned int crcu32 = crc;
-	if(buf_len < 0)
+	if (buf_len < 0)
 		return 0;
 	if (!ptr) return 0;
 	crcu32 = ~crcu32;
@@ -1760,14 +1771,14 @@ static int check_projectinfo_data_valid(char *data_str, int chksum_head_len, int
 static int gFBCPrjInfoRDPass = 0;
 static char gFBCPrjInfoBuf[1024] = {0};
 
-static int GetProjectInfoOriData(char data_str[])
+static int GetProjectInfoOriData(char data_str[], CFbcCommunication *fbcIns)
 {
 	int tmp_val = 0;
 	int src_type = GetPlatformProjectInfoSrc();
 
 	if (src_type == 0) {
 		memset(data_str, '\0', sizeof(data_str));
-		property_get("ubootenv.var.project_info", data_str, "null");
+		getBootEnv("ubootenv.var.project_info", data_str, "null");
 		if (strcmp(data_str, "null") == 0) {
 			LOGE("%s, get project info data error!!!\n", __FUNCTION__);
 			return -1;
@@ -1787,7 +1798,6 @@ static int GetProjectInfoOriData(char data_str[])
 		char build_name[64];
 		char tmp_buf[512] = {0};
 
-		CFbcCommunication *fbcIns = GetSingletonFBC();
 		if (fbcIns != NULL) {
 			if (gFBCPrjInfoRDPass == 0) {
 				memset((void *)gFBCPrjInfoBuf, 0, sizeof(gFBCPrjInfoBuf));
@@ -1855,7 +1865,42 @@ static int GetProjectInfoOriData(char data_str[])
 	return -1;
 }
 
-int GetProjectInfo(project_info_t *proj_info_ptr)
+static int handle_prj_info_by_ver(int ver, int item_ind, char *item_str, project_info_t *proj_info_ptr)
+{
+	if (ver == 1) {
+		if (item_ind == 0) {
+			strncpy(proj_info_ptr->version, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		} else if (item_ind == 1) {
+			strncpy(proj_info_ptr->panel_type, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		} else if (item_ind == 2) {
+			strncpy(proj_info_ptr->panel_outputmode, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		} else if (item_ind == 3) {
+			strncpy(proj_info_ptr->panel_rev, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		} else if (item_ind == 4) {
+			strncpy(proj_info_ptr->panel_name, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		} else if (item_ind == 5) {
+			strncpy(proj_info_ptr->amp_curve_name, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		}
+	} else {
+		if (item_ind == 0) {
+			strncpy(proj_info_ptr->version, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		} else if (item_ind == 1) {
+			strncpy(proj_info_ptr->panel_type, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		} else if (item_ind == 2) {
+			strncpy(proj_info_ptr->panel_name, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		}  else if (item_ind == 3) {
+			strncpy(proj_info_ptr->panel_outputmode, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		} else if (item_ind == 4) {
+			strncpy(proj_info_ptr->panel_rev, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		}else if (item_ind == 5) {
+			strncpy(proj_info_ptr->amp_curve_name, item_str, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
+		}
+	}
+
+	return 0;
+}
+
+int GetProjectInfo(project_info_t *proj_info_ptr, CFbcCommunication *fbcIns)
 {
 	int i = 0, tmp_ret = 0, tmp_val = 0, tmp_len = 0;
 	int item_cnt = 0, handle_prj_info_data_flag = 0;
@@ -1864,7 +1909,7 @@ int GetProjectInfo(project_info_t *proj_info_ptr)
 	char tmp_buf[1024] = { 0 };
 	char data_str[1024] = { 0 };
 
-	if (GetProjectInfoOriData(data_str) < 0) {
+	if (GetProjectInfoOriData(data_str, fbcIns) < 0) {
 		return -1;
 	}
 
@@ -1883,30 +1928,92 @@ int GetProjectInfo(project_info_t *proj_info_ptr)
 		item_cnt = 0;
 		memset((void *)tmp_buf, 0, sizeof(tmp_buf));
 		strncpy(tmp_buf, data_str + CC_HEAD_CHKSUM_LEN, sizeof(tmp_buf) - 1);
-		if (handle_prj_info_data_flag == 1) {
 			token = strtok(tmp_buf, strDelimit);
 			while (token != NULL) {
-				if (item_cnt == 0) {
-					strncpy(proj_info_ptr->version, token, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
-				} else if (item_cnt == 1) {
-					strncpy(proj_info_ptr->panel_type, token, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
-				} else if (item_cnt == 2) {
-					strncpy(proj_info_ptr->panel_outputmode, token, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
-				} else if (item_cnt == 3) {
-					strncpy(proj_info_ptr->panel_rev, token, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
-				} else if (item_cnt == 4) {
-					strncpy(proj_info_ptr->panel_name, token, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
-				} else if (item_cnt == 5) {
-					strncpy(proj_info_ptr->amp_curve_name, token, CC_PROJECT_INFO_ITEM_MAX_LEN - 1);
-				}
+				handle_prj_info_by_ver(handle_prj_info_data_flag, item_cnt, token, proj_info_ptr);
 
 				token = strtok(NULL, strDelimit);
 				item_cnt += 1;
 			}
-		}
 
 		return 0;
 	}
 
 	return -1;
 }
+
+#if ANDROID_PLATFORM_SDK_VERSION == 19
+int getBootEnv(const char* key, char* value, char* def_val) {
+    return property_get(key, value, def_val);
+}
+
+void setBootEnv(const char* key, const char* value) {
+    return property_set(key, value);
+}
+#endif
+
+#if ANDROID_PLATFORM_SDK_VERSION >= 21
+
+#include <binder/IServiceManager.h>
+#include <utils/threads.h>
+#include <systemcontrol/ISystemControlService.h>
+
+class DeathNotifier: public IBinder::DeathRecipient {
+    public:
+        DeathNotifier() {
+        }
+
+        void binderDied(const wp<IBinder>& who) {
+            ALOGW("system_control died!");
+        }
+};
+
+static sp<ISystemControlService> amSystemControlService;
+static sp<DeathNotifier> amDeathNotifier;
+static Mutex            amLock;
+
+static const sp<ISystemControlService>& getSystemControlService() {
+    Mutex::Autolock _l(amLock);
+    if (amSystemControlService.get() == 0) {
+        sp<IServiceManager> sm = defaultServiceManager();
+
+        sp<IBinder> binder;
+        do {
+            binder = sm->getService(String16("system_control"));
+            if (binder != 0)
+                break;
+            ALOGW("SystemControlService not published, waiting...");
+            usleep(500000); // 0.5 s
+        } while(true);
+        if (amDeathNotifier == NULL) {
+            amDeathNotifier = new DeathNotifier();
+        }
+        binder->linkToDeath(amDeathNotifier);
+        amSystemControlService = interface_cast<ISystemControlService>(binder);
+    }
+    ALOGE_IF(amSystemControlService==0, "no System Control Service!?");
+
+    return amSystemControlService;
+}
+
+int getBootEnv(const char* key, char* value, char* def_val) {
+    const sp<ISystemControlService>& sws = getSystemControlService();
+    if (sws != 0) {
+        String16 v;
+        if (sws->getBootEnv(String16(key), v)) {
+            strcpy(value, String8(v).string());
+            return 0;
+        }
+    }
+
+    strcpy(value, def_val);
+    return -1;
+}
+
+void setBootEnv(const char* key, const char* value) {
+    const sp<ISystemControlService>& sws = getSystemControlService();
+    if (sws != 0) {
+        sws->setBootEnv(String16(key), String16(value));
+    }
+}
+#endif

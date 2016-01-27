@@ -20,7 +20,7 @@ public:
 	{
 		Parcel data, reply;
 		data.writeInterfaceToken(ITvService::getInterfaceDescriptor());
-		data.writeStrongBinder(tvClient->asBinder());
+		data.writeStrongBinder(IInterface::asBinder(tvClient));
 		remote()->transact(BnTvService::CONNECT, data, &reply);
 		return interface_cast<ITv>(reply.readStrongBinder());
 	}
@@ -33,13 +33,13 @@ IMPLEMENT_META_INTERFACE(TvService, "android.amlogic.ITvService");
 status_t BnTvService::onTransact(
 	uint32_t code, const Parcel &data, Parcel *reply, uint32_t flags)
 {
-	switch(code) {
+	switch (code) {
 	case CONNECT: {
 		CHECK_INTERFACE(ITvService, data, reply);
 		sp<ITvClient> tvClient = interface_cast<ITvClient>(data.readStrongBinder());
 		sp<ITv> tv = connect(tvClient);
 		ALOGD("BnTvService::onTransact(　sp<ITv> tv = connect(tvClient);");
-		reply->writeStrongBinder(tv->asBinder());
+		reply->writeStrongBinder(IInterface::asBinder(tv));
 		return NO_ERROR;
 	}
 	break;

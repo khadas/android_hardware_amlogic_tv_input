@@ -20,6 +20,7 @@
 #include "../tvsetting/CTvSetting.h"
 #include "../tvutils/tvutils.h"
 #include "../tvconfig/tvconfig.h"
+#include "CFbcCommunication.h"
 
 
 #ifdef LOG_TAG
@@ -460,7 +461,7 @@ int CTvin::VDIN_GetSignalInfo ( struct tvin_info_s *SignalInfo )
 
 	if ( rt < 0 ) {
 		LOGW ( "Vdin get signal info, error(%s), ret = %d.\n", strerror ( errno ), rt );
-		system("reboot");
+		//system("reboot");
 	}
 
 	return rt;
@@ -531,20 +532,14 @@ int CTvin::VDIN_GetDisplayVFreq (void)
 	memset(buf, 0, sizeof(buf));
 	read(fd, buf, sizeof(buf));
 	close(fd);
-	if(strncmp("4k2k50hz420", buf, 11) == 0) {
-		LOGD("VDIN_GetDisplayVFreq (%s)----1.\n", buf);
+	LOGD( "s%, VDIN_GetDisplayVFreq is %s\n", __FUNCTION__, buf);
+	if (strstr(buf, "50hz") != NULL) {
 		return 50;
-	} else if (strncmp("4k2k60hz420", buf, 11) == 0) {
-		LOGD("VDIN_GetDisplayVFreq (%s)----2.\n", buf);
+	} else if (strstr(buf, "60hz") != 0) {
 		return 60;
-	} else if (strncmp("1080p", buf, 5) == 0) {
-		LOGD("VDIN_GetDisplayVFreq (%s)----3.\n", buf);
-		return 60;
-	} else if (strncmp("4k2k30hz", buf, 8) == 0) {
-		LOGD("VDIN_GetDisplayVFreq (%s)----4.\n", buf);
-		return 30;
+	} else {
+		return 50;
 	}
-	return 50;
 }
 
 int CTvin::VDIN_SetDisplayVFreq ( int freq, int display_resolution , bool isFbc)
@@ -552,6 +547,17 @@ int CTvin::VDIN_SetDisplayVFreq ( int freq, int display_resolution , bool isFbc)
 	FILE *fp = NULL;
 	const char *config_value = NULL;
 	static int display_mode_type = -1;
+	CFbcCommunication *pFBC = NULL;
+	static int last_freq = 50;
+
+	last_freq = VDIN_GetDisplayVFreq();
+	if (last_freq == freq) {
+		LOGD ( "%s, same freq, last_freq = %d, freq = %d.", __FUNCTION__, last_freq, freq);
+		return 0;
+	} else {
+		LOGD ( "%s, from last_freq[%d[ to new_freq[%d].", __FUNCTION__, last_freq, freq);
+		last_freq = freq;
+	}
 
 	if (display_mode_type == -1) {
 		config_value = config_get_str ( "TV", "tvin.display.mode.type", "null" );
@@ -571,6 +577,14 @@ int CTvin::VDIN_SetDisplayVFreq ( int freq, int display_resolution , bool isFbc)
 		return -1;
 	}
 
+	if ( isFbc ) {
+		pFBC = GetSingletonFBC();
+		if (pFBC != NULL) {
+			pFBC->cfbc_Set_VMute (COMM_DEV_SERIAL, 2);
+			usleep ( 300000 );
+		}
+	}
+
 	switch ( display_resolution ) {
 	case VPP_DISPLAY_RESOLUTION_1366X768:
 		if ( freq == 50 ) {
@@ -581,16 +595,16 @@ int CTvin::VDIN_SetDisplayVFreq ( int freq, int display_resolution , bool isFbc)
 		break;
 	case VPP_DISPLAY_RESOLUTION_3840X2160:
 		if ( freq == 50 ) {
-			if(isFbc) {
-				fprintf ( fp, "%s", "4k2k50hz420" );
+			if (isFbc) {
+				fprintf ( fp, "%s", "2160p50hz420" );
 			} else {
-				fprintf ( fp, "%s", "4k2k50hz" );
+				fprintf ( fp, "%s", "2160p50hz" );
 			}
 		} else {
-			if(isFbc) {
-				fprintf ( fp, "%s", "4k2k60hz420" );
+			if (isFbc) {
+				fprintf ( fp, "%s", "2160p60hz420" );
 			} else {
-				fprintf ( fp, "%s", "4k2k60hz" );
+				fprintf ( fp, "%s", "2160p60hz" );
 			}
 		}
 		break;
@@ -599,7 +613,7 @@ int CTvin::VDIN_SetDisplayVFreq ( int freq, int display_resolution , bool isFbc)
 		if ( freq == 50 ) {
 			fprintf ( fp, "%s", "1080p50hz" );
 		} else {
-			fprintf ( fp, "%s", "1080p" );
+			fprintf ( fp, "%s", "1080p60hz" );
 		}
 		break;
 	}
@@ -655,6 +669,27 @@ int CTvin::VDIN_Set2Dto3D ( int on_off )
 	VdinParam.flag |= ( on_off ) ? ( TVIN_PARM_FLAG_2D_TO_3D ) : ( 0 );
 	return VDIN_SetVdinParam ( &VdinParam );
 }
+
+int CTvin::VDIN_Get_avg_luma(void)
+{
+	unsigned int lum_sum,pixel_sum,luma_avg;
+	struct tvin_parm_s vdinParam;
+
+	if ( 0 == VDIN_GetVdinParam( &vdinParam )) {
+		lum_sum = vdinParam.luma_sum;
+		pixel_sum = vdinParam.pixel_sum*2;
+		if (pixel_sum != 0 && m_is_decoder_start) {
+			luma_avg = lum_sum/pixel_sum;
+		} else {
+			luma_avg = 116;
+		}
+	} else {
+		return -1;
+	}
+	LOGD ( "VDIN_get_avg_lut lum_sum =%d,pixel_sum=%d,lut_avg=%d\n", lum_sum,pixel_sum,luma_avg);
+	return luma_avg;
+}
+
 int CTvin::VDIN_GetHistgram ( int *hisgram )
 {
 	int i = 0;
@@ -1119,15 +1154,23 @@ int CTvin::set3D_FL_Frame(int value)
 
 int CTvin::setLatchFlag(int value)
 {
+	int fd = -1;
+	int nodeVal = 0;
+	char s[10];
 	FILE *fp = NULL;
+	memset(s, 0, sizeof(s));
+	read(fd, s, sizeof(s));
+	close(fd);
+	nodeVal = atoi(s);
 	fp = fopen ( "/sys/module/am_vecm/parameters/vecm_latch_flag", "w" );
 	if ( fp == NULL ) {
 		LOGW ( "/sys/module/am_vecm/parameters/vecm_latch_flag error(%s)!\n", strerror ( errno ) );
 		return -1;
 	}
-	fprintf ( fp, "%d", value );
+	fprintf ( fp, "%d", value | nodeVal);
 	fclose ( fp );
 	fp = NULL;
+	LOGD ( "read vecm_latch_flag = (%s)====(0x%x), then set vecm_latch_flag | 0x%x = 0x%x.\n", s, nodeVal, value, value | nodeVal);
 	return 0;
 }
 
@@ -1152,15 +1195,15 @@ int CTvin::VDIN_SetDIProg_Proc_Config ( int value )
 	return 0;
 }
 #if(1)
-int CTvin::VDIN_SetDISip_Top_Bot ( int value )
+int CTvin::VDIN_SetDIInput2Pre ( int value )
 {
 	FILE *fp = NULL;
 
 
-	fp = fopen ( "/sys/module/di/parameters/skip_top_bot", "w" );
+	fp = fopen ( "/sys/module/di/parameters/input2pre", "w" );
 
 	if ( fp == NULL ) {
-		LOGW ( "Open /sys/module/di/parameters/skip_top_bot error(%s)!\n", strerror ( errno ) );
+		LOGW ( "Open /sys/module/di/parameters/input2pre error(%s)!\n", strerror ( errno ) );
 		return -1;
 	}
 
@@ -1812,7 +1855,7 @@ int CTvin::get_frame_average ( enum adc_cal_type_e calType, struct adc_cal_s *me
 		mem_data->cr_black /= CR_BLACK_SIZE;
 
 		/*
-		 for(j=COMP_BLACK_VS; j<=COMP_BLACK_VE; j++) {
+		 for (j=COMP_BLACK_VS; j<=COMP_BLACK_VE; j++) {
 		 for (i=COMP_BLACK_HS; i<=COMP_BLACK_HE;) {
 		 //mem_data->cb_black += get_mem_data(dp, ((COMP_BUF_WID*j+i)*YCBCR422+CB422_POS));
 		 mem_data->cr_black += get_mem_data(dp, ((COMP_BUF_WID*j+i)*YCBCR422+CR422_POS));
@@ -2611,6 +2654,40 @@ int CTvin::isVgaFmtInHdmi ( tvin_sig_fmt_t fmt )
 	return -1;
 }
 
+int CTvin::isSDFmtInHdmi ( tvin_sig_fmt_t fmt )
+{
+	if ( fmt == TVIN_SIG_FMT_HDMI_640X480P_60HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_720X480P_60HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_1440X480I_60HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_1440X240P_60HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_2880X480I_60HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_2880X240P_60HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_1440X480P_60HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_720X576P_50HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_1440X576I_50HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_1440X288P_50HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_2880X576I_50HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_2880X288P_50HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_1440X576P_50HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_2880X480P_60HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_2880X576P_60HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_720X576P_100HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_1440X576I_100HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_720X480P_120HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_1440X480I_120HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_720X576P_200HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_1440X576I_200HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_720X480P_240HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_1440X480I_240HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_800X600_00HZ
+			|| fmt == TVIN_SIG_FMT_HDMI_720X400_00HZ ) {
+		LOGD ( "%s, SD format.", "TV" );
+		return true;
+	} else {
+		LOGD ( "%s, HD format.", "TV" );
+		return false;
+	}
+}
 
 bool CTvin::Tvin_is50HzFrameRateFmt ( tvin_sig_fmt_t fmt )
 {
@@ -3037,6 +3114,7 @@ CTvin::CTvinSigDetect::CTvinSigDetect ( CTvin *pTvin )
 	mpObserver = NULL;
 	mpTvin = pTvin;
 	mKeepNosigTime = 0;
+	mResumeLaterTime = 0;
 	m_is_nosig_checktimes_once_valid = false;
 }
 
@@ -3045,7 +3123,7 @@ CTvin::CTvinSigDetect::~CTvinSigDetect()
 
 }
 
-int CTvin::CTvinSigDetect::startDetect()
+int CTvin::CTvinSigDetect::startDetect(bool bPause)
 {
 	LOGD ( "startDetect()" );
 
@@ -3061,7 +3139,7 @@ int CTvin::CTvinSigDetect::startDetect()
 	m_pre_sig_info = m_cur_sig_info;
 
 	//
-	m_request_pause_detect = false;
+	m_request_pause_detect = bPause;
 	this->run();
 	return mDetectState;
 }
@@ -3075,6 +3153,7 @@ int CTvin::CTvinSigDetect::initSigState()
 	m_pre_sig_info = m_cur_sig_info;
 	mKeepNosigTime = 0;
 	m_is_nosig_checktimes_once_valid = false;
+	mResumeLaterTime = 0;
 	return 0;
 }
 
@@ -3107,10 +3186,11 @@ int CTvin::CTvinSigDetect::requestAndWaitPauseDetect()
 	return 0;
 }
 
-int CTvin::CTvinSigDetect::resumeDetect()
+int CTvin::CTvinSigDetect::resumeDetect(int later)//ms
 {
 	CMutex::Autolock _l ( mLock );
 	LOGD ( "resumeDetect()" );
+	mResumeLaterTime = later;
 	m_request_pause_detect = false;
 	mDetectPauseCondition.signal();
 	return 0;
@@ -3128,23 +3208,23 @@ int CTvin::CTvinSigDetect::Tv_TvinSigDetect ( int &sleeptime )
 	mpTvin->VDIN_GetSignalInfo ( &m_cur_sig_info ); //get info
 	//set no sig check times
 	static long long sNosigKeepTime = 0;
-	//LOGD("stime=%d status=%d, sNosigKeepTime = %d, mKeepNosigTime = %d", sleeptime, m_cur_sig_info.status, sNosigKeepTime, mKeepNosigTime);
-	if(m_cur_sig_info.status == TVIN_SIG_STATUS_NOSIG  || m_cur_sig_info.status == TVIN_SIG_STATUS_NULL) {
+	//LOGD("stime=%d status=%d, fmt = %d sNosigKeepTime = %d, mKeepNosigTime = %d", sleeptime, m_cur_sig_info.status,m_cur_sig_info.fmt, sNosigKeepTime, mKeepNosigTime);
+	if ( m_cur_sig_info.status == TVIN_SIG_STATUS_NOSIG  || m_cur_sig_info.status == TVIN_SIG_STATUS_NULL ) {
 		sNosigKeepTime += sleeptime;
-		if(sNosigKeepTime > mKeepNosigTime) { //real no sig
+		if ( sNosigKeepTime > mKeepNosigTime ) { //real no sig
 			//cur is no sig
-			if(m_is_nosig_checktimes_once_valid) { //just once change,is nosig, and default it
+			if ( m_is_nosig_checktimes_once_valid ) { //just once change,is nosig, and default it
 				m_is_nosig_checktimes_once_valid = false;
 				mKeepNosigTime = 0;
 			}
 			//
-		} else { //not
+		} else {//not
 			m_cur_sig_info.status = m_pre_sig_info.status;
 		}
 	} else {
 		sNosigKeepTime = 0;
 		//
-		if(m_is_nosig_checktimes_once_valid) { //just once change,not nosig,default is
+		if ( m_is_nosig_checktimes_once_valid ) { //just once change,not nosig,default is
 			m_is_nosig_checktimes_once_valid = false;
 			mKeepNosigTime = 0;
 		}
@@ -3157,7 +3237,7 @@ int CTvin::CTvinSigDetect::Tv_TvinSigDetect ( int &sleeptime )
 
 		if ( m_cur_sig_info.status == TVIN_SIG_STATUS_STABLE ) { // to stable
 			//
-			sleeptime = 200;
+			sleeptime = 20;
 			mpObserver->onSigToStable();
 		} else if ( m_pre_sig_info.status == TVIN_SIG_STATUS_STABLE && m_cur_sig_info.status == TVIN_SIG_STATUS_UNSTABLE ) { //stable to unstable
 			//
@@ -3199,6 +3279,12 @@ int CTvin::CTvinSigDetect::Tv_TvinSigDetect ( int &sleeptime )
 			//
 			sleeptime = 20;//sleeptime = 500;
 			mpObserver->onSigStillStable();
+			if ( m_cur_sig_info.trans_fmt != m_pre_sig_info.trans_fmt ) {
+				mpObserver->onStableTransFmtChange();
+			}
+			if (m_cur_sig_info.fmt != m_pre_sig_info.fmt) {
+				mpObserver->onStableSigFmtChange();
+			}
 			break;
 
 		case TVIN_SIG_STATUS_NOTSUP:
@@ -3251,16 +3337,24 @@ bool  CTvin::CTvinSigDetect::threadLoop()
 
 	while ( !exitPending() ) { //requietexit() or requietexitWait() not call
 		while ( m_request_pause_detect ) {
-			mRequestPauseCondition.broadcast();
 			mLock.lock();
+			mRequestPauseCondition.broadcast();
 			mDetectState = STATE_PAUSE;
 			mDetectPauseCondition.wait ( mLock ); //first unlock,when return,lock again,so need,call unlock
 			mDetectState = STATE_RUNNING;
 			mLock.unlock();
+			//
+			while (!m_request_pause_detect && mResumeLaterTime > 0) {
+				//LOGD("mResumeLaterTime = %d", mResumeLaterTime);
+				usleep(10 * 1000);
+				mResumeLaterTime -= 10;
+			}
 		}
 
 		//
-		mpObserver->onLoop();
+		mResumeLaterTime = 0;
+		//
+		mpObserver->onSigDetectLoop();
 		Tv_TvinSigDetect ( sleeptime );
 		//可以优化
 		if ( !m_request_pause_detect ) {
@@ -3278,15 +3372,46 @@ bool  CTvin::CTvinSigDetect::threadLoop()
 v4l2_std_id CTvin::CvbsFtmToV4l2ColorStd(tvin_sig_fmt_t fmt)
 {
 	v4l2_std_id v4l2_std;
-	if(fmt == TVIN_SIG_FMT_CVBS_NTSC_M ||  fmt == TVIN_SIG_FMT_CVBS_NTSC_443) {
+	if (fmt == TVIN_SIG_FMT_CVBS_NTSC_M ||  fmt == TVIN_SIG_FMT_CVBS_NTSC_443) {
 		v4l2_std = V4L2_COLOR_STD_NTSC;
-	} else if(fmt >= TVIN_SIG_FMT_CVBS_PAL_I && fmt <= TVIN_SIG_FMT_CVBS_PAL_CN) {
+	} else if (fmt >= TVIN_SIG_FMT_CVBS_PAL_I && fmt <= TVIN_SIG_FMT_CVBS_PAL_CN) {
 		v4l2_std = V4L2_COLOR_STD_PAL;
-	} else if(fmt == TVIN_SIG_FMT_CVBS_SECAM) {
+	} else if (fmt == TVIN_SIG_FMT_CVBS_SECAM) {
 		v4l2_std = V4L2_COLOR_STD_SECAM;
 	} else {
 		v4l2_std = V4L2_COLOR_STD_PAL;
 	}
 	return v4l2_std;
+}
+
+
+int CTvin::CvbsFtmToColorStdEnum(tvin_sig_fmt_t fmt)
+{
+	v4l2_std_id v4l2_std;
+	if (fmt == TVIN_SIG_FMT_CVBS_NTSC_M ||  fmt == TVIN_SIG_FMT_CVBS_NTSC_443) {
+		v4l2_std = CC_ATV_VIDEO_STD_NTSC;
+	} else if (fmt >= TVIN_SIG_FMT_CVBS_PAL_I && fmt <= TVIN_SIG_FMT_CVBS_PAL_CN) {
+		v4l2_std = CC_ATV_VIDEO_STD_PAL;
+	} else if (fmt == TVIN_SIG_FMT_CVBS_SECAM) {
+		v4l2_std = CC_ATV_VIDEO_STD_SECAM;
+	} else {
+		v4l2_std = CC_ATV_VIDEO_STD_PAL;
+	}
+	return v4l2_std;
+}
+
+int CTvin::GetITContent()
+{
+	FILE *fp = NULL;
+	int value = 0;
+	fp = fopen("/sys/module/tvin_hdmirx/parameters/it_content", "r");
+	if (fp == NULL) {
+		LOGE ( "Open /sys/module/tvin_hdmirx/parameters/it_content error(%s)!\n", strerror ( errno ) );
+		return -1;
+	}
+	fscanf(fp, "%d", &value );
+	fclose(fp);
+	fp = NULL;
+	return value;
 }
 //**************************************************************************

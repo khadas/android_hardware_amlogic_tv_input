@@ -50,7 +50,7 @@ int CTvBooking::selectByID(int id, CTvBooking &CtvBook)
 
 	sql = String8("select * from booking_table where booking_table.db_evt_id = ") + String8::format("%d", id);
 	CTvDatabase::GetTvDb()->select(sql.string(), c);
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		CtvBook.InitFromCursor(c);
 	} else {
 		c.close();
@@ -70,10 +70,10 @@ int CTvBooking::getBookedEventList(Vector<sp<CTvBooking> > &vBv)
 	CTvDatabase::Cursor c;
 	int ret = CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		do {
 			vBv.add(new CTvBooking(c));
-		} while(c.moveToNext());
+		} while (c.moveToNext());
 
 
 	} else {
@@ -130,7 +130,7 @@ int CTvBooking::bookEvent(int evtId, bool bBookFlag)
 
 	CTvDatabase::GetTvDb()->exeSql(cmd.string());
 
-	if(true == bBookFlag) {
+	if (true == bBookFlag) {
 		CTvEvent evt;
 		CTvEvent::selectByID(evtId, evt);
 

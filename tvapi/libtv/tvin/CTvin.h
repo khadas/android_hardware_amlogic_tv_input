@@ -98,7 +98,7 @@ typedef enum tvin_port_e {
 	TVIN_PORT_CVBS0   = 0x00001000,
 	TVIN_PORT_CVBS1,
 	TVIN_PORT_CVBS2,
-	TVIN_PORT_CVBS3,	//as atv demod to tvafe
+	TVIN_PORT_CVBS3,    //as atv demod to tvafe
 	TVIN_PORT_CVBS4,
 	TVIN_PORT_CVBS5,
 	TVIN_PORT_CVBS6,
@@ -463,7 +463,7 @@ typedef struct tvin_info_s {
 	enum tvin_sig_fmt_e    fmt;
 	volatile enum tvin_sig_status_e status;
 	enum tvin_color_fmt_e  cfmt;
-	unsigned int		   fps;
+	unsigned int           fps;
 	unsigned int           reserved;
 } tvin_info_t;
 
@@ -592,59 +592,59 @@ typedef enum tvafe_cvbs_video_e {
 typedef enum tvafe_adc_pin_e {
 	TVAFE_ADC_PIN_NULL = 0,
 #if (MESON_CPU_TYPE == MESON_CPU_TYPE_MESONG9TV)
-	TVAFE_CVBS_IN0		= 1,
-	TVAFE_CVBS_IN1		= 2,
-	TVAFE_CVBS_IN2		= 3,
-	TVAFE_CVBS_IN3		= 4,//as atvdemod to tvafe
+	TVAFE_CVBS_IN0      = 1,
+	TVAFE_CVBS_IN1      = 2,
+	TVAFE_CVBS_IN2      = 3,
+	TVAFE_CVBS_IN3      = 4,//as atvdemod to tvafe
 #else
-	TVAFE_ADC_PIN_A_PGA_0	= 1,
-	TVAFE_ADC_PIN_A_PGA_1	= 2,
-	TVAFE_ADC_PIN_A_PGA_2	= 3,
-	TVAFE_ADC_PIN_A_PGA_3	= 4,
-	TVAFE_ADC_PIN_A_PGA_4	= 5,
-	TVAFE_ADC_PIN_A_PGA_5	= 6,
-	TVAFE_ADC_PIN_A_PGA_6	= 7,
-	TVAFE_ADC_PIN_A_PGA_7	= 8,
-	TVAFE_ADC_PIN_A_0	= 9,
-	TVAFE_ADC_PIN_A_1	= 10,
-	TVAFE_ADC_PIN_A_2	= 11,
-	TVAFE_ADC_PIN_A_3	= 12,
-	TVAFE_ADC_PIN_A_4	= 13,
-	TVAFE_ADC_PIN_A_5	= 14,
-	TVAFE_ADC_PIN_A_6	= 15,
-	TVAFE_ADC_PIN_A_7	= 16,
-	TVAFE_ADC_PIN_B_0	= 17,
-	TVAFE_ADC_PIN_B_1	= 18,
-	TVAFE_ADC_PIN_B_2	= 19,
-	TVAFE_ADC_PIN_B_3	= 20,
-	TVAFE_ADC_PIN_B_4	= 21,
-	TVAFE_ADC_PIN_B_5	= 22,
-	TVAFE_ADC_PIN_B_6	= 23,
-	TVAFE_ADC_PIN_B_7	= 24,
-	TVAFE_ADC_PIN_C_0	= 25,
-	TVAFE_ADC_PIN_C_1	= 26,
-	TVAFE_ADC_PIN_C_2	= 27,
-	TVAFE_ADC_PIN_C_3	= 28,
-	TVAFE_ADC_PIN_C_4	= 29,
-	TVAFE_ADC_PIN_C_5	= 30,
-	TVAFE_ADC_PIN_C_6	= 31,
-	TVAFE_ADC_PIN_C_7	= 32,
-	TVAFE_ADC_PIN_D_0	= 33,
-	TVAFE_ADC_PIN_D_1	= 34,
-	TVAFE_ADC_PIN_D_2	= 35,
-	TVAFE_ADC_PIN_D_3	= 36,
-	TVAFE_ADC_PIN_D_4	= 37,
-	TVAFE_ADC_PIN_D_5	= 38,
-	TVAFE_ADC_PIN_D_6	= 39,
-	TVAFE_ADC_PIN_D_7	= 40,
-	TVAFE_ADC_PIN_SOG_0	= 41,
-	TVAFE_ADC_PIN_SOG_1	= 42,
-	TVAFE_ADC_PIN_SOG_2	= 43,
-	TVAFE_ADC_PIN_SOG_3	= 44,
-	TVAFE_ADC_PIN_SOG_4	= 45,
-	TVAFE_ADC_PIN_SOG_5	= 46,
-	TVAFE_ADC_PIN_SOG_6	= 47,
-	TVAFE_ADC_PIN_SOG_7	= 48,
+	TVAFE_ADC_PIN_A_PGA_0   = 1,
+	TVAFE_ADC_PIN_A_PGA_1   = 2,
+	TVAFE_ADC_PIN_A_PGA_2   = 3,
+	TVAFE_ADC_PIN_A_PGA_3   = 4,
+	TVAFE_ADC_PIN_A_PGA_4   = 5,
+	TVAFE_ADC_PIN_A_PGA_5   = 6,
+	TVAFE_ADC_PIN_A_PGA_6   = 7,
+	TVAFE_ADC_PIN_A_PGA_7   = 8,
+	TVAFE_ADC_PIN_A_0   = 9,
+	TVAFE_ADC_PIN_A_1   = 10,
+	TVAFE_ADC_PIN_A_2   = 11,
+	TVAFE_ADC_PIN_A_3   = 12,
+	TVAFE_ADC_PIN_A_4   = 13,
+	TVAFE_ADC_PIN_A_5   = 14,
+	TVAFE_ADC_PIN_A_6   = 15,
+	TVAFE_ADC_PIN_A_7   = 16,
+	TVAFE_ADC_PIN_B_0   = 17,
+	TVAFE_ADC_PIN_B_1   = 18,
+	TVAFE_ADC_PIN_B_2   = 19,
+	TVAFE_ADC_PIN_B_3   = 20,
+	TVAFE_ADC_PIN_B_4   = 21,
+	TVAFE_ADC_PIN_B_5   = 22,
+	TVAFE_ADC_PIN_B_6   = 23,
+	TVAFE_ADC_PIN_B_7   = 24,
+	TVAFE_ADC_PIN_C_0   = 25,
+	TVAFE_ADC_PIN_C_1   = 26,
+	TVAFE_ADC_PIN_C_2   = 27,
+	TVAFE_ADC_PIN_C_3   = 28,
+	TVAFE_ADC_PIN_C_4   = 29,
+	TVAFE_ADC_PIN_C_5   = 30,
+	TVAFE_ADC_PIN_C_6   = 31,
+	TVAFE_ADC_PIN_C_7   = 32,
+	TVAFE_ADC_PIN_D_0   = 33,
+	TVAFE_ADC_PIN_D_1   = 34,
+	TVAFE_ADC_PIN_D_2   = 35,
+	TVAFE_ADC_PIN_D_3   = 36,
+	TVAFE_ADC_PIN_D_4   = 37,
+	TVAFE_ADC_PIN_D_5   = 38,
+	TVAFE_ADC_PIN_D_6   = 39,
+	TVAFE_ADC_PIN_D_7   = 40,
+	TVAFE_ADC_PIN_SOG_0 = 41,
+	TVAFE_ADC_PIN_SOG_1 = 42,
+	TVAFE_ADC_PIN_SOG_2 = 43,
+	TVAFE_ADC_PIN_SOG_3 = 44,
+	TVAFE_ADC_PIN_SOG_4 = 45,
+	TVAFE_ADC_PIN_SOG_5 = 46,
+	TVAFE_ADC_PIN_SOG_6 = 47,
+	TVAFE_ADC_PIN_SOG_7 = 48,
 #endif
 	TVAFE_ADC_PIN_MAX,
 } tvafe_adc_pin_t;
@@ -843,7 +843,7 @@ typedef struct tvafe_pin_mux_s {
 #define TVIN_IOC_G_AFE_CVBS_LOCK    _IOR(TVIN_IOC_MAGIC, 0x1a, enum tvafe_cvbs_video_e)
 #define TVIN_IOC_S_AFE_CVBS_STD     _IOW(TVIN_IOC_MAGIC, 0x1b, enum tvin_sig_fmt_e)
 #define TVIN_IOC_CALLMASTER_SET     _IOW(TVIN_IOC_MAGIC, 0x1c, enum tvin_port_e)
-#define TVIN_IOC_CALLMASTER_GET	    _IO( TVIN_IOC_MAGIC, 0x1d)
+#define TVIN_IOC_CALLMASTER_GET     _IO( TVIN_IOC_MAGIC, 0x1d)
 #define TVIN_IOC_S_AFE_ADC_COMP_CAL  _IOW(TVIN_IOC_MAGIC, 0x1e, struct tvafe_adc_comp_cal_s)
 #define TVIN_IOC_G_AFE_ADC_COMP_CAL  _IOR(TVIN_IOC_MAGIC, 0x1f, struct tvafe_adc_comp_cal_s)
 #define TVIN_IOC_LOAD_REG           _IOW(TVIN_IOC_MAGIC, 0x20, struct am_regs_s)
@@ -983,8 +983,8 @@ typedef enum tv_audio_in_source_type_e {
 #define CC_RESOLUTION_3840X2160_H     (2160)
 
 typedef enum tv_source_connect_detect_status_e {
-	CC_SOURCE_PLUG_OUT,
-	CC_SOURCE_PLUG_IN,
+	CC_SOURCE_PLUG_OUT = 0,
+	CC_SOURCE_PLUG_IN = 1,
 } tv_source_connect_detect_status_t;
 
 //HDMI rx cec
@@ -1079,7 +1079,7 @@ public:
 	int VDIN_Set2Dto3D ( int on_off );
 	int VDIN_Set3DCmd ( int cmd );
 
-
+	int VDIN_Get_avg_luma(void);
 	int VDIN_GetHistgram ( int *hisgram );
 	int VDIN_SetMVCViewMode ( int mode );
 	int VDIN_GetMVCViewMode ( void );
@@ -1101,7 +1101,7 @@ public:
 	int VDIN_SetDIBypass3D ( int enable );
 	int VDIN_SetDIBypassPost ( int enable );
 	int VDIN_SetDIProg_Proc_Config ( int value );
-	int VDIN_SetDISip_Top_Bot ( int value );
+	int VDIN_SetDIInput2Pre ( int value );
 	int VDIN_SetVdinFlag ( int flag );
 	int VDIN_EnableRDMA ( int enable );
 	int VDIN_GetHdmiHdcpKeyKsvInfo(struct _hdcp_ksv *msg);
@@ -1130,10 +1130,11 @@ public:
 	struct adc_cal_s get_n_frame_average ( enum adc_cal_type_e calType ) ;
 	int AFE_GetMemData ( int typeSel, struct adc_cal_s *mem_data );
 	int AFE_GetCVBSLockStatus ( enum tvafe_cvbs_video_e *cvbs_lock_status );
-	int AFE_SetCVBSStd ( unsigned int sig_fmt );
+	static int CvbsFtmToColorStdEnum(tvin_sig_fmt_t fmt);
 	int VDIN_GetPortConnect ( int port );
 	int VDIN_OpenHDMIPinMuxOn ( bool flag );
 	int TVAFE_EnablePlugInDetect ( bool flag );
+	int GetITContent();
 	/*******************************************extend funs*********************/
 	static tv_source_input_type_t Tvin_SourcePortToSourceInputType ( tvin_port_t source_port );
 	static tv_source_input_type_t Tvin_SourceInputToSourceInputType ( tv_source_input_t source_input );
@@ -1146,6 +1147,7 @@ public:
 	static tv_audio_in_source_type_t Tvin_GetAudioInSourceType ( tv_source_input_t source_input );
 	static tv_source_input_t Tvin_PortToSourceInput ( tvin_port_t port );
 	static int isVgaFmtInHdmi ( tvin_sig_fmt_t fmt );
+	static int isSDFmtInHdmi ( tvin_sig_fmt_t fmt );
 	static bool Tvin_is50HzFrameRateFmt ( tvin_sig_fmt_t fmt );
 	static bool Tvin_IsDeinterlaceFmt ( tvin_sig_fmt_t fmt );
 	static  v4l2_std_id CvbsFtmToV4l2ColorStd(tvin_sig_fmt_t fmt);
@@ -1156,10 +1158,10 @@ public:
 		static const int VDIN_NOSIG_DEFAULT_CHECK_TIMES = 1;
 		CTvinSigDetect ( CTvin *pTvin );
 		~CTvinSigDetect();
-		int startDetect();
+		int startDetect(bool bPause = true);
 		int stopDetect();
 		int pauseDetect();
-		int resumeDetect();
+		int resumeDetect(int later = 0);
 		int initSigState();
 		void setVdinNoSigCheckKeepTimes(int times, bool isOnce);//times is time, ms
 		int requestAndWaitPauseDetect();
@@ -1171,14 +1173,11 @@ public:
 		class ISigDetectObserver {
 		public:
 			ISigDetectObserver()
-			{
-			};
+			{};
 			virtual ~ISigDetectObserver()
-			{
-			};
+			{};
 			virtual void onSigToStable()
-			{
-			};
+			{};
 			virtual void onSigStableToUnstable() {};
 			virtual void onSigStableToUnSupport() {};
 			virtual void onSigStableToNoSig() {};
@@ -1196,7 +1195,7 @@ public:
 			virtual void onStableTransFmtChange() {};
 
 			virtual void onSigDetectEnter() {};
-			virtual void onLoop() {};
+			virtual void onSigDetectLoop() {};
 		};
 		void setObserver ( ISigDetectObserver *pOb )
 		{
@@ -1223,63 +1222,11 @@ public:
 			STATE_PAUSE
 		};
 		int mDetectState;
+		int mResumeLaterTime;
 		ISigDetectObserver *mpObserver;
 	};//
 
-	class CSourceConnectDetect: public CThread {
-	public:
-		CSourceConnectDetect(CTvin *pTvin);
-		~CSourceConnectDetect();
 
-		int startDetect();
-		int refreshDetectSources();
-		int refreshDetectAVInfo();
-		int GetSourceConnectStatus(int source_input);
-
-		class ISourceConnectObserver {
-		public:
-			ISourceConnectObserver() {};
-			virtual ~ISourceConnectObserver() {};
-			virtual void onSourceConnect(int source_type, int connect_status) {};
-		};
-		void setObserver ( ISourceConnectObserver *pOb )
-		{
-			mpObserver = pOb;
-		};
-	private:
-#define CC_AV_DETECT_METHOD_ADC_PLUG_IN     (0)
-#define CC_AV_DETECT_METHOD_ADC_PLUG_OUT    (1)
-#define CC_AV_DETECT_SAMPLE_DATA_MAX_LEN    (512)
-
-		bool threadLoop();
-
-		ISourceConnectObserver *mpObserver;
-		CTvin *mpTvin;
-
-		volatile int mSourceDetectSleepTime;
-
-		//AV detect variables
-		int mAVDetectMethod;
-		int mAVDetectPlugOutDutyCycle;
-		int mAVDetectPlugInDutyCycle;
-		int mAVDetectPlugOutADCThreshold;
-		int mAVDetectPlugInADCThreshold;
-		int mAVDetectSampleSize;
-		int mAV1DetectADCChan;
-		int mAV2DetectADCChan;
-		int mAV1CurSampleInd;
-		int mAV2CurSampleInd;
-		int mAV1SampleDataBuf[CC_AV_DETECT_SAMPLE_DATA_MAX_LEN];
-		int mAV2SampleDataBuf[CC_AV_DETECT_SAMPLE_DATA_MAX_LEN];
-
-		int mSourceDetectTable[SOURCE_MAX];
-		int mSourceDetectPreStatusBuf[SOURCE_MAX];
-		int mSourceDetectCurStatusBuf[SOURCE_MAX];
-
-		int DetectSources();
-		int DetectAVSource(int source_input);
-		int DetectHDMISource(int source_input);
-	};
 
 	class CHDMIRxCEC: public CThread {
 	public:

@@ -26,7 +26,7 @@
 #define AMSTREAM_IOC_PORT_INIT   _IO(AMSTREAM_IOC_MAGIC, 0x11)
 #define AMSTREAM_IOC_TRICKMODE   _IOW(AMSTREAM_IOC_MAGIC, 0x12, unsigned long)
 
-#define AMSTREAM_IOC_AUDIO_INFO	 _IOW(AMSTREAM_IOC_MAGIC, 0x13, unsigned long)
+#define AMSTREAM_IOC_AUDIO_INFO  _IOW(AMSTREAM_IOC_MAGIC, 0x13, unsigned long)
 #define AMSTREAM_IOC_TRICK_STAT  _IOR(AMSTREAM_IOC_MAGIC, 0x14, unsigned long)
 #define AMSTREAM_IOC_AUDIO_RESET _IO(AMSTREAM_IOC_MAGIC, 0x15)
 #define AMSTREAM_IOC_SID         _IOW(AMSTREAM_IOC_MAGIC, 0x16, int)
@@ -78,8 +78,8 @@
 #define  AMSTREAM_IOC_SET_3D_TYPE  _IOW(AMSTREAM_IOC_MAGIC, 0x3c, unsigned int)
 #define  AMSTREAM_IOC_GET_3D_TYPE  _IOW(AMSTREAM_IOC_MAGIC, 0x3d, unsigned int)
 
-#define AMSTREAM_IOC_SUB_NUM	_IOR(AMSTREAM_IOC_MAGIC, 0x50, unsigned long)
-#define AMSTREAM_IOC_SUB_INFO	_IOR(AMSTREAM_IOC_MAGIC, 0x51, unsigned long)
+#define AMSTREAM_IOC_SUB_NUM    _IOR(AMSTREAM_IOC_MAGIC, 0x50, unsigned long)
+#define AMSTREAM_IOC_SUB_INFO   _IOR(AMSTREAM_IOC_MAGIC, 0x51, unsigned long)
 #define AMSTREAM_IOC_GET_BLACKOUT_POLICY   _IOR(AMSTREAM_IOC_MAGIC, 0x52, unsigned long)
 #define AMSTREAM_IOC_SET_BLACKOUT_POLICY   _IOW(AMSTREAM_IOC_MAGIC, 0x53, unsigned long)
 #define AMSTREAM_IOC_GET_SCREEN_MODE _IOR(AMSTREAM_IOC_MAGIC, 0x58, int)
@@ -117,7 +117,7 @@
 #define TRICK_STAT_WAIT      0x00
 
 #define AUDIO_EXTRA_DATA_SIZE   (4096)
-#define MAX_SUB_NUM		32
+#define MAX_SUB_NUM     32
 /*
 enum VIDEO_DEC_TYPE
 {
@@ -208,10 +208,10 @@ struct subtitle_info {
 };
 
 struct codec_profile_t {
-	char *name;		// video codec short name
-	char *profile;	// Attributes,seperated by commas
+	char *name;     // video codec short name
+	char *profile;  // Attributes,seperated by commas
 };
-#define SUPPORT_VDEC_NUM	(8)
+#define SUPPORT_VDEC_NUM    (8)
 
 int vcodec_profile_register(const struct codec_profile_t *vdec_profile);
 int vcodec_profile_read(char *buf);

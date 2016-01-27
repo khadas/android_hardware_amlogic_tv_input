@@ -60,7 +60,7 @@ int CTvRegion::getChannelListByName(char *name, Vector<sp<CTvChannel> > &vcp)
 	int ofdmMode;
 	int channelNum = 0;
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		do {
 			col = c.getColumnIndex("db_id");
 			id = c.getInt(col);
@@ -80,7 +80,7 @@ int CTvRegion::getChannelListByName(char *name, Vector<sp<CTvChannel> > &vcp)
 			channelNum = c.getInt(col);
 			vcp.add(new CTvChannel(id, mode, frequency, bandwidth, modulation, symbolRate, ofdmMode, channelNum));
 			size++;
-		} while(c.moveToNext());
+		} while (c.moveToNext());
 	}
 	c.close();
 
@@ -110,7 +110,7 @@ int CTvRegion::getChannelListByNameAndFreqRange(char *name, int beginFreq, int e
 	int channelNum = 0;
 
 	do {
-		if(c.moveToFirst()) {
+		if (c.moveToFirst()) {
 			do {
 				col = c.getColumnIndex("db_id");
 				id = c.getInt(col);
@@ -130,12 +130,12 @@ int CTvRegion::getChannelListByNameAndFreqRange(char *name, int beginFreq, int e
 				channelNum = c.getInt(col);
 				vcp.add(new CTvChannel(id, mode, frequency, bandwidth, modulation, symbolRate, ofdmMode, channelNum));
 				size++;
-			} while(c.moveToNext());
+			} while (c.moveToNext());
 		} else {
 			ret = -1;
 			break;
 		}
-	} while(false);
+	} while (false);
 
 	c.close();
 	return ret;
@@ -172,7 +172,7 @@ int CTvRegion::getLogicNumByNameAndfreq(char *name, int freq)
 
 	CTvDatabase::Cursor c;
 	CTvDatabase::GetTvDb()->select(cmd, c);
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		col = c.getColumnIndex("logical_channel_num");
 		ret = c.getInt(col);
 	}

@@ -105,7 +105,7 @@ void *CThread::_threadLoop(void *user)
 			self->mThreadExitedCondition.broadcast();
 			break;
 		}
-	} while(true);
+	} while (true);
 
 	return NULL;
 }

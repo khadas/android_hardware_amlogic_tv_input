@@ -61,7 +61,7 @@ void CTvRecord::dvr_init(void)
 	AM_DVR_OpenPara_t para;
 	char buf[32];
 
-	if(pvr_init)
+	if (pvr_init)
 		return;
 
 	memset(&para, 0, sizeof(para));
@@ -166,25 +166,25 @@ void CTvRecord::get_cur_program_pid(int progId)
 	CTvProgram::Audio *pA;
 	CTvProgram::Video *pV;
 	int ret = CTvProgram::selectByID(progId, prog);
-	if(ret != 0) return;
+	if (ret != 0) return;
 
 	LOGD("%s,%d", "TV", __LINE__);
 	pV = prog.getVideo();
-	if(pV != NULL) {
+	if (pV != NULL) {
 		setvpid(pV->getPID());
 	}
 
 	aindex = prog.getCurrAudioTrackIndex();
-	if(-1 == aindex) { //db is default
+	if (-1 == aindex) { //db is default
 		aindex = prog.getCurrentAudio(String8("eng"));
-		if(aindex >= 0) {
+		if (aindex >= 0) {
 			prog.setCurrAudioTrackIndex(progId, aindex);
 		}
 	}
 
-	if(aindex >= 0) {
+	if (aindex >= 0) {
 		pA = prog.getAudio(aindex);
-		if(pA != NULL) {
+		if (pA != NULL) {
 			setapid(pA->getPID());
 		}
 	}
@@ -234,7 +234,7 @@ void CTvRecord::StartRecord(int id)
 
 	AM_FEND_GetStatus(FEND_DEV_NO, &status);
 
-	if(status & FE_HAS_LOCK) {
+	if (status & FE_HAS_LOCK) {
 		LOGD("locked\n");
 	} else {
 		LOGD("unlocked\n");
@@ -265,9 +265,9 @@ void CTvRecord::SetRecCurTsOrCurProgram(int sel)
 	int i = 0;
 	char buf[50];
 	memset(buf, 0, sizeof(buf));
-	for(; i < 3; i++) {
+	for (; i < 3; i++) {
 		snprintf(buf, sizeof(buf), "/sys/class/stb/dvr%d_mode", i);
-		if(sel)
+		if (sel)
 			AM_FileEcho(buf, "ts");
 		else
 			AM_FileEcho(buf, "pid");

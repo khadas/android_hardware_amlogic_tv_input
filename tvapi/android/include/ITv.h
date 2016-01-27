@@ -27,12 +27,12 @@ public:
 	// allow other processes to use this ITv interface
 	virtual status_t        unlock() = 0;
 
-	virtual status_t  		processCmd(const Parcel &p, Parcel *r) = 0;
+	virtual status_t        processCmd(const Parcel &p, Parcel *r) = 0;
 
 	//share mem for subtitle bmp
-	virtual status_t		createSubtitle(const sp<IMemory> &share_mem) = 0;
+	virtual status_t        createSubtitle(const sp<IMemory> &share_mem) = 0;
 	//share mem for video/hdmi bmp
-	virtual status_t 		createVideoFrame(const sp<IMemory> &share_mem) = 0;
+	virtual status_t        createVideoFrame(const sp<IMemory> &share_mem, int iSourceMode, int iCapVideoLayerOnly) = 0;
 
 };
 

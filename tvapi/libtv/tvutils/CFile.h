@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <string.h>
 #include <errno.h>
 
 #define CC_MAX_FILE_PATH_LEN       (256)
@@ -22,7 +23,7 @@ public:
 	virtual int openFile(const char *path);
 	virtual int closeFile();
 	virtual int writeFile(const unsigned char *pData, int uLen);
-	virtual int readFile(const unsigned char *pBuf, int uLen);
+	virtual int readFile(void* pBuf, int uLen);
 	int copyTo(const char *dstPath);
 	static int delFile(const char *path);
 	static int  getFileAttrValue(const char *path);

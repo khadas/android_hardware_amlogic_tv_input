@@ -34,7 +34,7 @@ void CTvChannel::createFromCursor(CTvDatabase::Cursor &c)
 	col = c.getColumnIndex("freq");
 	freq = c.getInt(col);
 
-	if(src == MODE_QAM) {
+	if (src == MODE_QAM) {
 		col = c.getColumnIndex("mod");
 		mod = c.getInt(col);
 
@@ -46,7 +46,7 @@ void CTvChannel::createFromCursor(CTvDatabase::Cursor &c)
 		symbolRate = symb;
 		mode = MODE_QAM;
 
-	} else if(src == MODE_OFDM) {
+	} else if (src == MODE_OFDM) {
 		col = c.getColumnIndex("bw");
 		bw = c.getInt(col);
 
@@ -54,14 +54,14 @@ void CTvChannel::createFromCursor(CTvDatabase::Cursor &c)
 		bandwidth = bw;
 		mode = MODE_OFDM;
 
-	} else if(src == MODE_ATSC) {
+	} else if (src == MODE_ATSC) {
 		col = c.getColumnIndex("mod");
 		mod = c.getInt(col);
 
 		frequency  = freq;
 		modulation = mod;
 		mode = MODE_ATSC;
-	} else if(src == MODE_ANALOG) {
+	} else if (src == MODE_ANALOG) {
 		col = c.getColumnIndex("std");
 		int std = c.getInt(col);
 		col = c.getColumnIndex("aud_mode");
@@ -74,7 +74,7 @@ void CTvChannel::createFromCursor(CTvDatabase::Cursor &c)
 		standard  = std;
 		afc_data  = afc_flag;
 		mode = MODE_ANALOG;
-	} else if(src == MODE_QPSK) {
+	} else if (src == MODE_QPSK) {
 		col = c.getColumnIndex("symb");
 		symb = c.getInt(col);
 
@@ -94,7 +94,7 @@ void CTvChannel::createFromCursor(CTvDatabase::Cursor &c)
 		//showboz
 		//TVSatellite sat = TVSatellite.tvSatelliteSelect(sat_id);
 		//tv_satparams = sat.getParams();
-	} else if(src == MODE_DTMB) {
+	} else if (src == MODE_DTMB) {
 		col = c.getColumnIndex("bw");
 		bw = c.getInt(col);
 
@@ -115,31 +115,31 @@ CTvChannel::CTvChannel()
 CTvChannel::CTvChannel(int dbID, int mode, int freq, int bw, int mod, int symb, int ofdm, int channelNum)
 {
 	//other member not init,just a paras
-	if(mode == MODE_QAM) {
+	if (mode == MODE_QAM) {
 		id = dbID;
 		frequency  = freq;
 		modulation = mod;
 		symbolRate = symb;
 		mode = MODE_QAM;
-	} else if(mode == MODE_OFDM) {
+	} else if (mode == MODE_OFDM) {
 		id = dbID;
 		frequency = freq;
 		bandwidth = bw;
 		mode = MODE_OFDM;
-	} else if(mode == MODE_ATSC) {
+	} else if (mode == MODE_ATSC) {
 		id = dbID;
 		frequency  = freq;
 		modulation = mod;
 		logicalChannelNum = channelNum;
 		mod = MODE_ATSC;
-	} else if(mode == MODE_ANALOG) {
+	} else if (mode == MODE_ANALOG) {
 		id = dbID;
 		frequency = freq;
 		audio     = 0;
 		standard  = 0;
 		afc_data  = 0;
 		mode = MODE_ANALOG;
-	} else if(mode == MODE_DTMB) {
+	} else if (mode == MODE_DTMB) {
 		id = dbID;
 		frequency = freq;
 		bandwidth = bw;
@@ -164,7 +164,7 @@ int CTvChannel::selectByID(int cid, CTvChannel &channel)
 	CTvDatabase::Cursor c;
 	CTvDatabase::GetTvDb()->select(cmd, c);
 
-	if(c.moveToFirst()) {
+	if (c.moveToFirst()) {
 		channel.createFromCursor(c);
 	} else {
 		c.close();
@@ -185,7 +185,7 @@ int CTvChannel::SelectByFreq(int freq, CTvChannel &channel)
 		cmd = String8("select * from ts_table where ts_table.freq = ") + String8::format("%d", freq);
 		CTvDatabase::GetTvDb()->select(cmd, c);
 
-		if(c.moveToFirst()) {
+		if (c.moveToFirst()) {
 			channel.createFromCursor(c);
 		} else {
 			iOutRet = -1;
@@ -194,7 +194,7 @@ int CTvChannel::SelectByFreq(int freq, CTvChannel &channel)
 
 		cmd = String8("delete  from ts_table where ts_table.freq = ") + String8::format("%d", freq);
 		CTvDatabase::GetTvDb()->exeSql(cmd.string());
-	} while(false);
+	} while (false);
 
 	c.close();
 	return iOutRet;
@@ -216,13 +216,13 @@ int CTvChannel::DeleteBetweenFreq(int beginFreq, int endFreq)
 				channel.createFromCursor(c);
 				cmd = String8("delete  from ts_table where ts_table.freq = ") + String8::format("%d", channel.frequency);
 				CTvDatabase::GetTvDb()->exeSql(cmd.string());
-			} while(c.moveToNext());
+			} while (c.moveToNext());
 		} else {
 			iOutRet = -1;
 			break;
 		}
 
-	} while(false);
+	} while (false);
 
 	c.close();
 	return iOutRet;
@@ -247,11 +247,11 @@ int CTvChannel::getChannelListBySrc(int src, Vector< sp<CTvChannel> > &v_channel
 				channel = new CTvChannel();
 				channel->createFromCursor(c);
 				v_channel.add(channel);
-			} while(c.moveToNext());
+			} while (c.moveToNext());
 		} else {
 			break;
 		}
-	} while(false);
+	} while (false);
 
 	return 0;
 }

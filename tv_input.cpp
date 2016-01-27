@@ -22,34 +22,37 @@
 #include <cutils/native_handle.h>
 
 #include <hardware/tv_input.h>
-#include <tv/CTv.h>
-#include <tvin/CTvin.h>
-#include <tvserver/TvService.h>
-#include <screen_source/v4l2_vdin.h>
+#include "tvapi/android/tv/CTv.h"
+#include "tv_callback.h"
+#include "tvapi/android/include/tvcmd.h"
 #include <ui/GraphicBufferMapper.h>
 #include <ui/GraphicBuffer.h>
 /*****************************************************************************/
 
 #define LOGD(...) \
 { \
-__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__); }
+__android_log_print(ANDROID_LOG_DEBUG, "tv_input", __VA_ARGS__); }
 
 #ifndef container_of
 #define container_of(ptr, type, member) ({                      \
-		const typeof(((type *) 0)->member) *__mptr = (ptr);     \
-		(type *) ((char *) __mptr - (char *)(&((type *)0)->member)); })
+        const typeof(((type *) 0)->member) *__mptr = (ptr);     \
+        (type *) ((char *) __mptr - (char *)(&((type *)0)->member)); })
 #endif
+
+struct sideband_handle_t {
+	native_handle_t nativeHandle;
+	int identflag;
+	int usage;
+};
 
 typedef struct tv_input_private {
 	tv_input_device_t device;
-
-	// Callback related data
 	const tv_input_callback_ops_t *callback;
 	void *callback_data;
-	//TvService* pTvService;
-	CTv *pTv;
-	vdin_screen_source *pScreen;
+	CTv *mpTv;
+	TvCallback *tvcallback;
 } tv_input_private_t;
+
 
 static int notify_ATV_device_available(tv_input_private_t *priv)
 {
@@ -58,6 +61,7 @@ static int notify_ATV_device_available(tv_input_private_t *priv)
 	event.device_info.type = TV_INPUT_TYPE_TUNER;
 	event.type = TV_INPUT_EVENT_DEVICE_AVAILABLE;
 	event.device_info.audio_type = AUDIO_DEVICE_NONE;
+	event.device_info.audio_address = NULL;
 	priv->callback->notify(&priv->device, &event, priv->callback_data);
 	return 0;
 }
@@ -69,6 +73,7 @@ static int notify_ATV_stream_configurations_change(tv_input_private_t *priv)
 	event.device_info.type = TV_INPUT_TYPE_TUNER;
 	event.type = TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED;
 	event.device_info.audio_type = AUDIO_DEVICE_NONE;
+	event.device_info.audio_address = NULL;
 	priv->callback->notify(&priv->device, &event, priv->callback_data);
 	return 0;
 }
@@ -80,6 +85,7 @@ static int notify_DTV_device_available(tv_input_private_t *priv)
 	event.device_info.type = TV_INPUT_TYPE_TUNER;
 	event.type = TV_INPUT_EVENT_DEVICE_AVAILABLE;
 	event.device_info.audio_type = AUDIO_DEVICE_NONE;
+	event.device_info.audio_address = NULL;
 	priv->callback->notify(&priv->device, &event, priv->callback_data);
 	return 0;
 }
@@ -91,54 +97,128 @@ static int notify_DTV_stream_configurations_change(tv_input_private_t *priv)
 	event.device_info.type = TV_INPUT_TYPE_TUNER;
 	event.type = TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED;
 	event.device_info.audio_type = AUDIO_DEVICE_NONE;
+	event.device_info.audio_address = NULL;
 	priv->callback->notify(&priv->device, &event, priv->callback_data);
 	return 0;
 }
 
-static int notify_AV_device_available(tv_input_private_t *priv)
+void TvIputHal_ChannelConl(tv_input_private_t *priv, int ops_type, int device_id)
+{
+	if (priv->mpTv) {
+		if (ops_type) {
+			LOGD ( "%s\, OpenSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
+			priv->mpTv->StartTv();
+			priv->mpTv->SwitchSourceInput((tv_source_input_t) device_id);
+		} else {
+			if (priv->mpTv->GetCurrentSourceInput() == device_id) {
+				LOGD ( "%s\, StopSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
+				priv->mpTv->StopTv();
+			}
+		}
+	}
+}
+
+static int notify_AV_device_available(tv_input_private_t *priv, tv_source_input_t source_input, int type)
 {
 	tv_input_event_t event;
-	event.device_info.device_id = SOURCE_AV1;
+	event.device_info.device_id = source_input;
 	event.device_info.type = TV_INPUT_TYPE_COMPONENT;
-	event.type = TV_INPUT_EVENT_DEVICE_AVAILABLE;
+	event.type = type;
 	event.device_info.audio_type = AUDIO_DEVICE_NONE;
+	event.device_info.audio_address = NULL;
 	priv->callback->notify(&priv->device, &event, priv->callback_data);
 	return 0;
 }
 
-static int notify_AV_stream_configurations_change(tv_input_private_t *priv)
+static int notify_AV_stream_configurations_change(tv_input_private_t *priv, tv_source_input_t source_input)
 {
 	tv_input_event_t event;
-	event.device_info.device_id = SOURCE_AV1;
+	event.device_info.device_id = source_input;
 	event.device_info.type = TV_INPUT_TYPE_COMPONENT;
 	event.type = TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED;
 	event.device_info.audio_type = AUDIO_DEVICE_NONE;
+	event.device_info.audio_address = NULL;
 	priv->callback->notify(&priv->device, &event, priv->callback_data);
 	return 0;
 }
 
-static int notify_HDMI_device_available(tv_input_private_t *priv, int dev_id, uint32_t port_id)
+static int notify_HDMI_device_available(tv_input_private_t *priv, tv_source_input_t source_input, uint32_t port_id, int type)
 {
 	tv_input_event_t event;
-	event.device_info.device_id = dev_id;
+	event.device_info.device_id = source_input;
 	event.device_info.type = TV_INPUT_TYPE_HDMI;
-	event.type = TV_INPUT_EVENT_DEVICE_AVAILABLE;
+	event.type = type;
 	event.device_info.hdmi.port_id = port_id;
 	event.device_info.audio_type = AUDIO_DEVICE_NONE;
+	event.device_info.audio_address = NULL;
 	priv->callback->notify(&priv->device, &event, priv->callback_data);
 	return 0;
 }
 
-static int notify_HDMI_stream_configurations_change(tv_input_private_t *priv, int dev_id, uint32_t port_id)
+static int notify_HDMI_stream_configurations_change(tv_input_private_t *priv, tv_source_input_t source_input, uint32_t port_id)
 {
 	tv_input_event_t event;
-	event.device_info.device_id = dev_id;
+	event.device_info.device_id = source_input;
 	event.device_info.type = TV_INPUT_TYPE_HDMI;
 	event.type = TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED;
 	event.device_info.hdmi.port_id = port_id;
 	event.device_info.audio_type = AUDIO_DEVICE_NONE;
+	event.device_info.audio_address = NULL;
 	priv->callback->notify(&priv->device, &event, priv->callback_data);
 	return 0;
+}
+
+
+void TvCallback::onTvEvent (int32_t msgType, const Parcel &p)
+{
+	tv_input_private_t *priv = (tv_input_private_t *)(mPri);
+	switch (msgType) {
+	case SOURCE_CONNECT_CALLBACK: {
+		int source = p.readInt32();
+		int connectState = p.readInt32();
+		LOGD("TvCallback::onTvEvent  source = %d, status = %d", source, connectState)
+		if ( connectState == 1) {
+			switch (source) {
+			case SOURCE_HDMI1:
+			case SOURCE_HDMI2:
+			case SOURCE_HDMI3: {
+				notify_HDMI_device_available(priv, (tv_source_input_t)source, 1, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+				notify_HDMI_stream_configurations_change(priv, (tv_source_input_t)source, 1);
+				break;
+			}
+			case SOURCE_AV1:
+			case SOURCE_AV2: {
+				notify_AV_device_available(priv, (tv_source_input_t)source, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+				notify_AV_stream_configurations_change(priv, (tv_source_input_t)source);
+				break;
+			}
+			default:
+				break;
+			}
+		} else {//out
+			switch (source) {
+			case SOURCE_HDMI1:
+			case SOURCE_HDMI2:
+			case SOURCE_HDMI3: {
+				notify_HDMI_device_available(priv, (tv_source_input_t)source, 1, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
+				break;
+			}
+			case SOURCE_AV1:
+			case SOURCE_AV2: {
+				notify_AV_device_available(priv, (tv_source_input_t)source, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
+				break;
+			}
+			default:
+				break;
+			}
+		}
+		//tv_input_event_t event;
+
+		break;
+	}
+	default:
+		break;
+	}
 }
 
 #define NORMAL_STREAM_ID 1
@@ -172,6 +252,7 @@ static int get_stream_configs(int dev_id, int *num_configurations, const tv_stre
 		*configs = mconfig;
 		break;
 	case SOURCE_AV1:
+	case SOURCE_AV2:
 		mconfig[0].stream_id = NORMAL_STREAM_ID;
 		mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
 		mconfig[0].max_video_width = 1920;
@@ -227,13 +308,18 @@ static int get_stream_configs(int dev_id, int *num_configurations, const tv_stre
 
 static int get_tv_stream(tv_stream_t *stream)
 {
+	static struct sideband_handle_t *tvstream = NULL;
 	if (stream->stream_id == NORMAL_STREAM_ID) {
-		native_handle *h = native_handle_create(0, 0);
-		if (!h) {
-			return -EINVAL;
+		if ( !tvstream ) {
+			tvstream = (struct sideband_handle_t *)native_handle_create(0, 2);
+			if ( !tvstream ) {
+				return -EINVAL;
+			}
 		}
+		tvstream->identflag = 0xabcdcdef; //magic word
+		tvstream->usage = GRALLOC_USAGE_AML_VIDEO_OVERLAY;
 		stream->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE;
-		stream->sideband_stream_source_handle = h;
+		stream->sideband_stream_source_handle = (native_handle_t *)tvstream;
 	} else if (stream->stream_id == NORMAL_STREAM_ID) {
 		stream->type = TV_STREAM_TYPE_BUFFER_PRODUCER;
 	}
@@ -278,7 +364,6 @@ static int tv_input_initialize(struct tv_input_device *dev,
 	if (priv->callback != NULL) {
 		return -EEXIST;
 	}
-
 	priv->callback = callback;
 	priv->callback_data = data;
 	/*  ATV_DEVICE_AVAILABLE */
@@ -287,19 +372,61 @@ static int tv_input_initialize(struct tv_input_device *dev,
 	/*  DTV_DEVICE_AVAILABLE */
 	notify_DTV_device_available(priv);
 	notify_DTV_stream_configurations_change(priv);
-	/*  AV_DEVICE_AVAILABLE */
-	notify_AV_device_available(priv);
-	notify_AV_stream_configurations_change(priv);
-	/*  HDMI1_DEVICE_AVAILABLE */
-	notify_HDMI_device_available(priv, SOURCE_HDMI1, 1);
-	notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI1, 1);
-	/*  HDMI2_DEVICE_AVAILABLE */
-	notify_HDMI_device_available(priv, SOURCE_HDMI2, 1);
-	notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI2, 1);
-	/*  HDMI3_DEVICE_AVAILABLE */
-	notify_HDMI_device_available(priv, SOURCE_HDMI3, 1);
-	notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI3, 1);
-	//
+
+	if (priv->mpTv->GetHdmiAvHotplugDetectOnoff()) {
+		/*  AV1_DEVICE_AVAILABLE */
+		int status = priv->mpTv->GetSourceConnectStatus(SOURCE_AV1);
+		if (status == 1) { //IN
+			notify_AV_device_available(priv, SOURCE_AV1, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+			notify_AV_stream_configurations_change(priv, SOURCE_AV1);
+		}
+
+		/*  AV2_DEVICE_AVAILABLE */
+		status = priv->mpTv->GetSourceConnectStatus(SOURCE_AV2);
+		if (status == 1) { //IN
+			notify_AV_device_available(priv, SOURCE_AV2, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+			notify_AV_stream_configurations_change(priv, SOURCE_AV2);
+		}
+
+		/*  HDMI1_DEVICE_AVAILABLE */
+		status = priv->mpTv->GetSourceConnectStatus(SOURCE_HDMI1);
+		if (status == 1) { //IN
+			notify_HDMI_device_available(priv, SOURCE_HDMI1, 1, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+			notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI1, 0);
+		}
+
+		/*  HDMI2_DEVICE_AVAILABLE */
+		status = priv->mpTv->GetSourceConnectStatus(SOURCE_HDMI2);
+		if (status == 1) { //IN
+			notify_HDMI_device_available(priv, SOURCE_HDMI2, 1, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+			notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI2, 1);
+		}
+
+		/*  HDMI3_DEVICE_AVAILABLE */
+		status = priv->mpTv->GetSourceConnectStatus(SOURCE_HDMI3);
+		if (status == 1) { //IN
+			notify_HDMI_device_available(priv, SOURCE_HDMI3, 2, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+			notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI3, 2);
+		}
+
+		priv->mpTv->setTvObserver(priv->tvcallback);
+	} else {
+		/*  AV1_DEVICE_AVAILABLE */
+		notify_AV_device_available(priv, SOURCE_AV1, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+		notify_AV_stream_configurations_change(priv, SOURCE_AV1);
+		/*  AV2_DEVICE_AVAILABLE */
+		notify_AV_device_available(priv, SOURCE_AV2, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+		notify_AV_stream_configurations_change(priv, SOURCE_AV2);
+		/*  HDMI1_DEVICE_AVAILABLE */
+		notify_HDMI_device_available(priv, SOURCE_HDMI1, 1, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+		notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI1, 0);
+		/*  HDMI2_DEVICE_AVAILABLE */
+		notify_HDMI_device_available(priv, SOURCE_HDMI2, 1, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+		notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI2, 1);
+		/*  HDMI3_DEVICE_AVAILABLE */
+		notify_HDMI_device_available(priv, SOURCE_HDMI3, 2, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+		notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI3, 2);
+	}
 	return 0;
 }
 
@@ -322,13 +449,9 @@ static int tv_input_open_stream(struct tv_input_device *dev, int device_id,
 			return -EINVAL;
 		}
 		if (stream->stream_id == NORMAL_STREAM_ID) {
-			LOGD ( "%s, SetSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
-			priv->pTv->StartTvLock();
-			priv->pTv->SetSourceSwitchInput((tv_source_input_t) device_id);
+			TvIputHal_ChannelConl(priv, 1, device_id);
 			return 0;
 		} else if (stream->stream_id == FRAME_CAPTURE_STREAM_ID) {
-			priv->pScreen->set_format(1920, 1080, V4L2_PIX_FMT_NV21);
-			priv->pScreen->start_v4l2_device();
 			return 0;
 		}
 	}
@@ -340,11 +463,9 @@ static int tv_input_close_stream(struct tv_input_device *dev, int device_id,
 {
 	tv_input_private_t *priv = (tv_input_private_t *)dev;
 	if (stream_id == NORMAL_STREAM_ID) {
-		LOGD ( "%s, SetSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
-		//priv->pTv->StopTvLock();
+		TvIputHal_ChannelConl(priv, 0, device_id);
 		return 0;
 	} else if (stream_id == FRAME_CAPTURE_STREAM_ID) {
-		priv->pScreen->stop_v4l2_device();
 		return 0;
 	}
 	return -EINVAL;
@@ -353,35 +474,7 @@ static int tv_input_close_stream(struct tv_input_device *dev, int device_id,
 static int tv_input_request_capture(
 	struct tv_input_device *dev, int device_id, int stream_id, buffer_handle_t buffer, uint32_t seq)
 {
-	tv_input_private_t *priv = (tv_input_private_t *)dev;
-	int index;
-	aml_screen_buffer_info_t buff_info;
-	int mFrameWidth , mFrameHeight ;
-	int ret;
-	long *src = NULL;
-	unsigned char *dest = NULL;
-	ANativeWindowBuffer *buf;
-	ret = priv->pScreen->aquire_buffer(&buff_info);
-	if (ret != 0 || (buff_info.buffer_mem == 0)) {
-		LOGD("Get V4l2 buffer failed");
-		return -EWOULDBLOCK;
-	}
-	src = (long *)buff_info.buffer_mem;
-
-	buf = container_of(&buffer, ANativeWindowBuffer, handle);
-
-	sp<GraphicBuffer> graphicBuffer(new GraphicBuffer(buf, false));
-	graphicBuffer->lock(SCREENSOURCE_GRALLOC_USAGE, (void **)&dest);
-	if (dest == NULL) {
-		LOGD("Invalid Gralloc Handle");
-		return -EWOULDBLOCK;
-	}
-	memcpy(dest, src, mFrameWidth * mFrameHeight * 3 / 2);
-	graphicBuffer->unlock();
-	graphicBuffer.clear();
-	LOGD("queue one buffer to native window");
-	priv->pScreen->release_buffer(src);
-	return 0;
+	return -EINVAL;
 }
 
 static int tv_input_cancel_capture(struct tv_input_device *, int, int, uint32_t)
@@ -394,10 +487,10 @@ static int tv_input_cancel_capture(struct tv_input_device *, int, int, uint32_t)
 static int tv_input_device_close(struct hw_device_t *dev)
 {
 	tv_input_private_t *priv = (tv_input_private_t *)dev;
-	if (priv->pTv != NULL) {
-		delete priv->pTv;
-	}
 	if (priv) {
+		if (priv->mpTv) {
+			delete priv->mpTv;
+		}
 		free(priv);
 	}
 	return 0;
@@ -414,14 +507,8 @@ static int tv_input_device_open(const struct hw_module_t *module,
 
 		/* initialize our state here */
 		memset(dev, 0, sizeof(*dev));
-		/*intialize tv*/
-		dev->pTv = new CTv();
-		TvService::instantiate(dev->pTv);
-		dev->pTv->OpenTv();
-		dev->pScreen = new vdin_screen_source();
-		if (dev->pScreen->init() != 0 ) {
-			LOGD("init screen source not ok!");
-		}
+		dev->mpTv = new CTv();
+		dev->tvcallback = new TvCallback(dev);
 		/* initialize the procs */
 		dev->device.common.tag = HARDWARE_DEVICE_TAG;
 		dev->device.common.version = TV_INPUT_DEVICE_API_VERSION_0_1;

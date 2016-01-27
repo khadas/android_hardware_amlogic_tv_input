@@ -18,7 +18,7 @@ CTvSettingDeviceFactory::CTvSettingDeviceFactory()
 CTvSettingDeviceFactory::~CTvSettingDeviceFactory()
 {
 
-	if(mpCurDevice != NULL) {
+	if (mpCurDevice != NULL) {
 		delete mpCurDevice;
 		mpCurDevice = NULL;
 	}
@@ -175,12 +175,12 @@ CBlobDevice *CTvSettingDeviceFactory::getSaveDeviceFromConfigFile()
 	LOGD("getSaveDeviceFromConfigFile type=%s path=%s size=%s", device_type, device_path, device_size);
 
 	//
-	if(mpCurDevice != NULL) delete mpCurDevice;
+	if (mpCurDevice != NULL) delete mpCurDevice;
 
-	if(strcmp(device_type, "file") == 0) {
+	if (strcmp(device_type, "file") == 0) {
 		mpCurDevice = new CBlobDeviceFile();
-	} else if(strcmp(device_type, "e2prom") == 0) {
-	} else if(strcmp(device_type, "ram") == 0) {
+	} else if (strcmp(device_type, "e2prom") == 0) {
+	} else if (strcmp(device_type, "ram") == 0) {
 	}
 
 	return mpCurDevice;

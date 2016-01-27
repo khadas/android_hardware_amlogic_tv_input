@@ -485,8 +485,8 @@ bool CUpgradeFBC::threadLoop()
 		tmp_flag = 0;
 		memset(mDataBuf, 0, CC_UPGRADE_DATA_BUF_SIZE);
 		rw_size = mCfbcIns->uartReadStream(mDataBuf, CC_UPGRADE_DATA_BUF_SIZE, 2000);
-		for(i = 0; i < rw_size - 3; i++) {
-			if((0x5A == mDataBuf[i]) && (0x5A == mDataBuf[i + 1]) && (0x5A == mDataBuf[i + 2])) {
+		for (i = 0; i < rw_size - 3; i++) {
+			if ((0x5A == mDataBuf[i]) && (0x5A == mDataBuf[i + 1]) && (0x5A == mDataBuf[i + 2])) {
 				LOGD("%s, fbc write data at 0x%x ok!\n", __FUNCTION__, old_off);
 				tmp_flag = 1;
 				break;

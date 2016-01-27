@@ -239,10 +239,10 @@ public :
 		{
 
 			this->type = type;
-			if(type == TYPE_DVB_SUBTITLE) {
+			if (type == TYPE_DVB_SUBTITLE) {
 				compositionPage = num1;
 				ancillaryPage   = num2;
-			} else if(type == TYPE_DTV_TELETEXT) {
+			} else if (type == TYPE_DTV_TELETEXT) {
 				magazineNo = num1;
 				pageNo = num2;
 			}
@@ -422,7 +422,7 @@ public:
 	}
 	Audio *getAudio(int id)
 	{
-		if(mvAudios.size() <= 0) return NULL;
+		if (mvAudios.size() <= 0) return NULL;
 		return mvAudios[id];
 	}
 
@@ -433,7 +433,7 @@ public:
 	static int selectByID(int id, CTvProgram &p);
 	static CTvProgram selectByNumber(int num, int type);
 	int selectByNumber(int type, int major, int minor, CTvProgram &prog, int minor_check = MINOR_CHECK_NONE);
-	int selectByNumber(int type, int num, CTvProgram &prog);
+	static int selectByNumber(int type, int num, CTvProgram &prog);
 	static int selectByChannel(int channelID, int type, Vector<sp<CTvProgram> > &out);
 	// 列出全部TVProgram
 	static int selectAll(bool no_skip, Vector<sp<CTvProgram> > &out);
@@ -472,6 +472,8 @@ public:
 		return dvbServiceID;
 	};
 	int getProgSkipFlag();
+	int getSubtitleIndex(int progId);
+	int setSubtitleIndex(int progId, int index);
 	void setCurrAudioTrackIndex(int programId, int audioIndex);
 	int getCurrAudioTrackIndex();
 
@@ -493,7 +495,13 @@ public:
 	void setLockFlag(int progId, bool bLockFlag);
 	bool getLockFlag();
 	void swapChanOrder(int ProgId1, int chanOrderNum1, int ProgId2, int chanOrderNum2);
+	int getAudioChannel();
+	static int updateAudioChannel(int progId, int ch);
 	static int deleteChannelsProgram(CTvChannel &c);
+	Vector<Subtitle *> getSubtitles()
+	{
+		return mvSubtitles;
+	}
 private:
 	int CreateFromCursor(CTvDatabase::Cursor &c);
 	int selectProgramInChannelByNumber(int channelID, int num, CTvDatabase::Cursor &c);

@@ -32,6 +32,7 @@ public:
 	static const int TV_EVENT_UPGRADE_FBC = 16;
 	static const int TV_EVENT_2d4G_HEADSET = 17;
 	static const int TV_EVENT_AV = 18;
+	static const int TV_EVENT_SUBTITLE = 19;
 
 	CTvEv(int type);
 	virtual ~CTvEv() {};
@@ -175,6 +176,17 @@ namespace  TvEvent {
 	public:
 		int state;
 		int para;
+	};
+	class SubtitleEvent: public CTvEv {
+	public:
+		SubtitleEvent(): CTvEv(CTvEv::TV_EVENT_SUBTITLE)
+		{
+		}
+		~SubtitleEvent()
+		{
+		}
+		int pic_width;
+		int pic_height;
 	};
 };
 #endif
