@@ -169,9 +169,9 @@ CTvSettingDeviceFactory::~CTvSettingDeviceFactory()
 
 CBlobDevice *CTvSettingDeviceFactory::getSaveDeviceFromConfigFile()
 {
-	const char *device_type = config_get_str("SETTING", "store.device.type", "file");
-	const char *device_path = config_get_str("SETTING", "device_path", "/param/default_data");
-	const char *device_size = config_get_str("SETTING", "device_size", "0x1000");
+	const char *device_type = config_get_str(CFG_SECTION_SETTING, "store.device.type", "file");
+	const char *device_path = config_get_str(CFG_SECTION_SETTING, "device_path", "/param/default_data");
+	const char *device_size = config_get_str(CFG_SECTION_SETTING, "device_size", "0x1000");
 	LOGD("getSaveDeviceFromConfigFile type=%s path=%s size=%s", device_type, device_path, device_size);
 
 	//

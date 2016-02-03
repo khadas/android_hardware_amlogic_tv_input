@@ -34,7 +34,7 @@ bool CTvSettingLoad()
 	mpSettingDeviceFactory = new CTvSettingDeviceFactory();
 	mpCurDevice = mpSettingDeviceFactory->getSaveDeviceFromConfigFile();
 	if (mpCurDevice == NULL) {
-		LOGD("%s, CTvSettingLoad = NULL", "TV");
+		LOGD("%s, CTvSettingLoad = NULL", CFG_SECTION_TV);
 		return false;
 	} else {
 		mpCurDevice->OpenDevice();
@@ -66,14 +66,14 @@ static int SSMWriteNTypes(int offset, int data_len, T *data_buf)
 	pthread_mutex_lock(&ssm_r_w_op_mutex);
 
 	if (data_buf == NULL) {
-		LOGE("%s, data_buf is NULL.\n", "TV");
+		LOGE("%s, data_buf is NULL.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
 	}
 
 	if (mpCurDevice == NULL) {
-		LOGE("%s, ssm_device is NULL.\n", "TV");
+		LOGE("%s, ssm_device is NULL.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -81,7 +81,7 @@ static int SSMWriteNTypes(int offset, int data_len, T *data_buf)
 
 	if (mpCurDevice->WriteBytes(offset, data_len * sizeof(T),
 								(unsigned char *) data_buf) < 0) {
-		LOGE("%s, device WriteNBytes error.\n", "TV");
+		LOGE("%s, device WriteNBytes error.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -97,14 +97,14 @@ static int SSMReadNTypes(int offset, int data_len, T *data_buf)
 	pthread_mutex_lock(&ssm_r_w_op_mutex);
 
 	if (data_buf == NULL) {
-		LOGE("%s, data_buf is NULL.\n", "TV");
+		LOGE("%s, data_buf is NULL.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
 	}
 
 	if (mpCurDevice == NULL) {
-		LOGE("%s, ssm_device is NULL.\n", "TV");
+		LOGE("%s, ssm_device is NULL.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -112,7 +112,7 @@ static int SSMReadNTypes(int offset, int data_len, T *data_buf)
 
 	if (mpCurDevice->ReadBytes(offset, data_len * sizeof(T),
 							   (unsigned char *) data_buf) < 0) {
-		LOGE("%s, device ReadNBytes error.\n", "TV");
+		LOGE("%s, device ReadNBytes error.\n", CFG_SECTION_TV);
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
 	}
@@ -204,13 +204,13 @@ int SSMReadFlash_N_N310_N311(int offset, int data_len, int *data_buf)
 int EEPWriteOneByte(int offset, unsigned char *data_buf)
 {
 	int fd = 0;
-	const char *device_path = config_get_str("TV", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
+	const char *device_path = config_get_str(CFG_SECTION_TV, "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
 	pthread_mutex_lock(&ssm_r_w_op_mutex);
 
 	LOGD ( "~~~EEPWriteOneByte~~~##offset %d##rw_val %s##" , offset, data_buf);
 
 	if (data_buf == NULL) {
-		LOGE("%s, data_buf is NULL.\n", "TV");
+		LOGE("%s, data_buf is NULL.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -219,7 +219,7 @@ int EEPWriteOneByte(int offset, unsigned char *data_buf)
 	fd = open(device_path, O_RDWR);
 
 	if (fd < 0) {
-		LOGE("%s, ####i2c test device open failed####.\n", "TV");
+		LOGE("%s, ####i2c test device open failed####.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -228,7 +228,7 @@ int EEPWriteOneByte(int offset, unsigned char *data_buf)
 	lseek(fd, offset, SEEK_SET);
 
 	if (write(fd, data_buf, 1) < 0) {
-		LOGE("%s, device WriteOneBytes error.\n", "TV");
+		LOGE("%s, device WriteOneBytes error.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -236,7 +236,7 @@ int EEPWriteOneByte(int offset, unsigned char *data_buf)
 
 	close(fd);
 
-	LOGE("%s, device WriteOneBytes OK.\n", "TV");
+	LOGE("%s, device WriteOneBytes OK.\n", CFG_SECTION_TV);
 
 	pthread_mutex_unlock(&ssm_r_w_op_mutex);
 	return 0;
@@ -245,13 +245,13 @@ int EEPWriteOneByte(int offset, unsigned char *data_buf)
 int EEPReadOneByte(int offset , unsigned char *data_buf)
 {
 	int fd = 0;
-	//const char* device_type = config_get_str("SETTING", "peripheral.eeprom.device", "disable");
-	const char *device_path = config_get_str("TV", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
+	//const char* device_type = config_get_str(CFG_SECTION_SETTING, "peripheral.eeprom.device", "disable");
+	const char *device_path = config_get_str(CFG_SECTION_TV, "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
 
 	pthread_mutex_lock(&ssm_r_w_op_mutex);
 
 	if (data_buf == NULL) {
-		LOGE("%s, data_buf is NULL.\n", "TV");
+		LOGE("%s, data_buf is NULL.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -260,7 +260,7 @@ int EEPReadOneByte(int offset , unsigned char *data_buf)
 	fd = open(device_path, O_RDWR);
 
 	if (fd < 0) {
-		LOGE("%s, ssm_device is NULL.\n", "TV");
+		LOGE("%s, ssm_device is NULL.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -268,7 +268,7 @@ int EEPReadOneByte(int offset , unsigned char *data_buf)
 	lseek(fd, offset, SEEK_SET);
 
 	if (read(fd, data_buf, 1) < 0) {
-		LOGE("%s, device ReadOneBytes error.\n", "TV");
+		LOGE("%s, device ReadOneBytes error.\n", CFG_SECTION_TV);
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
 	}
@@ -284,13 +284,13 @@ int EEPReadOneByte(int offset , unsigned char *data_buf)
 int EEPWriteNByte(int offset, int data_len, unsigned char *data_buf)
 {
 	int fd = 0;
-	const char *device_path = config_get_str("TV", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
+	const char *device_path = config_get_str(CFG_SECTION_TV, "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
 	pthread_mutex_lock(&ssm_r_w_op_mutex);
 
 	LOGD ( "~~~EEPWriteNByte~~~##offset %d##data_len %d##" , offset, data_len);
 
 	if (data_buf == NULL) {
-		LOGE("%s, data_buf is NULL.\n", "TV");
+		LOGE("%s, data_buf is NULL.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -299,7 +299,7 @@ int EEPWriteNByte(int offset, int data_len, unsigned char *data_buf)
 	fd = open(device_path, O_RDWR);
 
 	if (fd < 0) {
-		LOGE("%s, ####i2c test device open failed####.\n", "TV");
+		LOGE("%s, ####i2c test device open failed####.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -308,7 +308,7 @@ int EEPWriteNByte(int offset, int data_len, unsigned char *data_buf)
 	lseek(fd, offset, SEEK_SET);
 
 	if (write(fd, data_buf, data_len) < 0) {
-		LOGE("%s, device WriteNBytes error.\n", "TV");
+		LOGE("%s, device WriteNBytes error.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -316,7 +316,7 @@ int EEPWriteNByte(int offset, int data_len, unsigned char *data_buf)
 
 	close(fd);
 
-	LOGE("%s, device WriteNBytes OK.\n", "TV");
+	LOGE("%s, device WriteNBytes OK.\n", CFG_SECTION_TV);
 
 	pthread_mutex_unlock(&ssm_r_w_op_mutex);
 	return 0;
@@ -324,11 +324,11 @@ int EEPWriteNByte(int offset, int data_len, unsigned char *data_buf)
 int EEPReadNByte(int offset, int data_len, unsigned char *data_buf)
 {
 	int fd = 0;
-	const char *device_path = config_get_str("TV", "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
+	const char *device_path = config_get_str(CFG_SECTION_TV, "peripheral.eeprom.path", "/sys/devices/i2c-2/2-0050/eeprom");
 	pthread_mutex_lock(&ssm_r_w_op_mutex);
 
 	if (data_buf == NULL) {
-		LOGE("%s, data_buf is NULL.\n", "TV");
+		LOGE("%s, data_buf is NULL.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -337,7 +337,7 @@ int EEPReadNByte(int offset, int data_len, unsigned char *data_buf)
 	fd = open(device_path, O_RDWR);
 
 	if (fd < 0) {
-		LOGE("%s, ssm_device is NULL.\n", "TV");
+		LOGE("%s, ssm_device is NULL.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -345,7 +345,7 @@ int EEPReadNByte(int offset, int data_len, unsigned char *data_buf)
 	lseek(fd, offset, SEEK_SET);
 
 	if (read(fd, data_buf, data_len) < 0) {
-		LOGE("%s, device ReadNBytes error.\n", "TV");
+		LOGE("%s, device ReadNBytes error.\n", CFG_SECTION_TV);
 
 		pthread_mutex_unlock(&ssm_r_w_op_mutex);
 		return -1;
@@ -363,7 +363,7 @@ int EEPReadNByte(int offset, int data_len, unsigned char *data_buf)
 int SSMSaveEEP_One_N310_N311(int offset, int rw_val)
 {
 	unsigned char tmp_val = rw_val;
-	const char *device_config = config_get_str("TV", "peripheral.eeprom.device", "disable");
+	const char *device_config = config_get_str(CFG_SECTION_TV, "peripheral.eeprom.device", "disable");
 
 	if (strcmp(device_config, "enable") != 0) {
 		LOGD ( "~~~ SSMSaveEEP_One ~~~##peripheral.eeprom.device error##");
@@ -377,7 +377,7 @@ int SSMSaveEEP_One_N310_N311(int offset, int rw_val)
 int SSMReadEEP_One_N310_N311(int offset)
 {
 	unsigned char tmp_val = 0;
-	const char *device_config = config_get_str("TV", "peripheral.eeprom.device", "disable");
+	const char *device_config = config_get_str(CFG_SECTION_TV, "peripheral.eeprom.device", "disable");
 
 	if (strcmp(device_config, "enable") != 0) {
 		LOGD ( "~~~ SSMReadEEP_One ~~~##peripheral.eeprom.device error##");
@@ -396,7 +396,7 @@ int SSMSaveEEP_N_N310_N311(int offset, int data_len, int *data_buf)
 {
 	int i = 0;
 	unsigned char *ptr = NULL;
-	const char *device_config = config_get_str("TV", "peripheral.eeprom.device", "disable");
+	const char *device_config = config_get_str(CFG_SECTION_TV, "peripheral.eeprom.device", "disable");
 
 	if (strcmp(device_config, "enable") != 0) {
 		LOGD ( "~~~ SSMSaveEEP_N ~~~##peripheral.eeprom.device error##");
@@ -433,7 +433,7 @@ int SSMReadEEP_N_N310_N311(int offset, int data_len, int *data_buf)
 {
 	int i = 0;
 	unsigned char *ptr = NULL;
-	const char *device_config = config_get_str("TV", "peripheral.eeprom.device", "disable");
+	const char *device_config = config_get_str(CFG_SECTION_TV, "peripheral.eeprom.device", "disable");
 
 	if (strcmp(device_config, "enable") != 0) {
 		LOGD ( "~~~ SSMReadEEP_N ~~~##peripheral.eeprom.device error##");
@@ -925,7 +925,7 @@ int SSMSaveNonStandardValue(unsigned short rw_val)
 		data[1] = (unsigned char) rw_val;
 	}
 
-	LOGD("%s, save NonStandard_value = %d", "TV", rw_val);
+	LOGD("%s, save NonStandard_value = %d", CFG_SECTION_TV, rw_val);
 
 	return SSMWriteNTypes(SSM_RW_NON_STANDARD_START, 2, data);
 }
@@ -936,7 +936,7 @@ int SSMReadNonStandardValue(void)
 	int data[] = { 0, 0 };
 
 	if (SSMReadNTypes(SSM_RW_NON_STANDARD_START, 2, data) < 0) {
-		LOGE("%s, read NonStandard_value error.", "TV");
+		LOGE("%s, read NonStandard_value error.", CFG_SECTION_TV);
 		return 0;
 	}
 
@@ -946,7 +946,7 @@ int SSMReadNonStandardValue(void)
 		value += data[0];
 	}
 
-	LOGD("%s, read NonStandard_value = %d.", "TV", value);
+	LOGD("%s, read NonStandard_value = %d.", CFG_SECTION_TV, value);
 
 	return value;
 }
@@ -963,11 +963,11 @@ int SSMReadAdbSwitchValue(void)
 	unsigned char switch_val = 0;
 
 	if (SSMReadNTypes(SSM_RW_ADB_SWITCH_START, 1, &switch_val) < 0) {
-		LOGD("%s, read switch value error", "TV");
+		LOGD("%s, read switch value error", CFG_SECTION_TV);
 		return -1;
 	}
 
-	LOGD("%s, read switch value = %d", "TV", switch_val);
+	LOGD("%s, read switch value = %d", CFG_SECTION_TV, switch_val);
 
 	return switch_val;
 }
@@ -984,11 +984,11 @@ int SSMReadSerialCMDSwitchValue(void)
 	unsigned char switch_val = 0;
 
 	if (SSMReadNTypes(SSM_RW_SERIAL_CMD_SWITCH_START, 1, &switch_val) < 0) {
-		LOGD("%s, read switch value error", "TV");
+		LOGD("%s, read switch value error", CFG_SECTION_TV);
 		return -1;
 	}
 
-	LOGD("%s, read switch value = %d", "TV", switch_val);
+	LOGD("%s, read switch value = %d", CFG_SECTION_TV, switch_val);
 
 	return switch_val;
 }
@@ -1005,11 +1005,11 @@ int SSMReadNoiseGateThresholdValue(void)
 	unsigned char tmp_val = 0;
 
 	if (SSMReadNTypes(SSM_RW_NOISE_GATE_THRESHOLD_START, 1, &tmp_val) < 0) {
-		LOGD("%s, read NoiseGateThreshold error", "TV");
+		LOGD("%s, read NoiseGateThreshold error", CFG_SECTION_TV);
 		return -1;
 	}
 
-	LOGD("%s, read NoiseGateThreshold = %d", "TV", tmp_val);
+	LOGD("%s, read NoiseGateThreshold = %d", CFG_SECTION_TV, tmp_val);
 
 	return tmp_val;
 }
@@ -1030,13 +1030,13 @@ int SSMReadGraphyBacklight(void)
 	unsigned char value = 0;
 
 	if (SSMReadNTypes(SSM_RW_UI_GRHPHY_BACKLIGHT_START, 1, &value) < 0) {
-		LOGD("%s, read graphybacklight error.\n", "TV");
+		LOGD("%s, read graphybacklight error.\n", CFG_SECTION_TV);
 		return -1;
 	}
 
 	if (/*value < 0 || */value > 100) {
 		LOGD("%s, range of graphybacklight (%d) is not between 0-100.\n",
-			 "TV", value);
+			 CFG_SECTION_TV, value);
 		return -1;
 	}
 
@@ -1055,7 +1055,7 @@ int SSMReadFastSuspendFlag(void)
 	unsigned char value = 0;
 
 	if (SSMReadNTypes(SSM_RW_FASTSUSPEND_FLAG_START, 1, &value) < 0) {
-		LOGD("%s, read FastSuspendFlag error.\n", "TV");
+		LOGD("%s, read FastSuspendFlag error.\n", CFG_SECTION_TV);
 		return -1;
 	}
 
@@ -1082,7 +1082,7 @@ int SSMReadCABufferSizeValue(void)
 	unsigned char data[] = { 0, 0 };
 
 	if (SSMReadNTypes(SSM_RW_CA_BUFFER_SIZE_START, 2, data) < 0) {
-		LOGE("%s, read ca_buffer_size error", "TV");
+		LOGE("%s, read ca_buffer_size error", CFG_SECTION_TV);
 		return 0;
 	}
 
@@ -1264,7 +1264,7 @@ int SSMDeviceMarkCheck()
 	for (i = 0; i < 3; i++) {
 		tmp_ch = 0;
 		if (SSMReadNTypes(mark_offset[i], 1, &tmp_ch) < 0) {
-			LOGE("%s, SSMDeviceMarkCheck Read Mark failed!!!\n", "TV");
+			LOGE("%s, SSMDeviceMarkCheck Read Mark failed!!!\n", CFG_SECTION_TV);
 			break;
 		}
 
@@ -1272,7 +1272,7 @@ int SSMDeviceMarkCheck()
 			failed_count += 1;
 			LOGE(
 				"%s, SSMDeviceMarkCheck Mark[%d]'s offset = %d, Mark[%d]'s Value = %d, read value = %d.\n",
-				"TV", i, mark_offset[i], i, mark_values[i], tmp_ch);
+				CFG_SECTION_TV, i, mark_offset[i], i, mark_values[i], tmp_ch);
 		}
 	}
 
@@ -1316,7 +1316,7 @@ static int SSMGetPreCopyingEnableCfg()
 {
 	const char *prop_value;
 
-	prop_value = config_get_str("TV", "ssm.precopying.en", "null");
+	prop_value = config_get_str(CFG_SECTION_TV, "ssm.precopying.en", "null");
 	if (strcmp(prop_value, "null") == 0 || strcmp(prop_value, "0") == 0
 			|| strcmp(prop_value, "disable") == 0) {
 		return 0;
@@ -1333,7 +1333,7 @@ static int SSMGetPreCopyingDevicePathCfg(char dev_path[])
 		return -1;
 	}
 
-	prop_value = config_get_str("TV", "ssm.precopying.devpath", "null");
+	prop_value = config_get_str(CFG_SECTION_TV, "ssm.precopying.devpath", "null");
 	if (strcmp(prop_value, "null") == 0) {
 		return 1;
 	}
@@ -1352,7 +1352,7 @@ int SSMHandlePreCopying()
 	char tmpPreCopyingDevicePath[256] = { '\0' };
 
 	if (SSMGetPreCopyingEnableCfg() == 0) {
-		LOGD("%s, Pre copying is disable now.\n", "TV");
+		LOGD("%s, Pre copying is disable now.\n", CFG_SECTION_TV);
 		return 0;
 	}
 
@@ -1363,7 +1363,7 @@ int SSMHandlePreCopying()
 
 	device_fd = open(tmpPreCopyingDevicePath, O_RDONLY);
 	if (device_fd < 0) {
-		LOGE("%s, Open device file \"%s\" error: %s.\n", "TV",
+		LOGE("%s, Open device file \"%s\" error: %s.\n", CFG_SECTION_TV,
 			 tmpPreCopyingDevicePath, strerror(errno));
 		return -1;
 	}
@@ -1417,9 +1417,9 @@ int GetSSMCfgBufferData(const char *key_str, int *buf_item_count, int radix,
 	const char *config_value;
 	char data_str[CC_CFG_VALUE_STR_MAX_LEN] = { 0 };
 
-	config_value = config_get_str("TV", key_str, "null");
+	config_value = config_get_str(CFG_SECTION_TV, key_str, "null");
 	if (strcasecmp(config_value, "null") == 0) {
-		LOGE("%s, can't get config \"%s\"!!!\n", "TV", key_str);
+		LOGE("%s, can't get config \"%s\"!!!\n", CFG_SECTION_TV, key_str);
 		return -1;
 	}
 
@@ -1438,7 +1438,7 @@ int GetSSMCfgBufferData(const char *key_str, int *buf_item_count, int radix,
 			cfg_item_count += 1;
 		} else {
 			LOGE("%s, we get data count more than desire count (%d)!!!\n",
-				 "TV", *buf_item_count);
+				 CFG_SECTION_TV, *buf_item_count);
 			return -1;
 		}
 	}

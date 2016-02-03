@@ -464,7 +464,7 @@ int CFbcCommunication::processData(COMM_DEV_TYPE_E fromDev, unsigned char *pData
 			//just test
 			const char *value;
 			if (!mbSendKeyCode) {
-				value = config_get_str("FBCUART", "fbc_key_event_handle", "null");
+				value = config_get_str(CFG_SECTION_FBCUART, "fbc_key_event_handle", "null");
 				if ( strcmp ( value, "true" ) == 0 )
 					mbSendKeyCode = true;
 				else mbSendKeyCode = false;

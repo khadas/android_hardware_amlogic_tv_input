@@ -248,7 +248,7 @@ public:
 	int SendHDMIRxCECGiveOSDNameMessage(tv_source_input_t source_input, unsigned char data_buf[]);
 
 	int GetHdmiHdcpKeyKsvInfo(int data_buf[]);
-	virtual int hdmi_out_towhat();
+	virtual bool hdmiOutWithFbc();
 	int StartUpgradeFBC(char *file_name, int mode, int upgrade_blk_size);
 	int SetSerialSwitch(int dev_id, int switch_val);
 	int SendSerialData(int dev_id, int data_len, unsigned char data_buf[]);
@@ -781,7 +781,7 @@ protected:
 	tv_window_mode_t m_win_mode;
 	int m_blackout_enable;//1 enable 0 disable
 	int m_cur_playing_prog_id;
-	bool mB_hdmiout_fbc;
+	bool mHdmiOutFbc;
 	CFbcCommunication *fbcIns;
 
 

@@ -106,10 +106,10 @@ CTvin::~CTvin()
 int CTvin::OpenTvin()
 {
 	const char *config_value;
-	config_value = config_get_str ( "TV", "tvin.manual.set.tvpath", "null" );
+	config_value = config_get_str ( CFG_SECTION_TV, "tvin.manual.set.tvpath", "null" );
 	strcpy ( config_tv_path, config_value );
 	memset ( config_default_path, 0x0, 64 );
-	config_value = config_get_str ( "TV", "tvin.manual.set.defaultpath", "null" );
+	config_value = config_get_str ( CFG_SECTION_TV, "tvin.manual.set.defaultpath", "null" );
 	strcpy ( config_default_path, config_value );
 	return 0;
 }
@@ -182,8 +182,8 @@ char *CTvin::VDIN_CheckVideoPath ( const char *videopath )
 		}
 	}
 
-	LOGW ( "%s, video path before check [%s]\n", "TV", videopath );
-	LOGW ( "%s, video path after check [%s]\n", "TV", gVideoPath );
+	LOGW ( "%s, video path before check [%s]\n", CFG_SECTION_TV, videopath );
+	LOGW ( "%s, video path after check [%s]\n", CFG_SECTION_TV, gVideoPath );
 
 	return gVideoPath;
 }
@@ -560,7 +560,7 @@ int CTvin::VDIN_SetDisplayVFreq ( int freq, int display_resolution , bool isFbc)
 	}
 
 	if (display_mode_type == -1) {
-		config_value = config_get_str ( "TV", "tvin.display.mode.type", "null" );
+		config_value = config_get_str ( CFG_SECTION_TV, "tvin.display.mode.type", "null" );
 		if (strcasecmp(config_value, "null") == 0 || strcasecmp(config_value, "hdmi_out") == 0) {
 			display_mode_type = 0;
 		} else if (strcasecmp(config_value, "lvds_out") == 0) {
@@ -2213,7 +2213,7 @@ int CTvin::TvinApi_SetCompPhaseEnable ( int enable )
 
 	if ( enable == 1 ) {
 		ret = SetFileAttrValue ( "/sys/module/tvin_afe/parameters/enable_dphase", "Y" );
-		LOGD ( "%s, enable TvinApi_SetCompPhase.", "TV" );
+		LOGD ( "%s, enable TvinApi_SetCompPhase.", CFG_SECTION_TV );
 	}
 
 	return ret;
@@ -2233,7 +2233,7 @@ int CTvin::VDIN_GetPortConnect ( int port )
 		return 0;
 	}
 
-	//LOGD("%s, port:%x,status:%d", "TV",port,status);
+	//LOGD("%s, port:%x,status:%d", CFG_SECTION_TV,port,status);
 
 	return status;
 }
@@ -2528,34 +2528,33 @@ unsigned int CTvin::Tvin_TransPortStringToValue(const char *port_str)
 
 void CTvin::Tvin_LoadSourceInputToPortMap()
 {
-	const char *SourceInputMapSection = "SourceInputMap";
 	const char *config_value = NULL;
 
-	config_value = config_get_str(SourceInputMapSection, "ro.tv.tvinchannel.atv", "TVIN_PORT_CVBS3");
+	config_value = config_get_str(CFG_SECTION_SRC_INPUT, "ro.tv.tvinchannel.atv", "TVIN_PORT_CVBS3");
 	mSourceInputToPortMap[SOURCE_TV] = Tvin_TransPortStringToValue(config_value);
 
-	config_value = config_get_str(SourceInputMapSection, "ro.tv.tvinchannel.av1", "TVIN_PORT_CVBS1");
+	config_value = config_get_str(CFG_SECTION_SRC_INPUT, "ro.tv.tvinchannel.av1", "TVIN_PORT_CVBS1");
 	mSourceInputToPortMap[SOURCE_AV1] = Tvin_TransPortStringToValue(config_value);
 
-	config_value = config_get_str(SourceInputMapSection, "ro.tv.tvinchannel.av2", "TVIN_PORT_CVBS2");
+	config_value = config_get_str(CFG_SECTION_SRC_INPUT, "ro.tv.tvinchannel.av2", "TVIN_PORT_CVBS2");
 	mSourceInputToPortMap[SOURCE_AV2] = Tvin_TransPortStringToValue(config_value);
 
-	config_value = config_get_str(SourceInputMapSection, "ro.tv.tvinchannel.ypbpr1", "TVIN_PORT_COMP0");
+	config_value = config_get_str(CFG_SECTION_SRC_INPUT, "ro.tv.tvinchannel.ypbpr1", "TVIN_PORT_COMP0");
 	mSourceInputToPortMap[SOURCE_YPBPR1] = Tvin_TransPortStringToValue(config_value);
 
-	config_value = config_get_str(SourceInputMapSection, "ro.tv.tvinchannel.ypbpr2", "TVIN_PORT_COMP1");
+	config_value = config_get_str(CFG_SECTION_SRC_INPUT, "ro.tv.tvinchannel.ypbpr2", "TVIN_PORT_COMP1");
 	mSourceInputToPortMap[SOURCE_YPBPR2] = Tvin_TransPortStringToValue(config_value);
 
-	config_value = config_get_str(SourceInputMapSection, "ro.tv.tvinchannel.hdmi1", "TVIN_PORT_HDMI0");
+	config_value = config_get_str(CFG_SECTION_SRC_INPUT, "ro.tv.tvinchannel.hdmi1", "TVIN_PORT_HDMI0");
 	mSourceInputToPortMap[SOURCE_HDMI1] = Tvin_TransPortStringToValue(config_value);
 
-	config_value = config_get_str(SourceInputMapSection, "ro.tv.tvinchannel.hdmi2", "TVIN_PORT_HDMI2");
+	config_value = config_get_str(CFG_SECTION_SRC_INPUT, "ro.tv.tvinchannel.hdmi2", "TVIN_PORT_HDMI2");
 	mSourceInputToPortMap[SOURCE_HDMI2] = Tvin_TransPortStringToValue(config_value);
 
-	config_value = config_get_str(SourceInputMapSection, "ro.tv.tvinchannel.hdmi3", "TVIN_PORT_HDMI1");
+	config_value = config_get_str(CFG_SECTION_SRC_INPUT, "ro.tv.tvinchannel.hdmi3", "TVIN_PORT_HDMI1");
 	mSourceInputToPortMap[SOURCE_HDMI3] = Tvin_TransPortStringToValue(config_value);
 
-	config_value = config_get_str(SourceInputMapSection, "ro.tv.tvinchannel.vga", "TVIN_PORT_VGA0");
+	config_value = config_get_str(CFG_SECTION_SRC_INPUT, "ro.tv.tvinchannel.vga", "TVIN_PORT_VGA0");
 	mSourceInputToPortMap[SOURCE_VGA] = Tvin_TransPortStringToValue(config_value);
 
 	mSourceInputToPortMap[SOURCE_MPEG] = TVIN_PORT_MPEG0;
@@ -2584,25 +2583,25 @@ tv_audio_channel_t CTvin::Tvin_GetInputSourceAudioChannelIndex ( tv_source_input
 	const char *config_value = NULL;
 
 	if ( source_input == SOURCE_TV ) {
-		config_value = config_get_str("TV", "tvin.aud.chan.atv", "2");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.aud.chan.atv", "2");
 	} else if ( source_input == SOURCE_AV1 ) {
-		config_value = config_get_str("TV", "tvin.aud.chan.av1", "1");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.aud.chan.av1", "1");
 	} else if ( source_input == SOURCE_AV2 ) {
-		config_value = config_get_str("TV", "tvin.aud.chan.av2", "3");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.aud.chan.av2", "3");
 	} else if ( source_input == SOURCE_YPBPR1 ) {
-		config_value = config_get_str("TV", "tvin.aud.chan.comp1", "0");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.aud.chan.comp1", "0");
 	} else if ( source_input == SOURCE_YPBPR2 ) {
-		config_value = config_get_str("TV", "tvin.aud.chan.comp2", "0");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.aud.chan.comp2", "0");
 	} else if ( source_input == SOURCE_HDMI1 ) {
-		config_value = config_get_str("TV", "tvin.aud.chan.hdmi1", "0");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.aud.chan.hdmi1", "0");
 	} else if ( source_input == SOURCE_HDMI2 ) {
-		config_value = config_get_str("TV", "tvin.aud.chan.hdmi2", "0");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.aud.chan.hdmi2", "0");
 	} else if ( source_input == SOURCE_HDMI3 ) {
-		config_value = config_get_str("TV", "tvin.aud.chan.hdmi3", "0");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.aud.chan.hdmi3", "0");
 	} else if ( source_input == SOURCE_VGA ) {
-		config_value = config_get_str("TV", "tvin.aud.chan.vga", "0");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.aud.chan.vga", "0");
 	} else if ( source_input == SOURCE_MPEG ) {
-		config_value = config_get_str("TV", "tvin.aud.chan.mpeg", "0");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.aud.chan.mpeg", "0");
 	}
 
 	if (config_value != NULL) {
@@ -2617,7 +2616,7 @@ tv_audio_in_source_type_t CTvin::Tvin_GetAudioInSourceType ( tv_source_input_t s
 	const char *config_value = NULL;
 
 	if (source_input == SOURCE_TV) {
-		config_value = config_get_str("TV", "tvin.aud.insource.atv", "TV_AUDIO_IN_SOURCE_TYPE_LINEIN");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.aud.insource.atv", "TV_AUDIO_IN_SOURCE_TYPE_LINEIN");
 		if (strcasecmp(config_value, "TV_AUDIO_IN_SOURCE_TYPE_ATV") == 0) {
 			return TV_AUDIO_IN_SOURCE_TYPE_ATV;
 		}
@@ -2647,7 +2646,7 @@ int CTvin::isVgaFmtInHdmi ( tvin_sig_fmt_t fmt )
 			|| fmt == TVIN_SIG_FMT_HDMI_1366X768_00HZ
 			|| fmt == TVIN_SIG_FMT_HDMI_1600X1200_00HZ
 			|| fmt == TVIN_SIG_FMT_HDMI_1920X1200_00HZ ) {
-		LOGD ( "%s, HDMI source : VGA format.", "TV" );
+		LOGD ( "%s, HDMI source : VGA format.", CFG_SECTION_TV );
 		return 1;
 	}
 
@@ -2681,10 +2680,10 @@ int CTvin::isSDFmtInHdmi ( tvin_sig_fmt_t fmt )
 			|| fmt == TVIN_SIG_FMT_HDMI_1440X480I_240HZ
 			|| fmt == TVIN_SIG_FMT_HDMI_800X600_00HZ
 			|| fmt == TVIN_SIG_FMT_HDMI_720X400_00HZ ) {
-		LOGD ( "%s, SD format.", "TV" );
+		LOGD ( "%s, SD format.", CFG_SECTION_TV );
 		return true;
 	} else {
-		LOGD ( "%s, HD format.", "TV" );
+		LOGD ( "%s, HD format.", CFG_SECTION_TV );
 		return false;
 	}
 }
@@ -2720,10 +2719,10 @@ bool CTvin::Tvin_is50HzFrameRateFmt ( tvin_sig_fmt_t fmt )
 			|| fmt == TVIN_SIG_FMT_CVBS_PAL_M
 			|| fmt == TVIN_SIG_FMT_CVBS_PAL_CN
 			|| fmt == TVIN_SIG_FMT_CVBS_SECAM ) {
-		LOGD ( "%s, Frame rate == 50Hz.", "TV" );
+		LOGD ( "%s, Frame rate == 50Hz.", CFG_SECTION_TV );
 		return true;
 	} else {
-		LOGD ( "%s, Frame rate != 50Hz.", "TV" );
+		LOGD ( "%s, Frame rate != 50Hz.", CFG_SECTION_TV );
 		return false;
 	}
 }
@@ -2761,10 +2760,10 @@ bool CTvin::Tvin_IsDeinterlaceFmt ( tvin_sig_fmt_t fmt )
 			|| fmt == TVIN_SIG_FMT_CVBS_PAL_I
 			|| fmt == TVIN_SIG_FMT_CVBS_PAL_M
 			|| fmt == TVIN_SIG_FMT_CVBS_SECAM ) {
-		LOGD ( "%s, Interlace format.", "TV" );
+		LOGD ( "%s, Interlace format.", CFG_SECTION_TV );
 		return true;
 	} else {
-		LOGD ( "%s, Progressive format.", "TV" );
+		LOGD ( "%s, Progressive format.", CFG_SECTION_TV );
 		return false;
 	}
 }
@@ -2854,7 +2853,7 @@ int CTvin::Tvin_AddPath ( tvin_path_id_t pathid )
 
 	if ( pathid >= TV_PATH_VDIN_AMVIDEO && pathid < TV_PATH_DECODER_3D_AMVIDEO ) {
 		if ( m_pathid == pathid ) {
-			LOGW ( "%s, no need to add the same tvin path.\n", "TV" );
+			LOGW ( "%s, no need to add the same tvin path.\n", CFG_SECTION_TV );
 			return 0;
 		}
 
@@ -2862,10 +2861,10 @@ int CTvin::Tvin_AddPath ( tvin_path_id_t pathid )
 			ret = VDIN_RmTvPath();
 
 			if ( ret > 0 ) {
-				LOGD ( "%s, remove tvin path ok, %d ms gone.\n", "TV", ( dly * i ) );
+				LOGD ( "%s, remove tvin path ok, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 				break;
 			} else {
-				LOGW ( "%s, remove tvin path faild, %d ms gone.\n", "TV", ( dly * i ) );
+				LOGW ( "%s, remove tvin path faild, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 				usleep ( dly * 1000 );
 			}
 		}
@@ -2874,10 +2873,10 @@ int CTvin::Tvin_AddPath ( tvin_path_id_t pathid )
 			ret = VDIN_RmDefPath();
 
 			if ( ret > 0 ) {
-				LOGD ( "%s, remove default path ok, %d ms gone.\n", "TV", ( dly * i ) );
+				LOGD ( "%s, remove default path ok, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 				break;
 			} else {
-				LOGW ( "%s, remove default path faild, %d ms gone.\n", "TV", ( dly * i ) );
+				LOGW ( "%s, remove default path faild, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 				usleep ( dly * 1000 );
 			}
 		}
@@ -2899,10 +2898,10 @@ int CTvin::Tvin_AddPath ( tvin_path_id_t pathid )
 		}
 
 		if ( ret >= 0 ) {
-			LOGD ( "%s, add pathid[%d] ok, %d ms gone.\n", "TV", pathid, i );
+			LOGD ( "%s, add pathid[%d] ok, %d ms gone.\n", CFG_SECTION_TV, pathid, i );
 			break;
 		} else {
-			LOGW ( "%s, add pathid[%d] faild, %d ms gone.\n", "TV", pathid, i );
+			LOGW ( "%s, add pathid[%d] faild, %d ms gone.\n", CFG_SECTION_TV, pathid, i );
 			usleep ( dly * 1000 );
 		}
 	}
@@ -2924,7 +2923,7 @@ int CTvin::Tvin_RemovePath ( tv_path_type_t pathtype )
 		ret = Tvin_CheckPathActive ( pathtype, 0 );
 
 		if ( ret == TV_PATH_STATUS_INACTIVE ) {
-			LOGD ( "%s, check path is inactive, %d ms gone.\n", "TV", ( dly * i ) );
+			LOGD ( "%s, check path is inactive, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 			break;
 		} else if ( ret == TV_PATH_STATUS_INACTIVE || ret == TV_PATH_STATUS_ERROR ) {
 			usleep ( dly * 1000 );
@@ -2934,7 +2933,7 @@ int CTvin::Tvin_RemovePath ( tv_path_type_t pathtype )
 	}
 
 	if ( i == 500 ) {
-		LOGE ( "%s, check path active faild, %d ms gone.\n", "TV", ( dly * i ) );
+		LOGE ( "%s, check path active faild, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 	}
 
 	if ( pathtype == TV_PATH_TYPE_DEFAULT ) {
@@ -2942,10 +2941,10 @@ int CTvin::Tvin_RemovePath ( tv_path_type_t pathtype )
 			ret = VDIN_RmDefPath();
 
 			if ( ret > 0 ) {
-				LOGD ( "%s, remove default path ok, %d ms gone.\n", "TV", ( dly * i ) );
+				LOGD ( "%s, remove default path ok, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 				break;
 			} else {
-				LOGW ( "%s, remove default path faild, %d ms gone.\n", "TV", ( dly * i ) );
+				LOGW ( "%s, remove default path faild, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 				usleep ( dly * 1000 );
 			}
 		}
@@ -2954,10 +2953,10 @@ int CTvin::Tvin_RemovePath ( tv_path_type_t pathtype )
 			ret = VDIN_RmTvPath();
 
 			if ( ret > 0 ) {
-				LOGD ( "%s, remove tvin path ok, %d ms gone.\n", "TV", ( dly * i ) );
+				LOGD ( "%s, remove tvin path ok, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 				break;
 			} else {
-				LOGW ( "%s, remove tvin path faild, %d ms gone.\n", "TV", ( dly * i ) );
+				LOGW ( "%s, remove tvin path faild, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 				usleep ( dly * 1000 );
 			}
 		}
@@ -2968,10 +2967,10 @@ int CTvin::Tvin_RemovePath ( tv_path_type_t pathtype )
 			ret = VDIN_RmPreviewPath();
 
 			if ( ret > 0 ) {
-				LOGD ( "%s, remove preview path ok, %d ms gone.\n", "TV", ( dly * i ) );
+				LOGD ( "%s, remove preview path ok, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 				break;
 			} else {
-				LOGW ( "%s, remove preview path faild, %d ms gone.\n", "TV", ( dly * i ) );
+				LOGW ( "%s, remove preview path faild, %d ms gone.\n", CFG_SECTION_TV, ( dly * i ) );
 				usleep ( dly * 1000 );
 			}
 		}
@@ -3012,7 +3011,7 @@ int CTvin::Tvin_CheckPathActive ( tv_path_type_t path_type, int isCheckD2D3 )
 	f = fopen ( "/sys/class/vfm/map", "r" );
 
 	if ( !f ) {
-		LOGE ( "%s, can not open /sys/class/vfm/map!\n", "TV" );
+		LOGE ( "%s, can not open /sys/class/vfm/map!\n", CFG_SECTION_TV );
 		return TV_PATH_STATUS_NO_DEV;
 	}
 
@@ -3026,7 +3025,7 @@ int CTvin::Tvin_CheckPathActive ( tv_path_type_t path_type, int isCheckD2D3 )
 			active_str = tvin_active_str;
 			inactive_str = tvin_inactive_str;
 		} else {
-			LOGW ( "%s, there is no %d path_type.\n", "TV", path_type );
+			LOGW ( "%s, there is no %d path_type.\n", CFG_SECTION_TV, path_type );
 			break;
 		}
 
@@ -3034,31 +3033,31 @@ int CTvin::Tvin_CheckPathActive ( tv_path_type_t path_type, int isCheckD2D3 )
 			if ( isCheckD2D3 == 0 ) {
 				if ( strstr ( str_find, active_str ) && strstr ( str_find, di_active_str ) ) {
 					is_active = TV_PATH_STATUS_ACTIVE;
-					//LOGD("%s, %s is active.\n", "TV", path);
+					//LOGD("%s, %s is active.\n", CFG_SECTION_TV, path);
 				} else if ( strstr ( str_find, inactive_str )
 							&& ( strstr ( str_find, di_inactive_str ) || ( !strstr ( str_find, di_inactive_str ) ) )
 						  ) {
 					is_active = TV_PATH_STATUS_INACTIVE;
-					//LOGD("%s, %s is inactive.\n", "TV", path);
+					//LOGD("%s, %s is inactive.\n", CFG_SECTION_TV, path);
 				} else {
 					is_active = TV_PATH_STATUS_ERROR;
-					LOGE ( "%s, %s is error!\n", "TV", path );
+					LOGE ( "%s, %s is error!\n", CFG_SECTION_TV, path );
 				}
 
 				break;
 			} else {
 				if ( strstr ( str_find, active_str ) && strstr ( str_find, di_active_str ) && strstr ( str_find, d2d3_active_str ) ) {
 					is_active = TV_PATH_STATUS_ACTIVE;
-					//LOGD("%s, %s is active.\n", "TV", path);
+					//LOGD("%s, %s is active.\n", CFG_SECTION_TV, path);
 				} else if ( strstr ( str_find, inactive_str )
 							&& ( strstr ( str_find, di_inactive_str ) || ( !strstr ( str_find, di_inactive_str ) ) )
 							&& ( strstr ( str_find, d2d3_inactive_str ) || ( !strstr ( str_find, d2d3_inactive_str ) ) )
 						  ) {
 					is_active = TV_PATH_STATUS_INACTIVE;
-					//LOGD("%s, %s is inactive.\n", "TV", path);
+					//LOGD("%s, %s is inactive.\n", CFG_SECTION_TV, path);
 				} else {
 					is_active = TV_PATH_STATUS_ERROR;
-					LOGE ( "%s, %s is error!\n", "TV", path );
+					LOGE ( "%s, %s is error!\n", CFG_SECTION_TV, path );
 				}
 
 				break;

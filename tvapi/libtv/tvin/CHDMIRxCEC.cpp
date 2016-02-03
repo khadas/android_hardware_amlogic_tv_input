@@ -125,7 +125,7 @@ int CTvin::CHDMIRxCEC::GetModuleEnableFlag()
 	const char *config_value = NULL;
 
 	if (mModuleEnableFlag < 0) {
-		config_value = config_get_str("TV", "tvin.hdmirx.cec.enable", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "tvin.hdmirx.cec.enable", "null");
 		if (strcasecmp(config_value, "null") == 0) {
 			mModuleEnableFlag = 0;
 		} else if (strcasecmp(config_value, "1") == 0 || strcasecmp(config_value, "true") == 0) {

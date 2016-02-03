@@ -241,7 +241,7 @@ int KeyData_GetBarCodeDataLen()
 	const char *config_value;
 
 	if (gSSMBarCodeLen <= 0) {
-		config_value = config_get_str("TV", CS_BARCODE_LEN_CFG, "null");
+		config_value = config_get_str(CFG_SECTION_TV, CS_BARCODE_LEN_CFG, "null");
 		if (strcmp(config_value, "null") == 0) {
 			gSSMBarCodeLen = 32;
 		} else {
@@ -504,7 +504,7 @@ static int GetSSMMacAddressStartWorkEnableCFG()
 {
 	const char *config_value;
 
-	config_value = config_get_str("TV", CS_MAC_ADDRESS_STARTWRK_EN_CFG, "null");
+	config_value = config_get_str(CFG_SECTION_TV, CS_MAC_ADDRESS_STARTWRK_EN_CFG, "null");
 	if (strcmp(config_value, "null") == 0) {
 		LOGD(
 			"%s, get config is \"%s\", return 0 to not enable mac address start work.\n",
@@ -638,7 +638,7 @@ static void *SSMMacAddressStartWorkMainApp(void *data)
 	LOGD("%s, entering...\n", __FUNCTION__);
 
 	if (GetSSMMacAddressStartWorkEnableCFG() == 0) {
-		LOGE("%s, ssm mac address start work is not enable.\n", "TV");
+		LOGE("%s, ssm mac address start work is not enable.\n", CFG_SECTION_TV);
 		return NULL;
 	}
 
@@ -720,7 +720,7 @@ static int KillMacAddressStartWorkThread()
 	if (i == tmp_timeout_count) {
 		LOGE(
 			"%s, we have try %d times, but the mac address start work thread's exec flag is still(%d)!!!\n",
-			"TV", tmp_timeout_count,
+			CFG_SECTION_TV, tmp_timeout_count,
 			GetMacAddressStartWorkThreadExecFlag());
 		return -1;
 	}
@@ -793,7 +793,7 @@ int GetSSMHandleHDCPKeyEnableCFG()
 {
 	const char *config_value;
 
-	config_value = config_get_str("TV", CS_HDCP_KEY_EN_CFG, "null");
+	config_value = config_get_str(CFG_SECTION_TV, CS_HDCP_KEY_EN_CFG, "null");
 #if 0
 	LOGD("%s, get \"%s\" is \"%s\".\n", __FUNCTION__, CS_HDCP_KEY_EN_CFG,
 		 config_value);
@@ -812,7 +812,7 @@ int GetSSMHandleHDCPKeyDemoEnableCFG()
 {
 	const char *config_value;
 
-	config_value = config_get_str("TV", CS_HDCP_KEY_DEMO_EN_CFG, "null");
+	config_value = config_get_str(CFG_SECTION_TV, CS_HDCP_KEY_DEMO_EN_CFG, "null");
 #if 0
 	LOGD("%s, get \"%s\" is \"%s\".\n", __FUNCTION__, CS_HDCP_KEY_DEMO_EN_CFG,
 		 config_value);
@@ -855,14 +855,14 @@ int RealHandleHDCPKey(unsigned char hdcp_key_buf[])
 
 	dev_fd = open("/sys/class/hdmirx/hdmirx0/edid", O_RDWR);
 	if (dev_fd < 0) {
-		LOGE("%s, open edid file ERROR(%s)!!\n", "TV", strerror(errno));
+		LOGE("%s, open edid file ERROR(%s)!!\n", CFG_SECTION_TV, strerror(errno));
 		return -1;
 	}
 
 	if (write(dev_fd, hdcp_key_buf, CC_HDCP_KEY_TOTAL_SIZE) < 0) {
 		close(dev_fd);
 		dev_fd = -1;
-		LOGE("%s, write edid file ERROR(%s)!!\n", "TV", strerror(errno));
+		LOGE("%s, write edid file ERROR(%s)!!\n", CFG_SECTION_TV, strerror(errno));
 
 		return -1;
 	}
@@ -879,7 +879,7 @@ int GetSSMHandleHDMIEdidByCustomerEnableCFG()
 {
 	const char *config_value;
 
-	config_value = config_get_str("TV", CS_HDMI_EDID_EN_CFG, "null");
+	config_value = config_get_str(CFG_SECTION_TV, CS_HDMI_EDID_EN_CFG, "null");
 #if 0
 	LOGD("%s, get \"%s\" is \"%s\".\n", __FUNCTION__, CS_HDMI_EDID_EN_CFG,
 		 config_value);
@@ -903,7 +903,7 @@ int RealHandleHDMIEdid(unsigned char customer_hdmi_edid_buf[])
 
 	dev_fd = open("/sys/class/hdmirx/hdmirx0/edid", O_RDWR);
 	if (dev_fd < 0) {
-		LOGE("%s, open edid file ERROR(%s)!!\n", "TV", strerror(errno));
+		LOGE("%s, open edid file ERROR(%s)!!\n", CFG_SECTION_TV, strerror(errno));
 		return -1;
 	}
 
@@ -911,7 +911,7 @@ int RealHandleHDMIEdid(unsigned char customer_hdmi_edid_buf[])
 			< 0) {
 		close(dev_fd);
 		dev_fd = -1;
-		LOGE("%s, write edid file ERROR(%s)!!\n", "TV", strerror(errno));
+		LOGE("%s, write edid file ERROR(%s)!!\n", CFG_SECTION_TV, strerror(errno));
 
 		return -1;
 	}
@@ -925,7 +925,7 @@ int AppendEdidPrefixCode(unsigned char customer_hdmi_edid_buf[],
 						 unsigned char hdmi_edid_buf[])
 {
 	if (customer_hdmi_edid_buf == NULL || hdmi_edid_buf == NULL) {
-		LOGE("%s, Append hdmi edid's prefixCode ERROR(%s)!!\n", "TV",
+		LOGE("%s, Append hdmi edid's prefixCode ERROR(%s)!!\n", CFG_SECTION_TV,
 			 strerror(errno));
 		return -1;
 	}
@@ -982,10 +982,10 @@ static int GetFilePathCFG(char *key_str, char path_buf[])
 	const char *cfg_value;
 
 	path_buf[0] = '\0';
-	cfg_value = config_get_str("TV", key_str, "");
+	cfg_value = config_get_str(CFG_SECTION_TV, key_str, "");
 	strcpy(path_buf, cfg_value);
 #if 0
-	LOGD("%s, get \"%s\" is \"%s\".\n", "TV", key_str, path_buf);
+	LOGD("%s, get \"%s\" is \"%s\".\n", CFG_SECTION_TV, key_str, path_buf);
 #endif
 	return tmp_ret;
 }
@@ -994,12 +994,12 @@ static int GetFileOffsetCFG(char *key_str)
 {
 	const char *cfg_value;
 
-	cfg_value = config_get_str("TV", key_str, "null");
+	cfg_value = config_get_str(CFG_SECTION_TV, key_str, "null");
 #if 0
-	LOGD("%s, get \"%s\" is \"%s\".\n", "TV", key_str, cfg_value);
+	LOGD("%s, get \"%s\" is \"%s\".\n", CFG_SECTION_TV, key_str, cfg_value);
 #endif
 	if (strcmp(cfg_value, "null") == 0) {
-		LOGD("%s, get config \"%s\" is \"%s\", return 0 for default.\n", "TV",
+		LOGD("%s, get config \"%s\" is \"%s\", return 0 for default.\n", CFG_SECTION_TV,
 			 key_str, cfg_value);
 		return 0;
 	}
@@ -1011,7 +1011,7 @@ static int handleDataFilePath(char *file_name, int offset, int nsize,
 							  char file_path[])
 {
 	if (file_name == NULL) {
-		LOGE("%s, file_name is NULL!!!\n", "TV");
+		LOGE("%s, file_name is NULL!!!\n", CFG_SECTION_TV);
 		return -1;
 	}
 
@@ -1027,7 +1027,7 @@ static int ReadDataFromFile(char *file_name, int offset, int nsize,
 	char file_path[512] = { '\0' };
 
 	if (data_buf == NULL) {
-		LOGE("%s, data_buf is NULL!!!\n", "TV");
+		LOGE("%s, data_buf is NULL!!!\n", CFG_SECTION_TV);
 		return -1;
 	}
 
@@ -1046,7 +1046,7 @@ static int ReadDataFromFile(char *file_name, int offset, int nsize,
 
 	device_fd = open(tmp_ptr, O_RDONLY);
 	if (device_fd < 0) {
-		LOGE("%s: open file \"%s\" error(%s).\n", "TV", file_name,
+		LOGE("%s: open file \"%s\" error(%s).\n", CFG_SECTION_TV, file_name,
 			 strerror(errno));
 		return -1;
 	}
@@ -1069,7 +1069,7 @@ static int SaveDataToFile(char *file_name, int offset, int nsize,
 	char file_path[512] = { '\0' };
 
 	if (data_buf == NULL) {
-		LOGE("%s, data_buf is NULL!!!\n", "TV");
+		LOGE("%s, data_buf is NULL!!!\n", CFG_SECTION_TV);
 		return -1;
 	}
 
@@ -1088,7 +1088,7 @@ static int SaveDataToFile(char *file_name, int offset, int nsize,
 
 	device_fd = open(tmp_ptr, O_RDWR | O_SYNC);
 	if (device_fd < 0) {
-		LOGE("%s: open file \"%s\" error(%s).\n", "TV", file_name,
+		LOGE("%s: open file \"%s\" error(%s).\n", CFG_SECTION_TV, file_name,
 			 strerror(errno));
 		return -1;
 	}
@@ -1114,12 +1114,12 @@ static int RealRWData(RWDataInfo *data_info)
 	LOGD("%s, file_name is %s.\n", __FUNCTION__, file_name);
 #endif
 	if (strlen(file_name) == 0) {
-		LOGE("%s, length of file_name is 0!!!\n", "TV");
+		LOGE("%s, length of file_name is 0!!!\n", CFG_SECTION_TV);
 		return -2;
 	}
 
 	if (data_info->rw_off < 0) {
-		LOGE("%s, data_info->rw_off (%d) is less than 0!!!\n", "TV",
+		LOGE("%s, data_info->rw_off (%d) is less than 0!!!\n", CFG_SECTION_TV,
 			 data_info->rw_off);
 		return -1;
 	}
@@ -1127,14 +1127,14 @@ static int RealRWData(RWDataInfo *data_info)
 	if (data_info->rw_off + data_info->rw_size > data_info->max_size) {
 		LOGE(
 			"%s, data_info->rw_off + data_info->rw_size (%d) is more than data_info->max_size(%d) !!!\n",
-			"TV", data_info->rw_off + data_info->rw_size,
+			CFG_SECTION_TV, data_info->rw_off + data_info->rw_size,
 			data_info->max_size);
 		return -1;
 	}
 
 	file_off = GetFileOffsetCFG(data_info->off_cfg_name);
 	if (file_off < 0) {
-		LOGE("%s, file_off (%d) is less than 0!!!\n", "TV", file_off);
+		LOGE("%s, file_off (%d) is less than 0!!!\n", CFG_SECTION_TV, file_off);
 		return -1;
 	}
 
@@ -1321,7 +1321,7 @@ int GetHDMIEdidFromFile(int rd_off, int rd_size, int port,
 		tmpInfo.path_cfg_name = (char *) CS_HDMI_PORT3_EDID_FILE_PATH_CFG;
 		break;
 	default:
-		LOGE("%s, port is error, =%d\n", "TV", port);
+		LOGE("%s, port is error, =%d\n", CFG_SECTION_TV, port);
 		tmpInfo.path_cfg_name = (char *) CS_HDMI_EDID_FILE_PATH_CFG;
 		break;
 	}

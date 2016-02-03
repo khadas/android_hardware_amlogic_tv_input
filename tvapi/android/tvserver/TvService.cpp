@@ -2842,7 +2842,7 @@ status_t TvService::Client::processCmd(const Parcel &p, Parcel *r)
 		tmp_str16 = p.readString16();
 		value_str = String8(tmp_str16);
 
-		tmpRet = config_set_str("TV", key_str.string(), value_str.string());
+		tmpRet = config_set_str(CFG_SECTION_TV, key_str.string(), value_str.string());
 		r->writeInt32(tmpRet);
 		break;
 	}
@@ -2856,7 +2856,7 @@ status_t TvService::Client::processCmd(const Parcel &p, Parcel *r)
 		tmp_str16 = p.readString16();
 		def_str = String8(tmp_str16);
 
-		prop_value = config_get_str("TV", key_str.string(), def_str.string());
+		prop_value = config_get_str(CFG_SECTION_TV, key_str.string(), def_str.string());
 		tmp_str16 = String16(prop_value);
 
 		r->writeString16(tmp_str16);
@@ -3117,7 +3117,7 @@ status_t TvService::Client::processCmd(const Parcel &p, Parcel *r)
 		Vector<sp<CTvChannel> > out;
 		int tmpRet = CTvRegion::getChannelListByName("CHINA,Default DTMB ALL", out);
 		r->writeInt32(out.size());
-		for (int i = 0; i < out.size(); i++) {
+		for (int i = 0; i < (int)out.size(); i++) {
 			r->writeInt32(out[i]->getID());
 			r->writeInt32(out[i]->getFrequency());
 		}
@@ -3353,8 +3353,7 @@ status_t TvService::Client::processCmd(const Parcel &p, Parcel *r)
 	}
 
 	case HDMI_OUT_TOWHAT: {
-		int tmpRet = mpTv->hdmi_out_towhat();
-		r->writeInt32(tmpRet);
+		r->writeInt32(mpTv->hdmiOutWithFbc()?1:0);
 		break;
 	}
 	case FACTORY_FBC_UPGRADE: {
@@ -4281,7 +4280,7 @@ status_t TvService::Client::processCmd(const Parcel &p, Parcel *r)
 		int skip = p.readInt32();
 		CTvProgram::selectByType(type, skip, out);
 		r->writeInt32(out.size());
-		for (int i = 0; i < out.size(); i++) {
+		for (int i = 0; i < (int)out.size(); i++) {
 			r->writeInt32(out[i]->getID());
 			r->writeInt32(out[i]->getChanOrderNum());
 			r->writeInt32(out[i]->getMajor());

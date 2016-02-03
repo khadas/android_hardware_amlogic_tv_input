@@ -40,39 +40,39 @@ int GetAudioAmpMasterNolinePointData(int get_type, const char *value_buf, int da
 {
 	const char *config_value;
 	if (value_buf != NULL) {
-		config_value = config_get_str("TV", value_buf, "null");
+		config_value = config_get_str(CFG_SECTION_TV, value_buf, "null");
 	} else {
 		switch (get_type) {
 		case CC_GET_LUT_TV: {
-			config_value = config_get_str("TV", "audio.amp.master.noline.point.data.tv", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.amp.master.noline.point.data.tv", "null");
 		}
 		break;
 		case CC_GET_LUT_AV: {
-			config_value = config_get_str("TV", "audio.amp.master.noline.point.data.av", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.amp.master.noline.point.data.av", "null");
 		}
 		break;
 		case CC_GET_LUT_COMP: {
-			config_value = config_get_str("TV", "audio.amp.master.noline.point.data.comp", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.amp.master.noline.point.data.comp", "null");
 		}
 		break;
 		case CC_GET_LUT_HDMI: {
-			config_value = config_get_str("TV", "audio.amp.master.noline.point.data.hdmi", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.amp.master.noline.point.data.hdmi", "null");
 		}
 		break;
 		case CC_GET_LUT_VGA: {
-			config_value = config_get_str("TV", "audio.amp.master.noline.point.data.vga", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.amp.master.noline.point.data.vga", "null");
 		}
 		break;
 		case CC_GET_LUT_MPEG: {
-			config_value = config_get_str("TV", "audio.amp.master.noline.point.data.mpeg", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.amp.master.noline.point.data.mpeg", "null");
 		}
 		break;
 		case CC_GET_LUT_HDMI_4K2K: {
-			config_value = config_get_str("TV", "audio.amp.master.noline.point.data.hdmi4k2k", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.amp.master.noline.point.data.hdmi4k2k", "null");
 		}
 		break;
 		case CC_GET_LUT_USB_4K2K: {
-			config_value = config_get_str("TV", "audio.amp.master.noline.point.data.usb4k2k", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.amp.master.noline.point.data.usb4k2k", "null");
 		}
 		break;
 		default: {
@@ -82,7 +82,7 @@ int GetAudioAmpMasterNolinePointData(int get_type, const char *value_buf, int da
 		}
 	}
 	if (strcasecmp(config_value, "null") == 0) {
-		//LOGE("%s, can't get config \"%s\"!!!\n", "TV", key_str);
+		//LOGE("%s, can't get config \"%s\"!!!\n", CFG_SECTION_TV, key_str);
 		return -1;
 	}
 
@@ -112,7 +112,7 @@ int GetDefault_EQGain_Table(int *EqTable)
 int GetAudioEQPresetBufferPtr(int *EqTable)
 {
 	int bufs_count = 0, buf_item_count = 0;
-	const char *config_value = config_get_str("TV", "audio.eq.presetbuf", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.eq.presetbuf", "null");
 	if (strcasecmp(config_value, "null") == 0) {
 		return -1;
 	}
@@ -155,7 +155,7 @@ int GetAudioAmpMainvolBuf(const char *TableKeyName, int data_buf[])
 	int bufs_count = 0, buf_item_count = 0;
 	const char *config_value;
 
-	config_value = config_get_str("TV", TableKeyName, "null");
+	config_value = config_get_str(CFG_SECTION_TV, TableKeyName, "null");
 	if (strcasecmp(config_value, "null") == 0) {
 		return -1;
 	}
@@ -192,39 +192,39 @@ int GetAudioAmpSupbassvolBuf(int get_type, int data_buf[])
 
 	switch (get_type) {
 	case CC_GET_LUT_TV: {
-		config_value = config_get_str("TV", "audio.amp.supbassvol.tv.lutbuf", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supbassvol.tv.lutbuf", "null");
 	}
 
 	break;
 	case CC_GET_LUT_AV: {
-		config_value = config_get_str("TV", "audio.amp.supbassvol.av.lutbuf", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supbassvol.av.lutbuf", "null");
 	}
 	break;
 	case CC_GET_LUT_COMP: {
-		config_value = config_get_str("TV", "audio.amp.supbassvol.comp.lutbuf", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supbassvol.comp.lutbuf", "null");
 	}
 	break;
 	case CC_GET_LUT_HDMI: {
-		config_value = config_get_str("TV", "audio.amp.supbassvol.hdmi.lutbuf", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supbassvol.hdmi.lutbuf", "null");
 	}
 	break;
 	case CC_GET_LUT_VGA: {
-		config_value = config_get_str("TV", "audio.amp.supbassvol.vga.lutbuf", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supbassvol.vga.lutbuf", "null");
 	}
 
 	break;
 	case CC_GET_LUT_MPEG: {
-		config_value = config_get_str("TV", "audio.amp.supbassvol.mpeg.lutbuf", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supbassvol.mpeg.lutbuf", "null");
 	}
 
 	break;
 	case CC_GET_LUT_HDMI_4K2K: {
-		config_value = config_get_str("TV", "audio.amp.supbassvol.hdmi4k2k.lb.name", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supbassvol.hdmi4k2k.lb.name", "null");
 	}
 
 	break;
 	case CC_GET_LUT_USB_4K2K: {
-		config_value = config_get_str("TV", "audio.amp.supbassvol.usb4k2k.lb.name", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supbassvol.usb4k2k.lb.name", "null");
 	}
 
 	break;
@@ -261,7 +261,7 @@ int GetAudioAmpSupbassvolBuf(int get_type, int data_buf[])
 
 int GetAudioAmplifierMasterNoLineSwitchFlag()
 {
-	const char *config_value = config_get_str("TV", "audio.amp.master.noline.switch", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.amp.master.noline.switch", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
@@ -272,7 +272,7 @@ int GetAudioAmplifierMasterNoLineSwitchFlag()
 
 int GetAudioAmplifierSupperBassNoLineSwitchFlag()
 {
-	const char *config_value = config_get_str("TV", "audio.amp.supperbass.noline.switch", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supperbass.noline.switch", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
@@ -283,7 +283,7 @@ int GetAudioAmplifierSupperBassNoLineSwitchFlag()
 
 int GetAudioAmplifierMasterNoLinePointsCount()
 {
-	const char *config_value = config_get_str("TV", "audio.amp.master.noline.point.cnt", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.amp.master.noline.point.cnt", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 11;
@@ -294,7 +294,7 @@ int GetAudioAmplifierMasterNoLinePointsCount()
 
 int GetAudioAmplifierSupperBassNoLinePointsCount()
 {
-	const char *config_value = config_get_str("TV", "audio.amp.supperbass.noline.point.cnt", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supperbass.noline.point.cnt", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 5;
@@ -305,10 +305,10 @@ int GetAudioAmplifierSupperBassNoLinePointsCount()
 
 int GetAudioAmplifierBalanceExchangeCFG()
 {
-	const char *config_value = config_get_str("TV", "audio.amp.balance.exchg", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.amp.balance.exchg", "null");
 
 	//   if (data_buf[0] >= 0 && data_buf[0] <= 100) {
-	//       LOGD("%s, we have get the index buffer.\n", "TV");
+	//       LOGD("%s, we have get the index buffer.\n", CFG_SECTION_TV);
 	//       return 0;
 	//   }
 
@@ -321,7 +321,7 @@ int GetAudioAmplifierBalanceExchangeCFG()
 
 int GetAudioMainVolLutBufCFGIndexModifyEnable()
 {
-	const char *config_value = config_get_str("TV", "audio.amp.master.cfgindex.mod.en", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.amp.master.cfgindex.mod.en", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
@@ -347,7 +347,7 @@ int GetAudioMainVolLutBufNameModifyUbootenvCFG()
 
 int GetAudioMainVolLutBufNameModifyEnableCFG()
 {
-	const char *config_value = config_get_str("TV", "audio.amp.mainvol.lutbufname.mod.en", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.amp.mainvol.lutbufname.mod.en", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
@@ -359,7 +359,7 @@ int GetAudioMainVolLutBufNameModifyEnableCFG()
 
 int GetAudioSupperBassVolLutBufCFGIndexModifyEnable()
 {
-	const char *config_value = config_get_str("TV", "audio.amp.supperbass.cfgindex.mod.en", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supperbass.cfgindex.mod.en", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
@@ -370,7 +370,7 @@ int GetAudioSupperBassVolLutBufCFGIndexModifyEnable()
 
 int GetAudioSupperBassVolLutBufNameModifyEnableCFG()
 {
-	const char *config_value = config_get_str("TV", "audio.amp.supbassvol.lutbufname.mod.en", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.amp.supbassvol.lutbufname.mod.en", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
@@ -382,7 +382,7 @@ int GetAudioSupperBassVolLutBufNameModifyEnableCFG()
 
 int GetAudioDVISupportEnable()
 {
-	const char *config_value = config_get_str("TV", "audio.dvi.support.enable", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.dvi.support.enable", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
@@ -394,7 +394,7 @@ int GetAudioDVISupportEnable()
 
 int GetTvAudioCardName(char tv_card_name_buf[])
 {
-	const char *value = config_get_str("TV", "audio.tv.card.name", "null");
+	const char *value = config_get_str(CFG_SECTION_TV, "audio.tv.card.name", "null");
 
 	strcpy(tv_card_name_buf, value);
 	if (strcmp(value, "null") == 0) {
@@ -406,7 +406,7 @@ int GetTvAudioCardName(char tv_card_name_buf[])
 
 int GetTvAudioCardNeedSet()
 {
-	const char *config_value = config_get_str("TV", "audio.tv.card.needset", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.tv.card.needset", "null");
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
 	}
@@ -421,7 +421,7 @@ int GetTvAudioCardNeedSet()
 int GetAudioEffectAmplifierGainCfg(const char *cfg_name, int def_gain_val, int max_gain_val)
 {
 	int tmp_val;
-	const char *config_value = config_get_str("TV", cfg_name, "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, cfg_name, "null");
 	if (strcmp(config_value, "null") == 0) {
 		tmp_val = def_gain_val;
 	} else {
@@ -437,7 +437,7 @@ int GetAudioEffectAmplifierGainCfg(const char *cfg_name, int def_gain_val, int m
 
 int GetAudioSRSSourroundEnableCFG()
 {
-	const char *config_value = config_get_str("TV", "audio.srs.sourround.enable", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.srs.sourround.enable", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
@@ -449,7 +449,7 @@ int GetAudioSRSSourroundEnableCFG()
 int GetAudioSRSGainCfg(const char *cfg_name, int def_gain_val)
 {
 	int tmp_val = 0;
-	const char *config_value = config_get_str("TV", cfg_name, "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, cfg_name, "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		tmp_val = def_gain_val;
@@ -470,7 +470,7 @@ int GetAudioSRSSupperBassTrubassSpeakerSizeCfg()
 
 	strcpy(cfg_name, "audio.srs.turbass.speakersize");
 
-	const char *config_value = config_get_str("TV", cfg_name, "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, cfg_name, "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return -1;
@@ -486,7 +486,7 @@ int GetAudioSRSSupperBassTrubassSpeakerSizeCfg()
 
 int GetAudioDumpDataEnableFlagCfg()
 {
-	const char *config_value = config_get_str("TV", "audio.dump.data.en", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.dump.data.en", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
@@ -497,7 +497,7 @@ int GetAudioDumpDataEnableFlagCfg()
 
 int GetAudioSupperBassSwitchDisableCFG()
 {
-	const char *config_value = config_get_str("TV", "audio.supperbass.switch.disable", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.supperbass.switch.disable", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
@@ -508,7 +508,7 @@ int GetAudioSupperBassSwitchDisableCFG()
 
 int GetAudioWallEffectTypeCfg()
 {
-	const char *config_value = config_get_str("TV", "audio.walleffect.type", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.walleffect.type", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 0;
@@ -519,7 +519,7 @@ int GetAudioWallEffectTypeCfg()
 
 int Get2d4gHeadsetEnable()
 {
-	const char *config_value = config_get_str ( "TV", "tvin.2d4G.headset.en", "null" );
+	const char *config_value = config_get_str ( CFG_SECTION_TV, "tvin.2d4G.headset.en", "null" );
 	if (strcmp(config_value, "enable") == 1) {
 		return 1;
 	}
@@ -530,12 +530,12 @@ int Get2d4gHeadsetEnable()
 
 const char *GetAudExtDacLibPath()
 {
-	return config_get_str("TV", "audio.external.dac.libpath", "/system/lib/libdac.so");
+	return config_get_str(CFG_SECTION_TV, "audio.external.dac.libpath", "/system/lib/libdac.so");
 }
 
 int GetKaraokAvEnable()
 {
-	const char *config_value = config_get_str("TV", "audio.switch.karaok.av.enable", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.switch.karaok.av.enable", "null");
 	if (strtoul(config_value, NULL, 10) == 1)
 		return 1;
 
@@ -552,9 +552,9 @@ int GetDefaultAvOutGainBuf(int *nAvoutTable)
 int GetAvOutGainBuf_Cfg(int *nAvoutTable)
 {
 	int bufs_count = 0, buf_item_count = 0;
-	const char *config_value = config_get_str("TV", "audio.avoutgain.presetbuf", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.avoutgain.presetbuf", "null");
 	if (strcasecmp(config_value, "null") == 0) {
-		// LOGE("%s, can't get config \"%s\"!!!\n", "TV", key_str);
+		// LOGE("%s, can't get config \"%s\"!!!\n", CFG_SECTION_TV, key_str);
 		return -1;
 	}
 
@@ -585,7 +585,7 @@ int GetAvOutGainBuf_Cfg(int *nAvoutTable)
 int GetADCDigitalCaptureVol_Cfg(void)
 {
 	int capture_vol = 0;
-	const char *config_value = config_get_str("TV", "audio.adc.digital.capture.vol", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.adc.digital.capture.vol", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return -1;
@@ -596,7 +596,7 @@ int GetADCDigitalCaptureVol_Cfg(void)
 
 int GetAudioInternalDacPGAInGain_Cfg(void)
 {
-	const char *config_value = config_get_str("TV", "audio.internal.dac.pga_in.gain", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.internal.dac.pga_in.gain", "null");
 
 	if (strcmp(config_value, "null") == 0) {
 		return 16;
@@ -610,11 +610,11 @@ int GetAudioInternalDACDigitalPlayBackVolume_Cfg(int audio_src_in_type)
 	const char *config_value = NULL;
 
 	if (audio_src_in_type == 2) {  // CC_AUDIO_IN_SOURCE_HDMI
-		config_value = config_get_str("TV", "audio.internal.dac.playback.volume_hdmi", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "audio.internal.dac.playback.volume_hdmi", "null");
 	} else if (audio_src_in_type == 0) {    // CC_AUDIO_IN_SOURCE_LINEIN
-		config_value = config_get_str("TV", "audio.internal.dac.playback.volume_linein", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "audio.internal.dac.playback.volume_linein", "null");
 	} else if (audio_src_in_type == 1) {    // CC_AUDIO_IN_SOURCE_ATV
-		config_value = config_get_str("TV", "audio.internal.dac.playback.volume_atv", "null");
+		config_value = config_get_str(CFG_SECTION_TV, "audio.internal.dac.playback.volume_atv", "null");
 	}
 
 	if (strcmp(config_value, "null") == 0) {
@@ -627,32 +627,32 @@ int GetAudioInternalDACDigitalPlayBackVolume_Cfg(int audio_src_in_type)
 int GetAudioOutputSwapStatus(tv_source_input_t source_input)
 {
 	int sw_status = 0;
-	const char *config_value = config_get_str("TV", "audio.output.swap.enable", "null");
+	const char *config_value = config_get_str(CFG_SECTION_TV, "audio.output.swap.enable", "null");
 	if ( strcmp ( config_value, "enable" ) == 0 ) {
 		switch (source_input) {
 		case SOURCE_AV1:
-			config_value = config_get_str("TV", "audio.output.swap.av1", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.output.swap.av1", "null");
 			break;
 		case SOURCE_AV2:
-			config_value = config_get_str("TV", "audio.output.swap.av2", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.output.swap.av2", "null");
 			break;
 		case SOURCE_HDMI1:
-			config_value = config_get_str("TV", "audio.output.swap.hdmi1", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.output.swap.hdmi1", "null");
 			break;
 		case SOURCE_HDMI2:
-			config_value = config_get_str("TV", "audio.output.swap.hdmi2", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.output.swap.hdmi2", "null");
 			break;
 		case SOURCE_HDMI3:
-			config_value = config_get_str("TV", "audio.output.swap.hdmi3", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.output.swap.hdmi3", "null");
 			break;
 		case SOURCE_TV:
-			config_value = config_get_str("TV", "audio.output.swap.tv", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.output.swap.tv", "null");
 			break;
 		case SOURCE_DTV:
-			config_value = config_get_str("TV", "audio.output.swap.dtv", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.output.swap.dtv", "null");
 			break;
 		case SOURCE_MPEG:
-			config_value = config_get_str("TV", "audio.output.swap.mpeg", "null");
+			config_value = config_get_str(CFG_SECTION_TV, "audio.output.swap.mpeg", "null");
 			break;
 		default:
 			break;
@@ -669,7 +669,7 @@ int GetAudioArchitectureTypeCFG()
 	static int architecture_type = -1;
 	const char *config_value = NULL;
 
-	config_value = config_get_str ( "TV", "audio.architecture.type", "null" );
+	config_value = config_get_str ( CFG_SECTION_TV, "audio.architecture.type", "null" );
 	if (strcasecmp(config_value, "null") == 0) {
 		architecture_type = CC_DAC_G9TV_EXTERNAL_DAC_OFF_BOARD_FBC;
 	} else if ((strcasecmp(config_value, "t866_external_dac_offboard_fbc") == 0) || (strcasecmp(config_value, "g9tv_external_dac_offboard_fbc") == 0)) {
@@ -699,7 +699,7 @@ int GetAudioResampleTypeCFG()
 		gAudioResampleType = 0;
 
 		char *pSave;
-		config_value = config_get_str ( "TV", "audio.resample.type", "null" );
+		config_value = config_get_str ( CFG_SECTION_TV, "audio.resample.type", "null" );
 		strncpy(cfg_buf, config_value, sizeof(cfg_buf));
 		if (strcmp(cfg_buf, "") != 0) {
 			token = strtok_r(cfg_buf, strDelimit, &pSave);

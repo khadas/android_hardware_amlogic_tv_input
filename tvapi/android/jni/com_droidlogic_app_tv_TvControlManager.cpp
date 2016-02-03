@@ -7,7 +7,7 @@
 #include "GraphicsJNI.h"
 #include "android_runtime/AndroidRuntime.h"
 #include <utils/Vector.h>
-#include <include/Tv.h>
+#include <include/TvClient.h>
 #include <binder/IMemory.h>
 #include <binder/Parcel.h>
 #include <binder/MemoryHeapBase.h>
@@ -31,14 +31,14 @@ static fields_t fields;
 static Mutex sLock;
 class JNITvContext: public TvListener {
 public:
-	JNITvContext(JNIEnv *env, jobject weak_this, jclass clazz, const sp<Tv> &tv);
+	JNITvContext(JNIEnv *env, jobject weak_this, jclass clazz, const sp<TvClient> &tv);
 	~JNITvContext()
 	{
 		release();
 	}
 	virtual void notify(int32_t msgType, const Parcel &p);
 	void addCallbackBuffer(JNIEnv *env, jbyteArray cbb);
-	sp<Tv> getTv()
+	sp<TvClient> getTv()
 	{
 		Mutex::Autolock _l(mLock);
 		return mTv;
@@ -50,7 +50,7 @@ public:
 private:
 	jobject     mTvJObjectWeak;     // weak reference to java object
 	jclass      mTvJClass;          // strong reference to java class
-	sp<Tv>      mTv;                // strong reference to native object
+	sp<TvClient>      mTv;                // strong reference to native object
 	Mutex       mLock;
 
 	Vector<jbyteArray> mCallbackBuffers;    // Global reference application managed byte[]
@@ -58,9 +58,9 @@ private:
 	bool mManualTvCallbackSet;              // Whether the callback has been set, used to reduce unnecessary calls to set the callback.
 };
 
-sp<Tv> get_native_tv(JNIEnv *env, jobject thiz, JNITvContext **pContext)
+sp<TvClient> get_native_tv(JNIEnv *env, jobject thiz, JNITvContext **pContext)
 {
-	sp<Tv> tv;
+	sp<TvClient> tv;
 	Mutex::Autolock _l(sLock);
 	JNITvContext *context = reinterpret_cast<JNITvContext *>(env->GetIntField(thiz, fields.context));
 	if (context != NULL) {
@@ -74,7 +74,7 @@ sp<Tv> get_native_tv(JNIEnv *env, jobject thiz, JNITvContext **pContext)
 	return tv;
 }
 
-JNITvContext::JNITvContext(JNIEnv *env, jobject weak_this, jclass clazz, const sp<Tv> &tv)
+JNITvContext::JNITvContext(JNIEnv *env, jobject weak_this, jclass clazz, const sp<TvClient> &tv)
 {
 	mTvJObjectWeak = env->NewGlobalRef(weak_this);
 	mTvJClass = (jclass)env->NewGlobalRef(clazz);
@@ -110,7 +110,7 @@ void JNITvContext::release()
 // connect to tv service
 static void com_droidlogic_app_tv_TvControlManager_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
 {
-	sp<Tv> tv = Tv::connect();
+	sp<TvClient> tv = TvClient::connect();
 
 	ALOGD("com_droidlogic_app_tv_TvControlManager_native_setup.");
 
@@ -143,7 +143,7 @@ static void com_droidlogic_app_tv_TvControlManager_release(JNIEnv *env, jobject 
 {
 	// TODO: Change to LOGE
 	JNITvContext *context = NULL;
-	sp<Tv> tv;
+	sp<TvClient> tv;
 	{
 		Mutex::Autolock _l(sLock);
 		context = reinterpret_cast<JNITvContext *>(env->GetIntField(thiz, fields.context));
@@ -217,7 +217,7 @@ void JNITvContext::addCallbackBuffer(JNIEnv *env, jbyteArray cbb)
 
 static jint com_droidlogic_app_tv_TvControlManager_processCmd(JNIEnv *env, jobject thiz, jobject pObj, jobject rObj)
 {
-	sp<Tv> tv = get_native_tv(env, thiz, NULL);
+	sp<TvClient> tv = get_native_tv(env, thiz, NULL);
 	if (tv == 0) return -1;
 
 	Parcel *p = parcelForJavaObject(env, pObj);
@@ -251,7 +251,7 @@ static void com_droidlogic_app_tv_TvControlManager_addCallbackBuffer(JNIEnv *env
 
 static void com_droidlogic_app_tv_TvControlManager_reconnect(JNIEnv *env, jobject thiz)
 {
-	sp<Tv> tv = get_native_tv(env, thiz, NULL);
+	sp<TvClient> tv = get_native_tv(env, thiz, NULL);
 	if (tv == 0) return;
 
 	if (tv->reconnect() != NO_ERROR) {
@@ -262,7 +262,7 @@ static void com_droidlogic_app_tv_TvControlManager_reconnect(JNIEnv *env, jobjec
 
 static void com_droidlogic_app_tv_TvControlManager_lock(JNIEnv *env, jobject thiz)
 {
-	sp<Tv> tv = get_native_tv(env, thiz, NULL);
+	sp<TvClient> tv = get_native_tv(env, thiz, NULL);
 	if (tv == 0) return;
 
 	ALOGD("lock");
@@ -274,7 +274,7 @@ static void com_droidlogic_app_tv_TvControlManager_lock(JNIEnv *env, jobject thi
 
 static void com_droidlogic_app_tv_TvControlManager_unlock(JNIEnv *env, jobject thiz)
 {
-	sp<Tv> tv = get_native_tv(env, thiz, NULL);
+	sp<TvClient> tv = get_native_tv(env, thiz, NULL);
 	if (tv == 0) return;
 
 	ALOGD("unlock");
@@ -288,7 +288,7 @@ static void com_droidlogic_app_tv_TvControlManager_create_subtitle_bitmap(JNIEnv
 {
 	ALOGD("create subtitle bmp");
 	JNITvContext *context = reinterpret_cast<JNITvContext *>(env->GetIntField(thiz, fields.context));
-	sp<Tv> tv = get_native_tv(env, thiz, NULL);
+	sp<TvClient> tv = get_native_tv(env, thiz, NULL);
 	if (tv == 0) return;
 
 	//get skbitmap
@@ -319,7 +319,7 @@ static void com_droidlogic_app_tv_TvControlManager_create_subtitle_bitmap(JNIEnv
 static void com_droidlogic_app_tv_TvControlManager_create_video_frame_bitmap(JNIEnv *env, jobject thiz, jobject bmpobj,  jint inputSourceMode, jint iCapVideoLayer )
 {
 	ALOGD("create video frame bmp");
-	sp<Tv> tv = get_native_tv(env, thiz, NULL);
+	sp<TvClient> tv = get_native_tv(env, thiz, NULL);
 	if (tv == 0) return;
 
 	//get skbitmap

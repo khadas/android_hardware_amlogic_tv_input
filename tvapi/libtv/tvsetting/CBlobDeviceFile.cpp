@@ -18,8 +18,8 @@ CBlobDeviceFile::CBlobDeviceFile()
 	m_dev_fd = -1;
 	mDataBuf = new unsigned char[m_dev_total_size];
 
-	const char *device_path = config_get_str("SETTING", "device_path", "/param/default_data");
-	const char *device_size = config_get_str("SETTING", "device_size", "0x1000");
+	const char *device_path = config_get_str(CFG_SECTION_SETTING, "device_path", "/param/default_data");
+	const char *device_size = config_get_str(CFG_SECTION_SETTING, "device_size", "0x1000");
 	strcpy(m_dev_path, device_path);
 }
 

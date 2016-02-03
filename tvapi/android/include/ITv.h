@@ -6,7 +6,7 @@
 #include <binder/Parcel.h>
 #include <binder/IMemory.h>
 #include <utils/String8.h>
-#include <include/Tv.h>
+#include <include/TvClient.h>
 
 using namespace android;
 

@@ -4,7 +4,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES:= \
-	Tv.cpp \
+	TvClient.cpp \
 	ITv.cpp \
 	ITvClient.cpp \
 	ITvService.cpp

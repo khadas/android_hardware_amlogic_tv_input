@@ -45,7 +45,7 @@ extern int cfg_get_one_item(const char *key_str, const char *strDelimit, int ite
 extern int Tv_Utils_CheckFs(void);
 extern int Tv_Utils_SetFileAttrStr(const char *file_path, char val_str_buf[]);
 extern int Tv_Utils_GetFileAttrStr(const char *file_path, int buf_size, char val_str_buf[]);
-extern int Tv_Utils_IsFileExist(const char *file_name);
+extern bool Tv_Utils_IsFileExist(const char *file_name);
 extern void monitor_info_name_init ( unsigned char *edidbuf );
 extern void monitor_info_set_name ( unsigned char *edidbuf );
 extern void monitor_info_set_imagesize ( unsigned char *edidbuf );

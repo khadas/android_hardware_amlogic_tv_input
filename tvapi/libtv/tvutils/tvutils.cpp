@@ -94,13 +94,13 @@ static int Miscioctl(const char *file_path, int request, ...)
 	void *arg;
 
 	if (file_path == NULL) {
-		LOGE("%s, file path is NULL!!!\n", "TV");
+		LOGE("%s, file path is NULL!!!\n", CFG_SECTION_TV);
 		return -1;
 	}
 
 	fd = open(file_path, O_RDWR);
 	if (fd < 0) {
-		LOGE("%s, Open %s ERROR(%s)!!\n", "TV", file_path, strerror(errno));
+		LOGE("%s, Open %s ERROR(%s)!!\n", CFG_SECTION_TV, file_path, strerror(errno));
 		return -1;
 	}
 
@@ -124,24 +124,24 @@ int cfg_get_one_item(const char *key_str, const char *strDelimit, int item_index
 	char data_str[CC_CFG_VALUE_STR_MAX_LEN] = { 0 };
 
 	if (key_str == NULL) {
-		LOGE("%s, key_str's pointer is NULL.\n", "TV");
+		LOGE("%s, key_str's pointer is NULL.\n", CFG_SECTION_TV);
 		return -1;
 	}
 
 	if (cfg_str == NULL) {
-		LOGE("%s, cfg_str's pointer is NULL.\n", "TV");
+		LOGE("%s, cfg_str's pointer is NULL.\n", CFG_SECTION_TV);
 		return -1;
 	}
 
 	if (item_index < 0) {
-		LOGE("%s, item_index can't be less than 0.\n", "TV");
+		LOGE("%s, item_index can't be less than 0.\n", CFG_SECTION_TV);
 		return -1;
 	}
 
-	config_value = config_get_str("TV", key_str, "null");
+	config_value = config_get_str(CFG_SECTION_TV, key_str, "null");
 	if (strcasecmp(config_value, "null") == 0) {
 		cfg_str[0] = '\0';
-		LOGE("%s, can't get config \"%s\"!!!\n", "TV", key_str);
+		LOGE("%s, can't get config \"%s\"!!!\n", CFG_SECTION_TV, key_str);
 		return -1;
 	}
 
@@ -175,22 +175,22 @@ int cfg_split(char *line_data, char *strDelimit, int *item_cnt, char **item_bufs
 	char *token = NULL;
 
 	if (line_data == NULL) {
-		LOGE("%s, line_data is NULL", "TV");
+		LOGE("%s, line_data is NULL", CFG_SECTION_TV);
 		return -1;
 	}
 
 	if (strDelimit == NULL) {
-		LOGE("%s, strDelimit is NULL", "TV");
+		LOGE("%s, strDelimit is NULL", CFG_SECTION_TV);
 		return -1;
 	}
 
 	if (item_cnt == NULL) {
-		LOGE("%s, item_cnt is NULL", "TV");
+		LOGE("%s, item_cnt is NULL", CFG_SECTION_TV);
 		return -1;
 	}
 
 	if (item_bufs == NULL) {
-		LOGE("%s, item_bufs is NULL", "TV");
+		LOGE("%s, item_bufs is NULL", CFG_SECTION_TV);
 		return -1;
 	}
 
@@ -404,7 +404,7 @@ static int setServer(const char *fileName)
 
 	sock = socket(PF_UNIX, SOCK_STREAM, 0);
 	if (sock < 0) {
-		LOGE("%s, socket create failed (errno = %d: %s).\n", "TV", errno, strerror(errno));
+		LOGE("%s, socket create failed (errno = %d: %s).\n", CFG_SECTION_TV, errno, strerror(errno));
 		return -1;
 	}
 
@@ -416,7 +416,7 @@ static int setServer(const char *fileName)
 	//bind sockfd & addr
 	ret = bind(sock, (struct sockaddr *) &srv_addr, sizeof(srv_addr));
 	if (ret == -1) {
-		LOGE("%s, cannot bind server socket.\n", "TV");
+		LOGE("%s, cannot bind server socket.\n", CFG_SECTION_TV);
 		close(sock);
 		unlink(CS_ATV_SOCKET_FILE_NAME);
 		return -1;
@@ -425,7 +425,7 @@ static int setServer(const char *fileName)
 	//listen sockfd
 	ret = listen(sock, 1);
 	if (ret == -1) {
-		LOGE("%s, cannot listen the client connect request.\n", "TV");
+		LOGE("%s, cannot listen the client connect request.\n", CFG_SECTION_TV);
 		close(sock);
 		unlink(CS_ATV_SOCKET_FILE_NAME);
 		return -1;
@@ -444,13 +444,13 @@ static int acceptMessage(int listen_fd)
 	len = sizeof(clt_addr);
 	com_fd = accept(listen_fd, (struct sockaddr *) &clt_addr, &len);
 	if (com_fd < 0) {
-		LOGE("%s, cannot accept client connect request.\n", "TV");
+		LOGE("%s, cannot accept client connect request.\n", CFG_SECTION_TV);
 		close(listen_fd);
 		unlink(CS_ATV_SOCKET_FILE_NAME);
 		return -1;
 	}
 
-	LOGD("%s, com_fd = %d\n", "TV", com_fd);
+	LOGD("%s, com_fd = %d\n", CFG_SECTION_TV, com_fd);
 
 	return com_fd;
 }
@@ -517,11 +517,11 @@ static int parse_socket_message(char *msg_str, int *para_cnt, int para_buf[])
             //read message from client
             memset((void *) recv_buf, 0, sizeof(recv_buf));
             rd_len = read(com_fd, recv_buf, sizeof(recv_buf));
-            LOGD("%s, message from client (%d)) : %s\n", "TV", rd_len, recv_buf);
+            LOGD("%s, message from client (%d)) : %s\n", CFG_SECTION_TV, rd_len, recv_buf);
 
             set_mode = parse_socket_message(recv_buf, &para_count, para_buf);
             if (set_mode == 0) {
-                LOGD("%s, receive quit message, starting to quit.\n", "TV");
+                LOGD("%s, receive quit message, starting to quit.\n", CFG_SECTION_TV);
                 sprintf(recv_buf, "%s", "quiting now...");
                 write(com_fd, recv_buf, strlen(recv_buf) + 1);
                 break;
@@ -529,11 +529,11 @@ static int parse_socket_message(char *msg_str, int *para_cnt, int para_buf[])
                 ret = -1;
 
                 if (para_count == 1) {
-                    LOGD("%s, SetAudioVolumeCompensationVal value = %d\n", "TV", para_buf[0]);
+                    LOGD("%s, SetAudioVolumeCompensationVal value = %d\n", CFG_SECTION_TV, para_buf[0]);
 
                     ret = SetAudioVolumeCompensationVal(para_buf[0]);
                 } else if (para_count == 2) {
-                    LOGD("%s, SetAudioVolumeCompensationVal value = %d, type = %d\n", "TV", para_buf[0], para_buf[1]);
+                    LOGD("%s, SetAudioVolumeCompensationVal value = %d, type = %d\n", CFG_SECTION_TV, para_buf[0], para_buf[1]);
 
                     ret = SetAudioVolumeCompensationVal(para_buf[0]);
 
@@ -549,7 +549,7 @@ static int parse_socket_message(char *msg_str, int *para_cnt, int para_buf[])
                 ret = -1;
 
                 if (para_count == 1) {
-                    LOGE("%s, mode = %d ------->\n", "TV", para_buf[0]);
+                    LOGE("%s, mode = %d ------->\n", CFG_SECTION_TV, para_buf[0]);
 
                     switch (para_buf[0]) {
                     case 4: //BT
@@ -569,9 +569,9 @@ static int parse_socket_message(char *msg_str, int *para_cnt, int para_buf[])
                         break;
                     }
                     if (ret == 0) {
-                        LOGE("%s, sk_hdi_av_set_3d_mode return sucess.\n", "TV");
+                        LOGE("%s, sk_hdi_av_set_3d_mode return sucess.\n", CFG_SECTION_TV);
                     } else {
-                        LOGE("%s, sk_hdi_av_set_3d_mode return error(%d).\n", "TV", ret);
+                        LOGE("%s, sk_hdi_av_set_3d_mode return error(%d).\n", CFG_SECTION_TV, ret);
                     }
                 }
 
@@ -610,13 +610,13 @@ static int connectToServer(char *file_name)
 	struct sockaddr_un addr;
 
 	if (file_name == NULL) {
-		LOGE("%s, file name is NULL\n", "TV");
+		LOGE("%s, file name is NULL\n", CFG_SECTION_TV);
 		return -1;
 	}
 
 	sock = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (sock < 0) {
-		LOGE("%s, socket create failed (errno = %d: %s)\n", "TV", errno, strerror(errno));
+		LOGE("%s, socket create failed (errno = %d: %s)\n", CFG_SECTION_TV, errno, strerror(errno));
 		return -1;
 	}
 
@@ -627,7 +627,7 @@ static int connectToServer(char *file_name)
 	if (tmp_ret < 0) {
 		// ENOENT means socket file doesn't exist
 		// ECONNREFUSED means socket exists but nobody is listening
-		LOGE("%s, AF_UNIX connect failed for '%s': %s\n", "TV", file_name, strerror(errno));
+		LOGE("%s, AF_UNIX connect failed for '%s': %s\n", CFG_SECTION_TV, file_name, strerror(errno));
 		close(sock);
 		return -1;
 	}
@@ -641,16 +641,16 @@ static int realSendSocketMsg(char *file_name, char *msg_str, char recv_buf[])
 	char tmp_buf[1024];
 
 	if (file_name == NULL) {
-		LOGE("%s, file name is NULL\n", "TV");
+		LOGE("%s, file name is NULL\n", CFG_SECTION_TV);
 		return -1;
 	}
 
 	if (msg_str == NULL) {
-		LOGE("%s, msg string is NULL\n", "TV");
+		LOGE("%s, msg string is NULL\n", CFG_SECTION_TV);
 		return -1;
 	}
 
-	LOGD("%s, message to server (%d)) : %s\n", "TV", strlen(msg_str), msg_str);
+	LOGD("%s, message to server (%d)) : %s\n", CFG_SECTION_TV, strlen(msg_str), msg_str);
 
 	sock = connectToServer(file_name);
 
@@ -660,10 +660,10 @@ static int realSendSocketMsg(char *file_name, char *msg_str, char recv_buf[])
 		if (recv_buf == NULL) {
 			memset((void *) tmp_buf, 0, sizeof(tmp_buf));
 			rd_len = read(sock, tmp_buf, sizeof(tmp_buf));
-			LOGD("%s, message from server (%d)) : %s\n", "TV", rd_len, tmp_buf);
+			LOGD("%s, message from server (%d)) : %s\n", CFG_SECTION_TV, rd_len, tmp_buf);
 		} else {
 			rd_len = read(sock, recv_buf, 1024);
-			LOGD("%s, message from server (%d)) : %s\n", "TV", rd_len, recv_buf);
+			LOGD("%s, message from server (%d)) : %s\n", CFG_SECTION_TV, rd_len, recv_buf);
 		}
 
 		close(sock);
@@ -709,17 +709,17 @@ int I2C_WriteNbyte(int i2c_no, int dev_addr, int slave_addr, int len, unsigned c
 	if (i2c_no == 1) {
 		device_fd = open(CS_I2C_1_DEV_PATH, O_RDWR);
 		if (device_fd < 0) {
-			LOGE("%s, Open device file %S error: %s.\n", "TV", CS_I2C_1_DEV_PATH, strerror(errno));
+			LOGE("%s, Open device file %S error: %s.\n", CFG_SECTION_TV, CS_I2C_1_DEV_PATH, strerror(errno));
 			return -1;
 		}
 	} else if (i2c_no == 2) {
 		device_fd = open(CS_I2C_2_DEV_PATH, O_RDWR);
 		if (device_fd < 0) {
-			LOGE("%s, Open device file %S error: %s.\n", "TV", CS_I2C_2_DEV_PATH, strerror(errno));
+			LOGE("%s, Open device file %S error: %s.\n", CFG_SECTION_TV, CS_I2C_2_DEV_PATH, strerror(errno));
 			return -1;
 		}
 	} else {
-		LOGE("%s, invalid i2c no (%d).\n", "TV", i2c_no);
+		LOGE("%s, invalid i2c no (%d).\n", CFG_SECTION_TV, i2c_no);
 		return -1;
 	}
 
@@ -766,17 +766,17 @@ int I2C_ReadNbyte(int i2c_no, int dev_addr, int slave_addr, int len, unsigned ch
 	if (i2c_no == 1) {
 		device_fd = open(CS_I2C_1_DEV_PATH, O_RDWR);
 		if (device_fd < 0) {
-			LOGE("%s, Open device file %S error: %s.\n", "TV", CS_I2C_1_DEV_PATH, strerror(errno));
+			LOGE("%s, Open device file %S error: %s.\n", CFG_SECTION_TV, CS_I2C_1_DEV_PATH, strerror(errno));
 			return -1;
 		}
 	} else if (i2c_no == 2) {
 		device_fd = open(CS_I2C_2_DEV_PATH, O_RDWR);
 		if (device_fd < 0) {
-			LOGE("%s, Open device file %S error: %s.\n", "TV", CS_I2C_2_DEV_PATH, strerror(errno));
+			LOGE("%s, Open device file %S error: %s.\n", CFG_SECTION_TV, CS_I2C_2_DEV_PATH, strerror(errno));
 			return -1;
 		}
 	} else {
-		LOGE("%s, invalid i2c no (%d).\n", "TV", i2c_no);
+		LOGE("%s, invalid i2c no (%d).\n", CFG_SECTION_TV, i2c_no);
 		return -1;
 	}
 
@@ -838,11 +838,11 @@ int GetFileAttrIntValue(const char *fp)
 
 	if (read(fd, temp_str, sizeof(temp_str)) > 0) {
 		if (sscanf(temp_str, "%d", &temp) >= 0) {
-			LOGD("%s -> get %s value =%d!\n", "TV", fp, temp);
+			LOGD("%s -> get %s value =%d!\n", CFG_SECTION_TV, fp, temp);
 			close(fd);
 			return temp;
 		} else {
-			LOGE("%s -> get %s value error(%s)\n", "TV", fp, strerror(errno));
+			LOGE("%s -> get %s value error(%s)\n", CFG_SECTION_TV, fp, strerror(errno));
 			close(fd);
 			return -1;
 		}
@@ -870,7 +870,7 @@ int *GetFileAttrIntValueStr(const char *fp)
 	}
 
 	if (read(fd, temp_str, sizeof(temp_str)) > 0) {
-		LOGD("%s,temp_str = %s\n", "TV", temp_str);
+		LOGD("%s,temp_str = %s\n", CFG_SECTION_TV, temp_str);
 		p = strtok(temp_str, " ");
 		while (p != NULL) {
 			sscanf(p, "%d", &temp[i]);
@@ -908,7 +908,7 @@ int Set_Fixed_NonStandard(int value)
 	}
 
 	if (ret <= 0) {
-		LOGE("%s -> set /sys/module/tvin_afe/parameters/force_nostd error(%s)!\n", "TV", strerror(errno));
+		LOGE("%s -> set /sys/module/tvin_afe/parameters/force_nostd error(%s)!\n", CFG_SECTION_TV, strerror(errno));
 	}
 
 	close(fd);
@@ -965,7 +965,7 @@ static void UserPet_KillThread(void)
 	}
 	pthread_join(UserPet_ThreadId, NULL);
 	UserPet_ThreadId = 0;
-	LOGD("%s, done.", "TV");
+	LOGD("%s, done.", CFG_SECTION_TV);
 }
 
 void TvMisc_EnableWDT(bool kernelpet_disable, unsigned int userpet_enable, unsigned int kernelpet_timeout, unsigned int userpet_timeout, unsigned int userpet_reset)
@@ -1135,7 +1135,7 @@ int Tv_Utils_CheckFs(void)
 		mount_type[255] = 0;
 		mount_opts[255] = 0;
 		if ((match == 6) && (!strncmp(mount_dev, "/dev/block", 10))) {
-			LOGD("%s, %s %s %s %s %d %d!", "TV", mount_dev, mount_dir, mount_type, mount_opts, mount_freq, mount_passno);
+			LOGD("%s, %s %s %s %s %d %d!", CFG_SECTION_TV, mount_dev, mount_dir, mount_type, mount_opts, mount_freq, mount_passno);
 			if (!strncmp(mount_dir, "/param", 6)) {
 				param_status |= 0x01;
 			} else if (!strncmp(mount_dir, "/atv", 4)) {
@@ -1168,22 +1168,22 @@ int Tv_Utils_CheckFs(void)
 
 	switch (param_status) {
 	case 0x03:
-		LOGW("%s, param partition is read-only!", "TV");
+		LOGW("%s, param partition is read-only!", CFG_SECTION_TV);
 		break;
 	case 0x00:
-		LOGW("%s, param partition can not be mounted!", "TV");
+		LOGW("%s, param partition can not be mounted!", CFG_SECTION_TV);
 		break;
 	default:
 		break;
 	}
 	switch (atv_status) {
 	case 0x03:
-		LOGW("%s, atv partition is read-only!", "TV");
+		LOGW("%s, atv partition is read-only!", CFG_SECTION_TV);
 		cool_reboot = 1;
 		//android_reboot(ANDROID_RB_RESTART2, 0, "cool_reboot");
 		break;
 	case 0x00:
-		LOGW("%s, atv partition can not be mounted!", "TV");
+		LOGW("%s, atv partition can not be mounted!", CFG_SECTION_TV);
 		recovery_reboot = 1;
 	//android_reboot(ANDROID_RB_RESTART2, 0, "recovery");
 	default:
@@ -1191,23 +1191,23 @@ int Tv_Utils_CheckFs(void)
 	}
 	switch (dtv_status) {
 	case 0x03:
-		LOGW("%s, dtv partition is read-only!", "TV");
+		LOGW("%s, dtv partition is read-only!", CFG_SECTION_TV);
 		//android_reboot(ANDROID_RB_RESTART2, 0, "cool_reboot");
 		break;
 	case 0x00:
-		LOGW("%s, dtv partition can not be mounted!", "TV");
+		LOGW("%s, dtv partition can not be mounted!", CFG_SECTION_TV);
 	//android_reboot(ANDROID_RB_RESTART2, 0, "recovery");
 	default:
 		break;
 	}
 	switch (data_status) {
 	case 0x03:
-		LOGW("%s, data partition is read-only!", "TV");
+		LOGW("%s, data partition is read-only!", CFG_SECTION_TV);
 		cool_reboot = 1;
 		//android_reboot(ANDROID_RB_RESTART2, 0, "cool_reboot");
 		break;
 	case 0x00:
-		LOGW("%s, data partition can not be mounted!", "TV");
+		LOGW("%s, data partition can not be mounted!", CFG_SECTION_TV);
 		recovery_reboot = 1;
 		//android_reboot(ANDROID_RB_RESTART2, 0, "recovery");
 		break;
@@ -1216,12 +1216,12 @@ int Tv_Utils_CheckFs(void)
 	}
 	switch (cache_status) {
 	case 0x03:
-		LOGW("%s, cache partition is read-only!", "TV");
+		LOGW("%s, cache partition is read-only!", CFG_SECTION_TV);
 		cool_reboot = 1;
 		//android_reboot(ANDROID_RB_RESTART2, 0, "cool_reboot");
 		break;
 	case 0x00:
-		LOGW("%s, cache partition can not be mounted!", "TV");
+		LOGW("%s, cache partition can not be mounted!", CFG_SECTION_TV);
 		recovery_reboot = 1;
 		//android_reboot(ANDROID_RB_RESTART2, 0, "recovery");
 		break;
@@ -1244,7 +1244,7 @@ int Tv_Utils_SetFileAttrStr(const char *file_path, char val_str_buf[])
 
 	tmpfp = fopen(file_path, "w");
 	if (tmpfp == NULL) {
-		LOGE("%s, write open file %s error(%s)!!!\n", "TV", file_path, strerror(errno));
+		LOGE("%s, write open file %s error(%s)!!!\n", CFG_SECTION_TV, file_path, strerror(errno));
 		return -1;
 	}
 
@@ -1262,7 +1262,7 @@ int Tv_Utils_GetFileAttrStr(const char *file_path, int buf_size, char val_str_bu
 
 	tmpfp = fopen(file_path, "r");
 	if (tmpfp == NULL) {
-		LOGE("%s, read open file %s error(%s)!!!\n", "TV", file_path, strerror(errno));
+		LOGE("%s, read open file %s error(%s)!!!\n", CFG_SECTION_TV, file_path, strerror(errno));
 		val_str_buf[0] = '\0';
 		return -1;
 	}
@@ -1275,12 +1275,12 @@ int Tv_Utils_GetFileAttrStr(const char *file_path, int buf_size, char val_str_bu
 	return 0;
 }
 
-
-int Tv_Utils_IsFileExist(const char *file_name)
+//check file exist or not
+bool Tv_Utils_IsFileExist(const char *file_name)
 {
 	struct stat tmp_st;
 
-	return stat(file_name, &tmp_st);
+	return stat(file_name, &tmp_st) == 0;
 }
 
 #define CC_EDID_SIZE                                (256)
@@ -1333,10 +1333,10 @@ void  monitor_info_set_date ( unsigned char *edidbuf )
 	edidbuf[16] = week;
 	edidbuf[17] = ( 1900 + p->tm_year ) - 1990;
 
-	LOGD ( "###############%s##############", "TV" );
+	LOGD ( "###############%s##############", CFG_SECTION_TV );
 	LOGD ( "Week number is %d", week );
 	LOGD ( "%d %02d %02d", 1900 + p->tm_year, 1 + p->tm_mon, p->tm_mday );
-	LOGD ( "###############%s##############", "TV" );
+	LOGD ( "###############%s##############", CFG_SECTION_TV );
 }
 
 
@@ -1376,7 +1376,7 @@ void monitor_info_set_name ( unsigned char *edidbuf )
 	int config_value_len;
 	const char *config_value;
 	unsigned char str_manufacturer_name[14];
-	config_value = config_get_str ( "TV", "tvin.hdmiedid.name", "null" );
+	config_value = config_get_str ( CFG_SECTION_TV, "tvin.hdmiedid.name", "null" );
 
 	if ( strcmp ( config_value, "null" ) != 0 ) {
 		config_value_len = strlen ( config_value );
@@ -1663,7 +1663,7 @@ int GetPlatformHaveDDFlag()
 {
 	const char *config_value;
 
-	config_value = config_get_str("TV", "platform.havedd", "null");
+	config_value = config_get_str(CFG_SECTION_TV, "platform.havedd", "null");
 	if (strcmp(config_value, "true") == 0 || strcmp(config_value, "1") == 0) {
 		return 1;
 	}
@@ -1675,7 +1675,7 @@ int GetPlatformProjectInfoSrc()
 {
 	const char *config_value;
 
-	config_value = config_get_str("TV", "platform.projectinfo.src", "null");
+	config_value = config_get_str(CFG_SECTION_TV, "platform.projectinfo.src", "null");
 	if (strcmp(config_value, "null") == 0 || strcmp(config_value, "prop") == 0) {
 		return 0;
 	} else if (strcmp(config_value, "emmckey") == 0) {

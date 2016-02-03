@@ -172,7 +172,7 @@ int CAv::EnableVideoNow()
 		return 0;
 	}
 	mCurVideoLayerMuteState = 0;
-	config_value = config_get_str ( "TV", "tvin.bluescreen.color", "null" );
+	config_value = config_get_str ( CFG_SECTION_TV, CFG_BLUE_SCREEN_COLOR, "null" );
 	if ( strcmp ( config_value, "black" ) == 0 ) {
 	} else {
 		SetVideoScreenColor ( 0, 16, 128, 128 ); // Show blue with vdin0, postblending disabled

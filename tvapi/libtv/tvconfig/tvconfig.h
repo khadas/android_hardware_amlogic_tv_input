@@ -5,6 +5,14 @@
 #define CC_CFG_VALUE_STR_MAX_LEN                (512)
 
 
+#define CFG_SECTION_TV                          "TV"
+#define CFG_SECTION_ATV                         "ATV"
+#define CFG_SECTION_SRC_INPUT                   "SourceInputMap"
+#define CFG_SECTION_SETTING                     "SETTING"
+#define CFG_SECTION_FBCUART                     "FBCUART"
+
+#define CFG_BLUE_SCREEN_COLOR                   "tvin.bluescreen.color"
+
 extern int tv_config_load(const char *file_name);
 extern int tv_config_unload();
 extern int tv_config_save();

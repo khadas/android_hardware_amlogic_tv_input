@@ -4,7 +4,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_SRC_FILES:= \
-	CTv.cpp \
+	TvPlay.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \

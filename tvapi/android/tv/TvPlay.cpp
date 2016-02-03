@@ -1,0 +1,85 @@
+#include <utils/Log.h>
+#include "TvPlay.h"
+#include "../include/tvcmd.h"
+
+TvPlay::TvPlay() {
+    mpObserver = NULL;
+    tvSession = TvClient::connect();
+    tvSession->setListener(this);
+}
+
+TvPlay::~TvPlay() {
+    tvSession.clear();
+}
+
+int TvPlay::setTvObserver ( TvPlayObserver *ob ) {
+    mpObserver = ob;
+    return 0;
+}
+
+void TvPlay::notify(int32_t msgType, const Parcel &p) {
+    ALOGD("TvPlay-------notify-------");
+    if (mpObserver != NULL)
+        mpObserver->onTvEvent(msgType, p);
+}
+
+int TvPlay::StartTv() {
+    Parcel p, r;
+    p.writeInt32(START_TV);
+    tvSession->processCmd(p, &r);
+    return r.readInt32();
+}
+
+int TvPlay::StopTv() {
+    Parcel p, r;
+    p.writeInt32(STOP_TV);
+    tvSession->processCmd(p, &r);
+    return r.readInt32();
+}
+
+int TvPlay::SwitchSourceInput(tv_source_input_t source_input) {
+    Parcel p, r;
+    p.writeInt32(SET_SOURCE_INPUT);
+    p.writeInt32(source_input);
+    tvSession->processCmd(p, &r);
+    return r.readInt32();
+}
+
+int TvPlay::DoSuspend(int type) {
+    Parcel p, r;
+    p.writeInt32(DO_SUSPEND);
+    p.writeInt32(type);
+    tvSession->processCmd(p, &r);
+    return r.readInt32();
+}
+
+int TvPlay::DoResume(int type) {
+    Parcel p, r;
+    p.writeInt32(DO_RESUME);
+    p.writeInt32(type);
+    tvSession->processCmd(p, &r);
+    return r.readInt32();
+}
+
+int TvPlay::GetSourceConnectStatus(tv_source_input_t source_input) {
+    Parcel p, r;
+    p.writeInt32(GET_SOURCE_CONNECT_STATUS);
+    p.writeInt32(source_input);
+    tvSession->processCmd(p, &r);
+    return r.readInt32();
+}
+
+int TvPlay::GetCurrentSourceInput() {
+    Parcel p, r;
+    p.writeInt32(SSM_READ_SOURCE_INPUT);
+    tvSession->processCmd(p, &r);
+    return r.readInt32();
+}
+
+int TvPlay::GetHdmiAvHotplugDetectOnoff() {
+    Parcel p, r;
+    p.writeInt32(HDMIAV_HOTPLUGDETECT_ONOFF);
+    tvSession->processCmd(p, &r);
+    return r.readInt32();
+}
+
