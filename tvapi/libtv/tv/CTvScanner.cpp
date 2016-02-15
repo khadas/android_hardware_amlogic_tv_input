@@ -524,9 +524,9 @@ void CTvScanner::scan_extract_srv_info_from_sdt(AM_SCAN_Result_t *result, dvbpsi
             memcpy(srv_info->name+curr_name_len, _s, copy_len);\
             curr_name_len += copy_len;\
         }\
-
-
     AM_MACRO_END
+
+
     AM_SI_LIST_BEGIN(sdts, sdt)
     AM_SI_LIST_BEGIN(sdt->p_first_service, srv)
     /*从SDT表中查找该service并获取信息*/
