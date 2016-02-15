@@ -138,78 +138,78 @@ enum VIDEO_DEC_TYPE
 };
 */
 struct buf_status {
-	int size;
-	int data_len;
-	int free_len;
-	unsigned int read_pointer;
-	unsigned int write_pointer;
+    int size;
+    int data_len;
+    int free_len;
+    unsigned int read_pointer;
+    unsigned int write_pointer;
 };
 
 
 struct vdec_status {
-	unsigned int width;
-	unsigned int height;
-	unsigned int fps;
-	unsigned int error_count;
-	unsigned int status;
+    unsigned int width;
+    unsigned int height;
+    unsigned int fps;
+    unsigned int error_count;
+    unsigned int status;
 };
 
 struct adec_status {
-	unsigned int channels;
-	unsigned int sample_rate;
-	unsigned int resolution;
-	unsigned int error_count;
-	unsigned int status;
+    unsigned int channels;
+    unsigned int sample_rate;
+    unsigned int resolution;
+    unsigned int error_count;
+    unsigned int status;
 };
 
 struct am_io_param {
-	union {
-		int data;
-		int id;//get bufstatus? //or others
-	};
+    union {
+        int data;
+        int id;//get bufstatus? //or others
+    };
 
-	int len; //buffer size;
+    int len; //buffer size;
 
-	union {
-		char buf[1];
-		struct buf_status status;
-		struct vdec_status vstatus;
-		struct adec_status astatus;
-	};
+    union {
+        char buf[1];
+        struct buf_status status;
+        struct vdec_status vstatus;
+        struct adec_status astatus;
+    };
 };
 struct audio_info {
-	int valid;
-	int sample_rate;
-	int channels;
-	int bitrate;
-	int codec_id;
-	int block_align;
-	int extradata_size;
-	char extradata[AUDIO_EXTRA_DATA_SIZE];
+    int valid;
+    int sample_rate;
+    int channels;
+    int bitrate;
+    int codec_id;
+    int block_align;
+    int extradata_size;
+    char extradata[AUDIO_EXTRA_DATA_SIZE];
 };
 
 struct dec_sysinfo {
-	unsigned int    format;
-	unsigned int    width;
-	unsigned int    height;
-	unsigned int    rate;
-	unsigned int    extra;
-	unsigned int    status;
-	unsigned int    ratio;
-	void           *param;
-	unsigned long long    ratio64;
+    unsigned int    format;
+    unsigned int    width;
+    unsigned int    height;
+    unsigned int    rate;
+    unsigned int    extra;
+    unsigned int    status;
+    unsigned int    ratio;
+    void           *param;
+    unsigned long long    ratio64;
 };
 
 struct subtitle_info {
-	unsigned char id;
-	unsigned char width;
-	unsigned char height;
-	unsigned char type;
+    unsigned char id;
+    unsigned char width;
+    unsigned char height;
+    unsigned char type;
 };
 
 struct codec_profile_t {
-	char *name;     // video codec short name
-	char *profile;  // Attributes,seperated by commas
+    char *name;     // video codec short name
+    char *profile;  // Attributes,seperated by commas
 };
 #define SUPPORT_VDEC_NUM    (8)
 
@@ -220,15 +220,15 @@ int vcodec_profile_read(char *buf);
 #ifdef ENABLE_DEMUX_DRIVER
 /*TS demux operation interface*/
 struct tsdemux_ops {
-	int (*reset)(void);
-	int (*set_reset_flag)(void);
-	int (*request_irq)(irq_handler_t handler, void *data);
-	int (*free_irq)(void);
-	int (*set_vid)(int vpid);
-	int (*set_aid)(int apid);
-	int (*set_sid)(int spid);
-	int (*set_skipbyte)(int skipbyte);
-	int (*set_demux)(int dev);
+    int (*reset)(void);
+    int (*set_reset_flag)(void);
+    int (*request_irq)(irq_handler_t handler, void *data);
+    int (*free_irq)(void);
+    int (*set_vid)(int vpid);
+    int (*set_aid)(int apid);
+    int (*set_sid)(int spid);
+    int (*set_skipbyte)(int skipbyte);
+    int (*set_demux)(int dev);
 };
 
 void tsdemux_set_ops(struct tsdemux_ops *ops);
@@ -244,20 +244,20 @@ int  get_sub_type(void);
 #endif
 
 typedef struct tcon_gamma_table_s {
-	unsigned short data[256];
+    unsigned short data[256];
 } tcon_gamma_table_t;
 
 typedef struct tcon_rgb_ogo_s {
-	unsigned int en;
-	int r_pre_offset;  // s11.0, range -1024~+1023, default is 0
-	int g_pre_offset;  // s11.0, range -1024~+1023, default is 0
-	int b_pre_offset;  // s11.0, range -1024~+1023, default is 0
-	unsigned int r_gain;        // u1.10, range 0~2047, default is 1024 (1.0x)
-	unsigned int g_gain;        // u1.10, range 0~2047, default is 1024 (1.0x)
-	unsigned int b_gain;        // u1.10, range 0~2047, default is 1024 (1.0x)
-	int r_post_offset; // s11.0, range -1024~+1023, default is 0
-	int g_post_offset; // s11.0, range -1024~+1023, default is 0
-	int b_post_offset; // s11.0, range -1024~+1023, default is 0
+    unsigned int en;
+    int r_pre_offset;  // s11.0, range -1024~+1023, default is 0
+    int g_pre_offset;  // s11.0, range -1024~+1023, default is 0
+    int b_pre_offset;  // s11.0, range -1024~+1023, default is 0
+    unsigned int r_gain;        // u1.10, range 0~2047, default is 1024 (1.0x)
+    unsigned int g_gain;        // u1.10, range 0~2047, default is 1024 (1.0x)
+    unsigned int b_gain;        // u1.10, range 0~2047, default is 1024 (1.0x)
+    int r_post_offset; // s11.0, range -1024~+1023, default is 0
+    int g_post_offset; // s11.0, range -1024~+1023, default is 0
+    int b_post_offset; // s11.0, range -1024~+1023, default is 0
 } tcon_rgb_ogo_t;
 
 #endif //__AMSTREAM_H__

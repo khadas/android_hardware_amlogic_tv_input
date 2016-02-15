@@ -5,29 +5,29 @@
 class CTv2d4GHeadSetDetect: public CThread {
 
 public:
-	CTv2d4GHeadSetDetect();
-	~CTv2d4GHeadSetDetect();
+    CTv2d4GHeadSetDetect();
+    ~CTv2d4GHeadSetDetect();
 
-	int startDetect();
+    int startDetect();
 
-	class IHeadSetObserver {
-	public:
-		IHeadSetObserver()
-		{};
-		virtual ~IHeadSetObserver()
-		{};
-		virtual void onHeadSetDetect(int state, int para) {};
-		virtual void onThermalDetect(int state) {};
+    class IHeadSetObserver {
+    public:
+        IHeadSetObserver()
+        {};
+        virtual ~IHeadSetObserver()
+        {};
+        virtual void onHeadSetDetect(int state, int para) {};
+        virtual void onThermalDetect(int state) {};
 
-	};
-	void setObserver ( IHeadSetObserver *pOb )
-	{
-		mpObserver = pOb;
-	};
+    };
+    void setObserver ( IHeadSetObserver *pOb )
+    {
+        mpObserver = pOb;
+    };
 
 private:
-	bool  threadLoop();
-	IHeadSetObserver *mpObserver;
+    bool  threadLoop();
+    IHeadSetObserver *mpObserver;
 
 };
 

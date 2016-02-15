@@ -20,22 +20,22 @@
 
 class CAutoPQparam: public CThread {
 private:
-	tv_source_input_type_t mAutoPQSource;
-	bool mAutoPQ_OnOff_Flag;
-	int preFmtType, curFmtType, autofreq_checkcount, autofreq_checkflag;
-	int adjustPQparameters();
-	bool  threadLoop();
+    tv_source_input_type_t mAutoPQSource;
+    bool mAutoPQ_OnOff_Flag;
+    int preFmtType, curFmtType, autofreq_checkcount, autofreq_checkflag;
+    int adjustPQparameters();
+    bool  threadLoop();
 
 public:
 
-	CVpp *myVpp;
-	CTvin *myTvin;
-	CAv *myAv;
+    CVpp *myVpp;
+    CTvin *myTvin;
+    CAv *myAv;
 
-	CAutoPQparam( CVpp *mVpp, CTvin *pTvin, CAv *mAV );
-	~CAutoPQparam();
-	void startAutoPQ( tv_source_input_type_t source_type );
-	void stopAutoPQ();
-	bool isAutoPQing();
+    CAutoPQparam( CVpp *mVpp, CTvin *pTvin, CAv *mAV );
+    ~CAutoPQparam();
+    void startAutoPQ( tv_source_input_type_t source_type );
+    void stopAutoPQ();
+    bool isAutoPQing();
 };
 #endif

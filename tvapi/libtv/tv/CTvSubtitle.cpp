@@ -12,21 +12,21 @@
 #include "am_dmx.h"
 CTvSubtitle::CTvSubtitle()
 {
-	mpObser = NULL;
+    mpObser = NULL;
 }
 CTvSubtitle::~CTvSubtitle()
 {
 }
 void CTvSubtitle::setObserver(IObserver *pObser)
 {
-	isSubOpen = false;
-	mpObser = pObser;
+    isSubOpen = false;
+    mpObser = pObser;
 }
 void CTvSubtitle::setBuffer(char *share_mem)
 {
-	pthread_mutex_lock(&lock);
-	buffer = (unsigned char *)share_mem;
-	pthread_mutex_unlock(&lock);
+    pthread_mutex_lock(&lock);
+    buffer = (unsigned char *)share_mem;
+    pthread_mutex_unlock(&lock);
 }
 void CTvSubtitle::stopDecoder()
 {
@@ -121,360 +121,360 @@ void CTvSubtitle::searchPrevious()
 
 int CTvSubtitle::sub_init(int bmp_width, int bmp_height)
 {
-	pthread_mutex_init(&lock, NULL);
-	bmp_w = bmp_width;
-	bmp_h = bmp_height;
-	sub_w = 720;
-	sub_h = 576;
-	bmp_pitch =  bmp_w * 4;
-	return 0;
+    pthread_mutex_init(&lock, NULL);
+    bmp_w = bmp_width;
+    bmp_h = bmp_height;
+    sub_w = 720;
+    sub_h = 576;
+    bmp_pitch =  bmp_w * 4;
+    return 0;
 }
 
 int CTvSubtitle::sub_destroy()
 {
-	return 0;
+    return 0;
 }
 
 int CTvSubtitle::sub_lock()
 {
-	pthread_mutex_lock(&lock);
-	return 0;
+    pthread_mutex_lock(&lock);
+    return 0;
 }
 
 int CTvSubtitle::sub_unlock()
 {
-	pthread_mutex_unlock(&lock);
-	return 0;
+    pthread_mutex_unlock(&lock);
+    return 0;
 }
 
 int CTvSubtitle::sub_clear()
 {
-	return 0;
+    return 0;
 }
 
 static void clear_bitmap(CTvSubtitle *pSub)
 {
-	unsigned char *ptr = pSub->buffer;
-	int y = pSub->bmp_h;
+    unsigned char *ptr = pSub->buffer;
+    int y = pSub->bmp_h;
 
-	while (y--) {
-		memset(ptr, 0, pSub->bmp_pitch);
-		ptr += pSub->bmp_pitch;
-	}
+    while (y--) {
+        memset(ptr, 0, pSub->bmp_pitch);
+        ptr += pSub->bmp_pitch;
+    }
 
 }
 
 static void show_sub_cb(AM_SUB2_Handle_t handle, AM_SUB2_Picture_t *pic)
 {
-	LOGD("dvb callback-----------");
+    LOGD("dvb callback-----------");
 
-	CTvSubtitle *pSub = ((CTvSubtitle *) AM_SUB2_GetUserData(handle));
-	pthread_mutex_lock(&pSub->lock);
-	clear_bitmap(pSub);
+    CTvSubtitle *pSub = ((CTvSubtitle *) AM_SUB2_GetUserData(handle));
+    pthread_mutex_lock(&pSub->lock);
+    clear_bitmap(pSub);
 
-	if (pic) {
-		AM_SUB2_Region_t *rgn = pic->p_region;
-		pSub->sub_w = pic->original_width;
-		pSub->sub_h = pic->original_height;
-		while (rgn) {
-			int sx, sy, dx, dy, rw, rh;
+    if (pic) {
+        AM_SUB2_Region_t *rgn = pic->p_region;
+        pSub->sub_w = pic->original_width;
+        pSub->sub_h = pic->original_height;
+        while (rgn) {
+            int sx, sy, dx, dy, rw, rh;
 
-			// ensure we have a valid buffer
-			if (! rgn->p_buf) {
-				rgn = rgn->p_next;
-				continue;
-			}
+            // ensure we have a valid buffer
+            if (! rgn->p_buf) {
+                rgn = rgn->p_next;
+                continue;
+            }
 
-			sx = 0;
-			sy = 0;
-			dx = pic->original_x + rgn->left;
-			dy = pic->original_y + rgn->top;
-			rw = rgn->width;
-			rh = rgn->height;
+            sx = 0;
+            sy = 0;
+            dx = pic->original_x + rgn->left;
+            dy = pic->original_y + rgn->top;
+            rw = rgn->width;
+            rh = rgn->height;
 
-			if (dx < 0) {
-				sx = -dx;
-				dx = 0;
-				rw += dx;
-			}
+            if (dx < 0) {
+                sx = -dx;
+                dx = 0;
+                rw += dx;
+            }
 
-			if (dx + rw > pSub->bmp_w) {
-				rw = pSub->bmp_w - dx;
-			}
+            if (dx + rw > pSub->bmp_w) {
+                rw = pSub->bmp_w - dx;
+            }
 
-			if (dy < 0) {
-				sy = -dy;
-				dy = 0;
-				rh += dy;
-			}
+            if (dy < 0) {
+                sy = -dy;
+                dy = 0;
+                rh += dy;
+            }
 
-			if (dy + rh > pSub->bmp_h) {
-				rh = pSub->bmp_h - dy;
-			}
+            if (dy + rh > pSub->bmp_h) {
+                rh = pSub->bmp_h - dy;
+            }
 
-			if ((rw > 0) && (rh > 0)) {
-				unsigned char *sbegin = (unsigned char *)rgn->p_buf + sy * rgn->width + sx;
-				unsigned char *dbegin = pSub->buffer + dy * pSub->bmp_pitch + dx * 4;
-				unsigned char *src, *dst;
-				int size;
+            if ((rw > 0) && (rh > 0)) {
+                unsigned char *sbegin = (unsigned char *)rgn->p_buf + sy * rgn->width + sx;
+                unsigned char *dbegin = pSub->buffer + dy * pSub->bmp_pitch + dx * 4;
+                unsigned char *src, *dst;
+                int size;
 
-				while (rh) {
-					src = sbegin;
-					dst = dbegin;
-					size = rw;
-					while (size--) {
-						int c = src[0];
+                while (rh) {
+                    src = sbegin;
+                    dst = dbegin;
+                    size = rw;
+                    while (size--) {
+                        int c = src[0];
 
-						if (c < (int)rgn->entry) {
-							if (rgn->clut[c].a) {
-								*dst++ = rgn->clut[c].r;
-								*dst++ = rgn->clut[c].g;
-								*dst++ = rgn->clut[c].b;
-							} else {
-								dst += 3;
-							}
-							*dst++ = rgn->clut[c].a;
-						} else {
-							dst += 4;
-						}
-						src ++;
-					}
-					sbegin += rgn->width;
-					dbegin += pSub->bmp_pitch;
-					rh--;
-				}
-			}
+                        if (c < (int)rgn->entry) {
+                            if (rgn->clut[c].a) {
+                                *dst++ = rgn->clut[c].r;
+                                *dst++ = rgn->clut[c].g;
+                                *dst++ = rgn->clut[c].b;
+                            } else {
+                                dst += 3;
+                            }
+                            *dst++ = rgn->clut[c].a;
+                        } else {
+                            dst += 4;
+                        }
+                        src ++;
+                    }
+                    sbegin += rgn->width;
+                    dbegin += pSub->bmp_pitch;
+                    rh--;
+                }
+            }
 
-			rgn = rgn->p_next;
-		}
-		pSub->mpObser->updateSubtitle(pic->original_width, pic->original_height);
-	}
-	pthread_mutex_unlock(&pSub->lock);
+            rgn = rgn->p_next;
+        }
+        pSub->mpObser->updateSubtitle(pic->original_width, pic->original_height);
+    }
+    pthread_mutex_unlock(&pSub->lock);
 
 }
 
 static uint64_t get_pts_cb(void *handle, uint64_t pts)
 {
-	char buf[32];
-	AM_ErrorCode_t ret;
-	uint32_t v;
-	uint64_t r;
+    char buf[32];
+    AM_ErrorCode_t ret;
+    uint32_t v;
+    uint64_t r;
 
-	ret = AM_FileRead("/sys/class/tsync/pts_pcrscr", buf, sizeof(buf));
-	if (!ret) {
-		v = strtoul(buf, 0, 16);
-		if (pts & (1LL << 32)) {
-			r = ((uint64_t)v) | (1LL << 32);
-		} else {
-			r = (uint64_t)v;
-		}
-	} else {
-		r = 0LL;
-	}
+    ret = AM_FileRead("/sys/class/tsync/pts_pcrscr", buf, sizeof(buf));
+    if (!ret) {
+        v = strtoul(buf, 0, 16);
+        if (pts & (1LL << 32)) {
+            r = ((uint64_t)v) | (1LL << 32);
+        } else {
+            r = (uint64_t)v;
+        }
+    } else {
+        r = 0LL;
+    }
 
-	return r;
+    return r;
 }
 
 static void pes_data_cb(int dev_no, int fhandle, const uint8_t *data, int len, void *user_data)
 {
-	CTvSubtitle *pSub = ((CTvSubtitle *) user_data);
-	AM_PES_Decode(pSub->pes_handle, (uint8_t *)data, len);
+    CTvSubtitle *pSub = ((CTvSubtitle *) user_data);
+    AM_PES_Decode(pSub->pes_handle, (uint8_t *)data, len);
 }
 
 static int close_dmx(CTvSubtitle *pSub)
 {
-	AM_DMX_FreeFilter(pSub->dmx_id, pSub->filter_handle);
-	AM_DMX_Close(pSub->dmx_id);
-	pSub->dmx_id = -1;
-	pSub->filter_handle = -1;
+    AM_DMX_FreeFilter(pSub->dmx_id, pSub->filter_handle);
+    AM_DMX_Close(pSub->dmx_id);
+    pSub->dmx_id = -1;
+    pSub->filter_handle = -1;
 
-	return 0;
+    return 0;
 }
 
 static int open_dmx(CTvSubtitle *pSub, int dmx_id, int pid)
 {
-	close_dmx(pSub);
-	AM_DMX_OpenPara_t op;
-	struct dmx_pes_filter_params pesp;
-	AM_ErrorCode_t ret;
+    close_dmx(pSub);
+    AM_DMX_OpenPara_t op;
+    struct dmx_pes_filter_params pesp;
+    AM_ErrorCode_t ret;
 
-	pSub->dmx_id = -1;
-	pSub->filter_handle = -1;
-	memset(&op, 0, sizeof(op));
+    pSub->dmx_id = -1;
+    pSub->filter_handle = -1;
+    memset(&op, 0, sizeof(op));
 
-	ret = AM_DMX_Open(dmx_id, &op);
-	if (ret != AM_SUCCESS) {
-		LOGD("error AM_DMX_Open != AM_SUCCESS");
-		goto error;
-	}
-	pSub->dmx_id = dmx_id;
+    ret = AM_DMX_Open(dmx_id, &op);
+    if (ret != AM_SUCCESS) {
+        LOGD("error AM_DMX_Open != AM_SUCCESS");
+        goto error;
+    }
+    pSub->dmx_id = dmx_id;
 
-	ret = AM_DMX_AllocateFilter(dmx_id, &pSub->filter_handle);
-	if (ret != AM_SUCCESS) {
-		LOGD("error AM_DMX_AllocateFilter != AM_SUCCESS");
-		goto error;
-	}
+    ret = AM_DMX_AllocateFilter(dmx_id, &pSub->filter_handle);
+    if (ret != AM_SUCCESS) {
+        LOGD("error AM_DMX_AllocateFilter != AM_SUCCESS");
+        goto error;
+    }
 
-	ret = AM_DMX_SetBufferSize(dmx_id, pSub->filter_handle, 0x80000);
-	if (ret != AM_SUCCESS) {
-		LOGD("error AM_DMX_SetBufferSize != AM_SUCCESS");
-		goto error;
-	}
+    ret = AM_DMX_SetBufferSize(dmx_id, pSub->filter_handle, 0x80000);
+    if (ret != AM_SUCCESS) {
+        LOGD("error AM_DMX_SetBufferSize != AM_SUCCESS");
+        goto error;
+    }
 
-	memset(&pesp, 0, sizeof(pesp));
-	pesp.pid = pid;
-	pesp.output = DMX_OUT_TAP;
-	pesp.pes_type = DMX_PES_TELETEXT0;
+    memset(&pesp, 0, sizeof(pesp));
+    pesp.pid = pid;
+    pesp.output = DMX_OUT_TAP;
+    pesp.pes_type = DMX_PES_TELETEXT0;
 
-	ret = AM_DMX_SetPesFilter(dmx_id, pSub->filter_handle, &pesp);
-	if (ret != AM_SUCCESS) {
-		LOGD("error AM_DMX_SetPesFilter != AM_SUCCESS, err = %d", strerror(errno));
-		goto error;
-	}
+    ret = AM_DMX_SetPesFilter(dmx_id, pSub->filter_handle, &pesp);
+    if (ret != AM_SUCCESS) {
+        LOGD("error AM_DMX_SetPesFilter != AM_SUCCESS, err = %d", strerror(errno));
+        goto error;
+    }
 
-	ret = AM_DMX_SetCallback(dmx_id, pSub->filter_handle, pes_data_cb, pSub);
-	if (ret != AM_SUCCESS) {
-		LOGD("error AM_DMX_SetCallback != AM_SUCCESS");
-		goto error;
-	}
+    ret = AM_DMX_SetCallback(dmx_id, pSub->filter_handle, pes_data_cb, pSub);
+    if (ret != AM_SUCCESS) {
+        LOGD("error AM_DMX_SetCallback != AM_SUCCESS");
+        goto error;
+    }
 
-	ret = AM_DMX_StartFilter(dmx_id, pSub->filter_handle);
-	if (ret != AM_SUCCESS) {
-		LOGD("error AM_DMX_StartFilter != AM_SUCCESS,dmx_id=%d,filter_handle=%d, ret = %d", dmx_id, pSub->filter_handle, ret);
-		goto error;
-	}
+    ret = AM_DMX_StartFilter(dmx_id, pSub->filter_handle);
+    if (ret != AM_SUCCESS) {
+        LOGD("error AM_DMX_StartFilter != AM_SUCCESS,dmx_id=%d,filter_handle=%d, ret = %d", dmx_id, pSub->filter_handle, ret);
+        goto error;
+    }
 
-	return 0;
+    return 0;
 error:
-	if (pSub->filter_handle != -1) {
-		AM_DMX_FreeFilter(dmx_id, pSub->filter_handle);
-	}
-	if (pSub->dmx_id != -1) {
-		AM_DMX_Close(dmx_id);
-	}
+    if (pSub->filter_handle != -1) {
+        AM_DMX_FreeFilter(dmx_id, pSub->filter_handle);
+    }
+    if (pSub->dmx_id != -1) {
+        AM_DMX_Close(dmx_id);
+    }
 
-	return -1;
+    return -1;
 }
 
 static void pes_sub_cb(AM_PES_Handle_t handle, uint8_t *buf, int size)
 {
-	CTvSubtitle *pSub = ((CTvSubtitle *) AM_SUB2_GetUserData(handle));
-	AM_SUB2_Decode(pSub->sub_handle, buf, size);
+    CTvSubtitle *pSub = ((CTvSubtitle *) AM_SUB2_GetUserData(handle));
+    AM_SUB2_Decode(pSub->sub_handle, buf, size);
 }
 
 int CTvSubtitle::sub_switch_status()
 {
-	return isSubOpen ? 1 : 0;
+    return isSubOpen ? 1 : 0;
 }
 int CTvSubtitle::sub_start_dvb_sub(int dmx_id, int pid, int page_id, int anc_page_id)
 {
-	LOGD("start dvb subtitle=----------------");
+    LOGD("start dvb subtitle=----------------");
 
-	AM_PES_Para_t pesp;
-	AM_SUB2_Para_t subp;
-	int ret;
+    AM_PES_Para_t pesp;
+    AM_SUB2_Para_t subp;
+    int ret;
 
-	memset(&pesp, 0, sizeof(pesp));
-	pesp.packet    = pes_sub_cb;
-	pesp.user_data = this;
-	ret = AM_PES_Create(&pes_handle, &pesp);
-	if (ret != AM_SUCCESS) {
-		LOGD("error AM_PES_Create != AM_SUCCESS");
-		goto error;
-	}
+    memset(&pesp, 0, sizeof(pesp));
+    pesp.packet    = pes_sub_cb;
+    pesp.user_data = this;
+    ret = AM_PES_Create(&pes_handle, &pesp);
+    if (ret != AM_SUCCESS) {
+        LOGD("error AM_PES_Create != AM_SUCCESS");
+        goto error;
+    }
 
-	memset(&subp, 0, sizeof(subp));
-	subp.show      = show_sub_cb;
-	subp.get_pts   = get_pts_cb;
-	subp.composition_id = page_id;
-	subp.ancillary_id   = anc_page_id;
-	subp.user_data = this;
-	ret = AM_SUB2_Create(&sub_handle, &subp);
-	if (ret != AM_SUCCESS) {
-		LOGD("error AM_SUB2_Create != AM_SUCCESS");
-		goto error;
-	}
+    memset(&subp, 0, sizeof(subp));
+    subp.show      = show_sub_cb;
+    subp.get_pts   = get_pts_cb;
+    subp.composition_id = page_id;
+    subp.ancillary_id   = anc_page_id;
+    subp.user_data = this;
+    ret = AM_SUB2_Create(&sub_handle, &subp);
+    if (ret != AM_SUCCESS) {
+        LOGD("error AM_SUB2_Create != AM_SUCCESS");
+        goto error;
+    }
 
-	ret = AM_SUB2_Start(sub_handle);
-	if (ret != AM_SUCCESS) {
-		LOGD("error AM_SUB2_Start != AM_SUCCESS");
-		goto error;
-	}
+    ret = AM_SUB2_Start(sub_handle);
+    if (ret != AM_SUCCESS) {
+        LOGD("error AM_SUB2_Start != AM_SUCCESS");
+        goto error;
+    }
 
-	ret = open_dmx(this, dmx_id, pid);
-	if (ret < 0) {
-		LOGD("error open_dmx != AM_SUCCESS");
-		goto error;
-	}
-	isSubOpen = true;
-	return 0;
+    ret = open_dmx(this, dmx_id, pid);
+    if (ret < 0) {
+        LOGD("error open_dmx != AM_SUCCESS");
+        goto error;
+    }
+    isSubOpen = true;
+    return 0;
 error:
-	if (sub_handle) {
-		AM_SUB2_Destroy(sub_handle);
-		sub_handle = NULL;
-	}
-	if (pes_handle) {
-		AM_PES_Destroy(pes_handle);
-		pes_handle = NULL;
-	}
-	return -1;
+    if (sub_handle) {
+        AM_SUB2_Destroy(sub_handle);
+        sub_handle = NULL;
+    }
+    if (pes_handle) {
+        AM_PES_Destroy(pes_handle);
+        pes_handle = NULL;
+    }
+    return -1;
 }
 
 int CTvSubtitle::sub_start_dtv_tt(int dmx_id, int region_id, int pid, int page, int sub_page, bool is_sub)
 {
-	return 0;
+    return 0;
 }
 
 int CTvSubtitle::sub_stop_dvb_sub()
 {
-	pthread_mutex_lock(&lock);
-	close_dmx(this);
-	AM_SUB2_Destroy(sub_handle);
-	AM_PES_Destroy(pes_handle);
+    pthread_mutex_lock(&lock);
+    close_dmx(this);
+    AM_SUB2_Destroy(sub_handle);
+    AM_PES_Destroy(pes_handle);
 
-	clear_bitmap(this);
-	mpObser->updateSubtitle(0, 0);
+    clear_bitmap(this);
+    mpObser->updateSubtitle(0, 0);
 
-	sub_handle = NULL;
-	pes_handle = NULL;
-	isSubOpen = false;
-	pthread_mutex_unlock(&lock);
-	return 0;
+    sub_handle = NULL;
+    pes_handle = NULL;
+    isSubOpen = false;
+    pthread_mutex_unlock(&lock);
+    return 0;
 }
 
 int CTvSubtitle::sub_stop_dtv_tt()
 {
-	return 0;
+    return 0;
 }
 
 int CTvSubtitle::sub_tt_goto(int page)
 {
-	return 0;
+    return 0;
 }
 
 int CTvSubtitle::sub_tt_color_link(int color)
 {
-	return 0;
+    return 0;
 }
 
 int CTvSubtitle::sub_tt_home_link()
 {
-	return 0;
+    return 0;
 }
 
 int CTvSubtitle::sub_tt_next(int dir)
 {
-	return 0;
+    return 0;
 }
 
 int CTvSubtitle::sub_tt_set_search_pattern(char *pattern, bool casefold)
 {
-	return 0;
+    return 0;
 }
 
 int CTvSubtitle::sub_tt_search(int dir)
 {
-	return 0;
+    return 0;
 }
 
 /*
@@ -524,92 +524,92 @@ program, no signal, blocked...*/
 //else != 0
 int CTvSubtitle::sub_start_atsc_cc(enum cc_param_country country, enum cc_param_source_type src_type, int channel_num, enum cc_param_caption_type caption_type)
 {
-	LOGD("----sub_start_atsc_cc-1--- country=%d,src=%d,ctype=%d", country, src_type, caption_type);
-	switch (country) {
-	case CC_PARAM_COUNTRY_USA:
-		AM_CC_Cmd(CMD_SET_COUNTRY_USA);
-		break;
-	case CC_PARAM_COUNTRY_KOREA:
-		AM_CC_Cmd(CMD_SET_COUNTRY_KOREA);
-		break;
-	default:
-		AM_CC_Cmd(CMD_SET_COUNTRY_USA);
-		break;
-	}
+    LOGD("----sub_start_atsc_cc-1--- country=%d,src=%d,ctype=%d", country, src_type, caption_type);
+    switch (country) {
+    case CC_PARAM_COUNTRY_USA:
+        AM_CC_Cmd(CMD_SET_COUNTRY_USA);
+        break;
+    case CC_PARAM_COUNTRY_KOREA:
+        AM_CC_Cmd(CMD_SET_COUNTRY_KOREA);
+        break;
+    default:
+        AM_CC_Cmd(CMD_SET_COUNTRY_USA);
+        break;
+    }
 
-	switch (src_type) {
-	case CC_PARAM_SOURCE_VBIDATA:
-		AM_CC_Cmd(CMD_CC_SET_VBIDATA);
-		break;
-	case CC_PARAM_SOURCE_USERDATA:
-		AM_CC_Cmd(CMD_CC_SET_USERDATA);
-		break;
-	default:
-		AM_CC_Cmd(CMD_CC_SET_USERDATA);
-		break;
-	}
+    switch (src_type) {
+    case CC_PARAM_SOURCE_VBIDATA:
+        AM_CC_Cmd(CMD_CC_SET_VBIDATA);
+        break;
+    case CC_PARAM_SOURCE_USERDATA:
+        AM_CC_Cmd(CMD_CC_SET_USERDATA);
+        break;
+    default:
+        AM_CC_Cmd(CMD_CC_SET_USERDATA);
+        break;
+    }
 
-	//just for test
-	if (channel_num == 0) {
-	} else {
-		//AM_CC_Cmd(CMD_CC_SET_CHAN_NUM);
-	}
+    //just for test
+    if (channel_num == 0) {
+    } else {
+        //AM_CC_Cmd(CMD_CC_SET_CHAN_NUM);
+    }
 
-	AM_CLOSECAPTION_cmd_t cc_t_cmd;
-	switch (caption_type) {
-	case CC_PARAM_ANALOG_CAPTION_TYPE_CC1:
-		cc_t_cmd = CMD_CC_1;
-		break;
-	case CC_PARAM_ANALOG_CAPTION_TYPE_CC2:
-		cc_t_cmd = CMD_CC_2;
-		break;
-	case CC_PARAM_ANALOG_CAPTION_TYPE_CC3:
-		cc_t_cmd = CMD_CC_3;
-		break;
-	case CC_PARAM_ANALOG_CAPTION_TYPE_CC4:
-		cc_t_cmd = CMD_CC_4;
-		break;
-	case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE1:
-		cc_t_cmd = CMD_SERVICE_1;
-		break;
-	case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE2:
-		cc_t_cmd = CMD_SERVICE_2;
-		break;
-	case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE3:
-		cc_t_cmd = CMD_SERVICE_3;
-		break;
-	case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE4:
-		cc_t_cmd = CMD_SERVICE_4;
-		break;
-	default:
-		cc_t_cmd = CMD_SERVICE_1;
-		break;
-	}
-	AM_CC_Cmd(cc_t_cmd);
+    AM_CLOSECAPTION_cmd_t cc_t_cmd;
+    switch (caption_type) {
+    case CC_PARAM_ANALOG_CAPTION_TYPE_CC1:
+        cc_t_cmd = CMD_CC_1;
+        break;
+    case CC_PARAM_ANALOG_CAPTION_TYPE_CC2:
+        cc_t_cmd = CMD_CC_2;
+        break;
+    case CC_PARAM_ANALOG_CAPTION_TYPE_CC3:
+        cc_t_cmd = CMD_CC_3;
+        break;
+    case CC_PARAM_ANALOG_CAPTION_TYPE_CC4:
+        cc_t_cmd = CMD_CC_4;
+        break;
+    case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE1:
+        cc_t_cmd = CMD_SERVICE_1;
+        break;
+    case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE2:
+        cc_t_cmd = CMD_SERVICE_2;
+        break;
+    case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE3:
+        cc_t_cmd = CMD_SERVICE_3;
+        break;
+    case CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE4:
+        cc_t_cmd = CMD_SERVICE_4;
+        break;
+    default:
+        cc_t_cmd = CMD_SERVICE_1;
+        break;
+    }
+    AM_CC_Cmd(cc_t_cmd);
 
-	AM_CC_Set_CallBack(close_caption_callback, this);
-	AM_VCHIP_Set_CallBack(atv_vchip_callback, this);
-	//start
-	AM_CC_Cmd(CMD_CC_START);
-	LOGD("----sub_start_atsc_cc-2--- country=%d,src=%d,ctype=%d", country, src_type, caption_type);
-	return 0;
+    AM_CC_Set_CallBack(close_caption_callback, this);
+    AM_VCHIP_Set_CallBack(atv_vchip_callback, this);
+    //start
+    AM_CC_Cmd(CMD_CC_START);
+    LOGD("----sub_start_atsc_cc-2--- country=%d,src=%d,ctype=%d", country, src_type, caption_type);
+    return 0;
 }
 
 int CTvSubtitle::sub_stop_atsc_cc()
 {
-	LOGD("----sub_stop_atsc_cc----");
-	AM_CC_Cmd(CMD_CC_STOP);
-	return 0;
+    LOGD("----sub_stop_atsc_cc----");
+    AM_CC_Cmd(CMD_CC_STOP);
+    return 0;
 }
 int CTvSubtitle::ResetVchipChgStat()
 {
-	avchip_chg = 0;
-	AM_CC_Cmd(CMD_VCHIP_RST_CHGSTAT);
-	return 0;
+    avchip_chg = 0;
+    AM_CC_Cmd(CMD_VCHIP_RST_CHGSTAT);
+    return 0;
 }
 int CTvSubtitle::IsVchipChange()
 {
-	return avchip_chg;
+    return avchip_chg;
 }
 //cnt :data buf len
 //databuf len  is max 512
@@ -617,27 +617,27 @@ int CTvSubtitle::IsVchipChange()
 void CTvSubtitle::close_caption_callback(char *str, int cnt, int data_buf[], int cmd_buf[], void *user_data)
 {
 
-	/*
-	CTvSubtitle *pSub = (CTvSubtitle *)user_data;
+    /*
+    CTvSubtitle *pSub = (CTvSubtitle *)user_data;
 
-	if (pSub == NULL)
-	{
-	    LOGD("sub cc callback is null user data for this");
-	    return;
-	}
+    if (pSub == NULL)
+    {
+        LOGD("sub cc callback is null user data for this");
+        return;
+    }
 
-	if (pSub->mpObser == NULL) return;
+    if (pSub->mpObser == NULL) return;
 
-	pSub->mCurCCEv.mDataBufSize = cnt;
-	pSub->mCurCCEv.mpDataBuffer = data_buf;
-	pSub->mCurCCEv.mCmdBufSize = 128;//max
-	pSub->mCurCCEv.mpCmdBuffer = cmd_buf;
+    pSub->mCurCCEv.mDataBufSize = cnt;
+    pSub->mCurCCEv.mpDataBuffer = data_buf;
+    pSub->mCurCCEv.mCmdBufSize = 128;//max
+    pSub->mCurCCEv.mpCmdBuffer = cmd_buf;
 
-	pSub->mpObser->onEvent(pSub->mCurCCEv);
-	*/
+    pSub->mpObser->onEvent(pSub->mCurCCEv);
+    */
 }
 void CTvSubtitle::atv_vchip_callback(int Is_chg,  void *user_data)
 {
-	CTvSubtitle *pSub = (CTvSubtitle *)user_data;
-	pSub->avchip_chg = Is_chg;
+    CTvSubtitle *pSub = (CTvSubtitle *)user_data;
+    pSub->avchip_chg = Is_chg;
 }

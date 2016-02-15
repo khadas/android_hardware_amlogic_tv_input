@@ -23,20 +23,23 @@
 #undef LOG_TAG
 #define LOG_TAG "CVpp"
 #endif
-CVpp::CVpp() {
+CVpp::CVpp()
+{
     vpp_amvideo_fd = -1;
     vpp_amvideo_3d_fd = -1;
     mpPqData = new CPqData();
 }
 
-CVpp::~CVpp() {
+CVpp::~CVpp()
+{
     if (mpPqData != NULL) {
         delete mpPqData;
         mpPqData = NULL;
     }
 }
 
-int CVpp::Vpp_Init(const char *pq_db_path) {
+int CVpp::Vpp_Init(const char *pq_db_path)
+{
     LOGD("Vpp_Init pq_db_path = %s", pq_db_path);
     if (mpPqData->openPqDB(pq_db_path)) {
         LOGW("%s, open pq failed!", __FUNCTION__);
@@ -74,13 +77,15 @@ int CVpp::Vpp_Init(const char *pq_db_path) {
     return ret;
 }
 
-int CVpp::Vpp_Uninit(void) {
+int CVpp::Vpp_Uninit(void)
+{
     Vpp_ResetLastVppSettingsSourceType();
     VPP_CloseModule();
     mpPqData->closeDb();
     return 0;
 }
-CPqData *CVpp::getPqData() {
+CPqData *CVpp::getPqData()
+{
     return mpPqData;
 }
 
@@ -93,7 +98,8 @@ int CVpp::doResume()
 {
     return mpPqData->reopenDB();
 }
-int CVpp::VPP_OpenModule(void) {
+int CVpp::VPP_OpenModule(void)
+{
 
     if (vpp_amvideo_fd < 0) {
         vpp_amvideo_fd = open(VPP_DEV_PATH, O_RDWR);
@@ -119,7 +125,8 @@ int CVpp::VPP_OpenModule(void) {
     return vpp_amvideo_fd;
 }
 
-int CVpp::VPP_CloseModule(void) {
+int CVpp::VPP_CloseModule(void)
+{
     if (vpp_amvideo_fd >= 0) {
         close ( vpp_amvideo_fd);
         vpp_amvideo_fd = -1;
@@ -133,7 +140,8 @@ int CVpp::VPP_CloseModule(void) {
     return 0;
 }
 
-int CVpp::VPP_DeviceIOCtl(int request, ...) {
+int CVpp::VPP_DeviceIOCtl(int request, ...)
+{
     int tmp_ret = -1;
     va_list ap;
     void *arg;
@@ -144,7 +152,8 @@ int CVpp::VPP_DeviceIOCtl(int request, ...) {
     return tmp_ret;
 }
 
-int CVpp::Vpp_LoadRegs(am_regs_t regs) {
+int CVpp::Vpp_LoadRegs(am_regs_t regs)
+{
     LOGD("~~~VPP_DeviceIOCtl~~~##Vpp_LoadRegs##AMVECM_IOC_LOAD_REG##");
 
     int count_retry = 20;
@@ -166,16 +175,18 @@ int CVpp::Vpp_LoadRegs(am_regs_t regs) {
     return rt;
 }
 
-int CVpp::isPreviewWindow() {
+int CVpp::isPreviewWindow()
+{
     char prop_value[PROPERTY_VALUE_MAX];
     memset(prop_value, '\0', PROPERTY_VALUE_MAX);
     property_get("tv.is.preview.window", prop_value, "false");
     LOGD("%s, prop tv.is.preview.window is \"%s\".\n", __FUNCTION__, prop_value);
-    return (strcmp(prop_value, "true")==0) ? 1 : 0;
+    return (strcmp(prop_value, "true") == 0) ? 1 : 0;
 }
 
 int CVpp::LoadVppSettings(tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                          is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     int val = 0, ret = -1;
     vpp_color_temperature_mode_t temp_mode = VPP_COLOR_TEMPERATURE_MODE_STANDARD;
     vpp_picture_mode_t pqmode = VPP_PICTURE_MODE_STANDARD;
@@ -184,17 +195,17 @@ int CVpp::LoadVppSettings(tv_source_input_type_t source_type, tvin_sig_fmt_t sig
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceType(source_type);
 
     if ((vpp_setting_last_source_type == source_type) && (vpp_setting_last_sig_fmt == sig_fmt)
-    /*&& ( vpp_setting_last_3d_status == status showbo mark)*/
-    && (vpp_setting_last_trans_fmt == trans_fmt)) {
+            /*&& ( vpp_setting_last_3d_status == status showbo mark)*/
+            && (vpp_setting_last_trans_fmt == trans_fmt)) {
         return -1;
     }
 
     nr_mode = GetNoiseReductionMode(source_type);
     ret |= Vpp_SetNoiseReductionMode(nr_mode, source_type, source_port, sig_fmt, is3d, trans_fmt);
     ret |= Vpp_SetXVYCCMode(VPP_XVYCC_MODE_STANDARD, source_type, source_port, sig_fmt, is3d,
-            trans_fmt);
+                            trans_fmt);
     ret |= Vpp_SetMCDIMode(VPP_MCDI_MODE_STANDARD, source_type, source_port, sig_fmt, is3d,
-            trans_fmt);
+                           trans_fmt);
     ret |= Vpp_SetDeblockMode(VPP_DEBLOCK_MODE_MIDDLE, source_port, sig_fmt, is3d, trans_fmt);
 
     Vpp_LoadDI(source_type, sig_fmt, is3d, trans_fmt);
@@ -234,7 +245,8 @@ int CVpp::LoadVppSettings(tv_source_input_type_t source_type, tvin_sig_fmt_t sig
     return 0;
 }
 
-int CVpp::Vpp_GetVppConfig(void) {
+int CVpp::Vpp_GetVppConfig(void)
+{
     const char *config_value;
     int cfg_item_count = 0;
     char *token = NULL;
@@ -333,7 +345,8 @@ int CVpp::Vpp_GetVppConfig(void) {
 }
 
 int CVpp::Vpp_LoadDI(tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                     is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     am_regs_t regs;
     int ret = -1;
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceType(source_type);
@@ -350,7 +363,8 @@ int CVpp::Vpp_LoadDI(tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt,
 }
 
 int CVpp::Vpp_LoadBasicRegs(tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                            is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     am_regs_t regs;
     int ret = -1, rangeRet = -1, formatRet = -1, enableFlag = -1;
 
@@ -376,7 +390,8 @@ int CVpp::Vpp_LoadBasicRegs(tv_source_input_type_t source_type, tvin_sig_fmt_t s
     return ret;
 }
 
-int CVpp::Vpp_ResetLastVppSettingsSourceType(void) {
+int CVpp::Vpp_ResetLastVppSettingsSourceType(void)
+{
     vpp_setting_last_source_type = SOURCE_TYPE_MAX;
     vpp_setting_last_sig_fmt = TVIN_SIG_FMT_MAX;
     //showbo mark vpp_setting_last_3d_status = STATUS3D_MAX;
@@ -384,7 +399,8 @@ int CVpp::Vpp_ResetLastVppSettingsSourceType(void) {
     return 0;
 }
 
-int CVpp::VPP3D_DeviceIOCtl(int request, ...) {
+int CVpp::VPP3D_DeviceIOCtl(int request, ...)
+{
     int tmp_ret = -1;
     va_list ap;
     void *arg;
@@ -402,7 +418,8 @@ int CVpp::VPP3D_DeviceIOCtl(int request, ...) {
 }
 
 int CVpp::Vpp_GetPQModeValue(tv_source_input_type_t source_type, vpp_picture_mode_t pq_mode,
-        vpp_pq_para_t *pq_para) {
+                             vpp_pq_para_t *pq_para)
+{
     vpp_pq_para_t parms;
     vpp_picture_mode_t real_pq_mode;
 
@@ -443,15 +460,16 @@ int CVpp::Vpp_GetPQModeValue(tv_source_input_type_t source_type, vpp_picture_mod
 }
 
 int CVpp::Vpp_SetPQParams(tv_source_input_type_t source_type, vpp_picture_mode_t pq_mode,
-        vpp_pq_para_t pq_para, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
-        tvin_trans_fmt_t trans_fmt) {
+                          vpp_pq_para_t pq_para, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
+                          tvin_trans_fmt_t trans_fmt)
+{
     int ret = 0, brightness = 50, contrast = 50, saturation = 50, hue = 50, sharnpess = 50;
     am_regs_t regs, regs_l;
     int level;
 
     if (pq_para.brightness >= 0 && pq_para.brightness <= 100) {
         if (mpPqData->PQ_GetBrightnessParams(source_port, sig_fmt, is3d, trans_fmt,
-                pq_para.brightness, &brightness) == 0) {
+                                             pq_para.brightness, &brightness) == 0) {
         } else {
             LOGE("%s, PQ_GetBrightnessParams error!\n", "Vpp_SetPQParams");
         }
@@ -461,7 +479,7 @@ int CVpp::Vpp_SetPQParams(tv_source_input_type_t source_type, vpp_picture_mode_t
 
     if (pq_para.contrast >= 0 && pq_para.contrast <= 100) {
         if (mpPqData->PQ_GetContrastParams(source_port, sig_fmt, is3d, trans_fmt, pq_para.contrast,
-                &contrast) == 0) {
+                                           &contrast) == 0) {
         } else {
             LOGE("%s, PQ_GetBrightnessParams error!\n", "Vpp_SetPQParams");
         }
@@ -471,7 +489,7 @@ int CVpp::Vpp_SetPQParams(tv_source_input_type_t source_type, vpp_picture_mode_t
 
     if (pq_para.saturation >= 0 && pq_para.saturation <= 100) {
         if (mpPqData->PQ_GetSaturationParams(source_port, sig_fmt, is3d, trans_fmt,
-                pq_para.saturation, &saturation) == 0) {
+                                             pq_para.saturation, &saturation) == 0) {
 
             if (mbVppCfg_hue_reverse) {
                 pq_para.hue = 100 - pq_para.hue;
@@ -500,7 +518,7 @@ int CVpp::Vpp_SetPQParams(tv_source_input_type_t source_type, vpp_picture_mode_t
         level = pq_para.sharpness;
 
         if (mpPqData->PQ_GetSharpnessParams(source_port, sig_fmt, is3d, trans_fmt, level, &regs,
-                &regs_l) == 0) {
+                                            &regs_l) == 0) {
             if (Vpp_LoadRegs(regs) < 0) {
                 LOGE("%s, load reg for sharpness0 failed!\n", __FUNCTION__);
             }
@@ -522,8 +540,9 @@ int CVpp::Vpp_SetPQParams(tv_source_input_type_t source_type, vpp_picture_mode_t
 }
 
 int CVpp::Vpp_SetPQMode(vpp_picture_mode_t pq_mode, tv_source_input_type_t source_type,
-        tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
-        tvin_trans_fmt_t trans_fmt) {
+                        tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
+                        tvin_trans_fmt_t trans_fmt)
+{
     vpp_pq_para_t pq_para;
     int ret = -1;
 
@@ -554,7 +573,8 @@ int CVpp::Vpp_SetPQMode(vpp_picture_mode_t pq_mode, tv_source_input_type_t sourc
     return ret;
 }
 
-int CVpp::SavePQMode(vpp_picture_mode_t pq_mode, tv_source_input_type_t source_type) {
+int CVpp::SavePQMode(vpp_picture_mode_t pq_mode, tv_source_input_type_t source_type)
+{
     vpp_pq_para_t pq_para;
     int ret = -1;
     int tmp_pic_mode = 0;
@@ -565,7 +585,8 @@ int CVpp::SavePQMode(vpp_picture_mode_t pq_mode, tv_source_input_type_t source_t
 }
 
 int CVpp::SetPQMode(vpp_picture_mode_t pq_mode, tv_source_input_type_t source_type,
-        tvin_sig_fmt_t sig_fmt, tvin_trans_fmt_t trans_fmt, is_3d_type_t is3d, int is_save) {
+                    tvin_sig_fmt_t sig_fmt, tvin_trans_fmt_t trans_fmt, is_3d_type_t is3d, int is_save)
+{
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceType(source_type);
 
     if (0 == Vpp_SetPQMode(pq_mode, source_type, source_port, sig_fmt, is3d, trans_fmt)) {
@@ -580,7 +601,8 @@ int CVpp::SetPQMode(vpp_picture_mode_t pq_mode, tv_source_input_type_t source_ty
     return -1;
 }
 
-vpp_picture_mode_t CVpp::GetPQMode(tv_source_input_type_t source_type) {
+vpp_picture_mode_t CVpp::GetPQMode(tv_source_input_type_t source_type)
+{
     vpp_picture_mode_t data = VPP_PICTURE_MODE_STANDARD;
     int tmp_pic_mode = 0;
 
@@ -594,7 +616,8 @@ vpp_picture_mode_t CVpp::GetPQMode(tv_source_input_type_t source_type) {
     return data;
 }
 
-int CVpp::Vpp_SetColorDemoMode(vpp_color_demomode_t demomode) {
+int CVpp::Vpp_SetColorDemoMode(vpp_color_demomode_t demomode)
+{
     cm_regmap_t regmap;
     unsigned long *temp_regmap;
     int i = 0;
@@ -664,14 +687,15 @@ int CVpp::Vpp_SetColorDemoMode(vpp_color_demomode_t demomode) {
 }
 
 int CVpp::Vpp_SetBaseColorMode(vpp_color_basemode_t basemode, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                               tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     int ret = -1;
     am_regs_t regs;
     LOGD("%s.\n", "Vpp_SetBaseColorMode");
 
     if (mbVppCfg_new_cm) {
         if (mpPqData->PQ_GetCM2Params((vpp_color_management2_t) basemode, source_port, sig_fmt,
-                is3d, trans_fmt, &regs) == 0) {
+                                      is3d, trans_fmt, &regs) == 0) {
             ret = Vpp_LoadRegs(regs);
         } else {
             LOGE("PQ_GetCM2Params failed!\n");
@@ -682,7 +706,8 @@ int CVpp::Vpp_SetBaseColorMode(vpp_color_basemode_t basemode, tvin_port_t source
 }
 
 int CVpp::Vpp_SetColorTemperatureUser(vpp_color_temperature_mode_t temp_mode,
-        tv_source_input_type_t source_type) {
+                                      tv_source_input_type_t source_type)
+{
     tcon_rgb_ogo_t rgbogo;
     unsigned int gain_r, gain_g, gain_b;
 
@@ -719,8 +744,9 @@ int CVpp::Vpp_SetColorTemperatureUser(vpp_color_temperature_mode_t temp_mode,
 }
 
 int CVpp::Vpp_SetColorTemperature(vpp_color_temperature_mode_t Tempmode,
-        tv_source_input_type_t source_type, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        tvin_trans_fmt_t trans_fmt) {
+                                  tv_source_input_type_t source_type, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
+                                  tvin_trans_fmt_t trans_fmt)
+{
     tcon_rgb_ogo_t rgbogo, rgbPreOffset;
     int ret = -1;
 
@@ -741,7 +767,8 @@ int CVpp::Vpp_SetColorTemperature(vpp_color_temperature_mode_t Tempmode,
 }
 
 int CVpp::Vpp_SetBrightness(int value, tv_source_input_type_t source_type, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                            tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     int ret = -1;
     int params;
     int level;
@@ -763,7 +790,8 @@ int CVpp::Vpp_SetBrightness(int value, tv_source_input_type_t source_type, tvin_
     return ret;
 }
 
-int CVpp::VPP_SetVideoBrightness(int value) {
+int CVpp::VPP_SetVideoBrightness(int value)
+{
     FILE *fp = NULL;
 
     fp = fopen("/sys/class/amvecm/brightness", "w");
@@ -783,7 +811,8 @@ int CVpp::VPP_SetVideoBrightness(int value) {
 }
 
 int CVpp::SetBrightness(int value, tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt,
-        tvin_trans_fmt_t trans_fmt, is_3d_type_t is3d, int is_save) {
+                        tvin_trans_fmt_t trans_fmt, is_3d_type_t is3d, int is_save)
+{
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceType(source_type);
 
     if (0 == Vpp_SetBrightness(value, source_type, source_port, sig_fmt, is3d, trans_fmt)) {
@@ -799,7 +828,8 @@ int CVpp::SetBrightness(int value, tv_source_input_type_t source_type, tvin_sig_
     return 0;
 }
 
-int CVpp::GetBrightness(tv_source_input_type_t source_type) {
+int CVpp::GetBrightness(tv_source_input_type_t source_type)
+{
     int data = 50;
     vpp_pq_para_t pq_para;
     vpp_picture_mode_t pq_mode = GetPQMode(source_type);
@@ -820,7 +850,8 @@ int CVpp::GetBrightness(tv_source_input_type_t source_type) {
 }
 
 int CVpp::Vpp_SetContrast(int value, tv_source_input_type_t source_type, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                          tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     int ret = -1;
     int params;
     int level;
@@ -842,7 +873,8 @@ int CVpp::Vpp_SetContrast(int value, tv_source_input_type_t source_type, tvin_po
     return ret;
 }
 
-int CVpp::VPP_SetVideoContrast(int value) {
+int CVpp::VPP_SetVideoContrast(int value)
+{
     FILE *fp = NULL;
 
     fp = fopen("/sys/class/amvecm/contrast", "w");
@@ -861,7 +893,8 @@ int CVpp::VPP_SetVideoContrast(int value) {
 }
 
 int CVpp::SetContrast(int value, tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt,
-        tvin_trans_fmt_t trans_fmt, is_3d_type_t is3d, int is_save) {
+                      tvin_trans_fmt_t trans_fmt, is_3d_type_t is3d, int is_save)
+{
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceType(source_type);
 
     if (0 == Vpp_SetContrast(value, source_type, source_port, sig_fmt, is3d, trans_fmt)) {
@@ -876,7 +909,8 @@ int CVpp::SetContrast(int value, tv_source_input_type_t source_type, tvin_sig_fm
     }
 }
 
-int CVpp::GetContrast(tv_source_input_type_t source_type) {
+int CVpp::GetContrast(tv_source_input_type_t source_type)
+{
     int data = 50;
     vpp_pq_para_t pq_para;
     vpp_picture_mode_t pq_mode = GetPQMode(source_type);
@@ -897,7 +931,8 @@ int CVpp::GetContrast(tv_source_input_type_t source_type) {
 }
 
 int CVpp::Vpp_SetSaturation(int value, tv_source_input_type_t source_type, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                            tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     int ret = -1;
     int params;
     int level;
@@ -919,7 +954,8 @@ int CVpp::Vpp_SetSaturation(int value, tv_source_input_type_t source_type, tvin_
 }
 
 int CVpp::SetSaturation(int value, tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt,
-        tvin_trans_fmt_t trans_fmt, is_3d_type_t is3d, int is_save) {
+                        tvin_trans_fmt_t trans_fmt, is_3d_type_t is3d, int is_save)
+{
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceType(source_type);
 
     if (0 == Vpp_SetSaturation(value, source_type, source_port, sig_fmt, is3d, trans_fmt)) {
@@ -934,7 +970,8 @@ int CVpp::SetSaturation(int value, tv_source_input_type_t source_type, tvin_sig_
     }
 }
 
-int CVpp::GetSaturation(tv_source_input_type_t source_type) {
+int CVpp::GetSaturation(tv_source_input_type_t source_type)
+{
     int data = 50;
     vpp_pq_para_t pq_para;
     vpp_picture_mode_t pq_mode = GetPQMode(source_type);
@@ -955,7 +992,8 @@ int CVpp::GetSaturation(tv_source_input_type_t source_type) {
 }
 
 int CVpp::Vpp_SetHue(int value, tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt,
-        tvin_port_t source_port, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                     tvin_port_t source_port, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     int ret = -1;
     int params, saturation_params;
     int level, saturation_level;
@@ -971,7 +1009,7 @@ int CVpp::Vpp_SetHue(int value, tv_source_input_type_t source_type, tvin_sig_fmt
             saturation_level = GetSaturation(source_type);
 
             if (mpPqData->PQ_GetSaturationParams(source_port, sig_fmt, is3d, trans_fmt,
-                    saturation_level, &saturation_params) == 0) {
+                                                 saturation_level, &saturation_params) == 0) {
             } else {
                 saturation_params = -20;
             }
@@ -988,7 +1026,8 @@ int CVpp::Vpp_SetHue(int value, tv_source_input_type_t source_type, tvin_sig_fmt
 }
 
 int CVpp::SetHue(int value, tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt,
-        tvin_trans_fmt_t trans_fmt, is_3d_type_t is3d, int is_save) {
+                 tvin_trans_fmt_t trans_fmt, is_3d_type_t is3d, int is_save)
+{
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceType(source_type);
 
     if (0 == Vpp_SetHue(value, source_type, sig_fmt, source_port, is3d, trans_fmt)) {
@@ -1005,7 +1044,8 @@ int CVpp::SetHue(int value, tv_source_input_type_t source_type, tvin_sig_fmt_t s
     return 0;
 }
 
-int CVpp::GetHue(tv_source_input_type_t source_type) {
+int CVpp::GetHue(tv_source_input_type_t source_type)
+{
     int data = 50;
     vpp_pq_para_t pq_para;
     vpp_picture_mode_t pq_mode = GetPQMode(source_type);
@@ -1026,7 +1066,8 @@ int CVpp::GetHue(tv_source_input_type_t source_type) {
 }
 
 int CVpp::Vpp_SetSharpness(int value, tv_source_input_type_t source_type, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                           tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     int ret = -1;
     am_regs_t regs, regs_l;
     int level;
@@ -1051,7 +1092,8 @@ int CVpp::Vpp_SetSharpness(int value, tv_source_input_type_t source_type, tvin_p
 }
 
 int CVpp::SetSharpness(int value, tv_source_input_type_t source_type, int is_enable,
-        is_3d_type_t is3d, tvin_sig_fmt_t sig_fmt, tvin_trans_fmt_t trans_fmt, int is_save) {
+                       is_3d_type_t is3d, tvin_sig_fmt_t sig_fmt, tvin_trans_fmt_t trans_fmt, int is_save)
+{
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceType(source_type);
 
     if (Vpp_SetSharpness(value, source_type, source_port, sig_fmt, is3d, trans_fmt) < 0) {
@@ -1069,7 +1111,8 @@ int CVpp::SetSharpness(int value, tv_source_input_type_t source_type, int is_ena
     return 0;
 }
 
-int CVpp::GetSharpness(tv_source_input_type_t source_type) {
+int CVpp::GetSharpness(tv_source_input_type_t source_type)
+{
     int data = 50;
     vpp_pq_para_t pq_para;
     vpp_picture_mode_t pq_mode = GetPQMode(source_type);
@@ -1090,7 +1133,8 @@ int CVpp::GetSharpness(tv_source_input_type_t source_type) {
     return data;
 }
 
-int CVpp::SetColorSpaceMode(vpp_color_space_type_t colorSpace) {
+int CVpp::SetColorSpaceMode(vpp_color_space_type_t colorSpace)
+{
     int ret = -1, fileRet = -1;
     SSMSaveColorSpaceStart(colorSpace);
 
@@ -1117,14 +1161,15 @@ int CVpp::SetColorSpaceMode(vpp_color_space_type_t colorSpace) {
 }
 
 int CVpp::Vpp_SetNoiseReductionMode(vpp_noise_reduction_mode_t nr_mode,
-        tv_source_input_type_t source_type, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                                    tv_source_input_type_t source_type, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
+                                    is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     int ret = -1;
     am_regs_t regs;
 
     if (mbVppCfg_new_nr) {
         if (mpPqData->PQ_GetNR2Params((vpp_noise_reduction2_mode_t) nr_mode, source_port, sig_fmt,
-                is3d, trans_fmt, &regs) == 0) {
+                                      is3d, trans_fmt, &regs) == 0) {
             ret = Vpp_LoadRegs(regs);
         } else {
             LOGE("PQ_GetNR2Params failed!\n");
@@ -1135,14 +1180,16 @@ int CVpp::Vpp_SetNoiseReductionMode(vpp_noise_reduction_mode_t nr_mode,
 }
 
 int CVpp::SaveNoiseReductionMode(vpp_noise_reduction_mode_t nr_mode,
-        tv_source_input_type_t source_type) {
+                                 tv_source_input_type_t source_type)
+{
     int tmp_save_noisereduction_mode = (int) nr_mode;
     return SSMSaveNoiseReduction(source_type, tmp_save_noisereduction_mode);
 }
 
 int CVpp::SetNoiseReductionMode(vpp_noise_reduction_mode_t nr_mode,
-        tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
-        tvin_trans_fmt_t trans_fmt, int is_save) {
+                                tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
+                                tvin_trans_fmt_t trans_fmt, int is_save)
+{
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceType(source_type);
     if (0 == Vpp_SetNoiseReductionMode(nr_mode, source_type, source_port, sig_fmt, is3d, trans_fmt)) {
         if (is_save == 1) {
@@ -1156,7 +1203,8 @@ int CVpp::SetNoiseReductionMode(vpp_noise_reduction_mode_t nr_mode,
     return -1;
 }
 
-vpp_noise_reduction_mode_t CVpp::GetNoiseReductionMode(tv_source_input_type_t source_type) {
+vpp_noise_reduction_mode_t CVpp::GetNoiseReductionMode(tv_source_input_type_t source_type)
+{
     vpp_noise_reduction_mode_t data = VPP_NOISE_REDUCTION_MODE_MID;
     int tmp_nr_mode = 0;
 
@@ -1171,8 +1219,9 @@ vpp_noise_reduction_mode_t CVpp::GetNoiseReductionMode(tv_source_input_type_t so
 }
 
 int CVpp::Vpp_SetXVYCCMode(vpp_xvycc_mode_t xvycc_mode, tv_source_input_type_t source_type,
-        tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
-        tvin_trans_fmt_t trans_fmt) {
+                           tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
+                           tvin_trans_fmt_t trans_fmt)
+{
     int ret = -1;
     am_regs_t regs, regs_1;
     char prop_value[PROPERTY_VALUE_MAX];
@@ -1183,7 +1232,7 @@ int CVpp::Vpp_SetXVYCCMode(vpp_xvycc_mode_t xvycc_mode, tv_source_input_type_t s
 
     if (strcmp(config_value, "enable") == 0) {
         if (mpPqData->PQ_GetXVYCCParams((vpp_xvycc_mode_t) xvycc_mode, source_port, sig_fmt, is3d,
-                trans_fmt, &regs, &regs_1) == 0) {
+                                        trans_fmt, &regs, &regs_1) == 0) {
             ret = Vpp_LoadRegs(regs);
             ret |= Vpp_LoadRegs(regs_1);
         } else {
@@ -1196,13 +1245,14 @@ int CVpp::Vpp_SetXVYCCMode(vpp_xvycc_mode_t xvycc_mode, tv_source_input_type_t s
 }
 
 int CVpp::Vpp_SetMCDIMode(vpp_mcdi_mode_t mcdi_mode, tv_source_input_type_t source_type,
-        tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
-        tvin_trans_fmt_t trans_fmt) {
+                          tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
+                          tvin_trans_fmt_t trans_fmt)
+{
     int ret = -1;
     am_regs_t regs;
 
     if (mpPqData->PQ_GetMCDIParams((vpp_mcdi_mode_t) mcdi_mode, source_port, sig_fmt, is3d,
-            trans_fmt, &regs) == 0) {
+                                   trans_fmt, &regs) == 0) {
         ret = Vpp_LoadRegs(regs);
     } else {
         LOGE("%s, PQ_GetMCDIParams failed!\n", __FUNCTION__);
@@ -1211,7 +1261,7 @@ int CVpp::Vpp_SetMCDIMode(vpp_mcdi_mode_t mcdi_mode, tv_source_input_type_t sour
 }
 
 int CVpp::Vpp_SetDeblockMode(vpp_deblock_mode_t mode, tvin_port_t source_port,
-    tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+                             tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
 {
     int ret = -1;
     am_regs_t regs;
@@ -1224,7 +1274,8 @@ int CVpp::Vpp_SetDeblockMode(vpp_deblock_mode_t mode, tvin_port_t source_port,
     return ret;
 }
 
-int CVpp::Vpp_LoadGammaDefault(tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt) {
+int CVpp::Vpp_LoadGammaDefault(tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt)
+{
     int ret = -1;
     int panel_id = 0;
     tcon_gamma_table_t gamma_r, gamma_g, gamma_b;
@@ -1248,7 +1299,8 @@ int CVpp::Vpp_LoadGammaDefault(tv_source_input_type_t source_type, tvin_sig_fmt_
 
 }
 
-int CVpp::Vpp_LoadGammaSpecial(int gammaValue) {
+int CVpp::Vpp_LoadGammaSpecial(int gammaValue)
+{
     int ret = -1;
     int panel_id = 0;
     tcon_gamma_table_t gamma_r, gamma_g, gamma_b;
@@ -1270,7 +1322,8 @@ int CVpp::Vpp_LoadGammaSpecial(int gammaValue) {
 
 }
 
-int CVpp::Vpp_LoadGamma(tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt) {
+int CVpp::Vpp_LoadGamma(tv_source_input_type_t source_type, tvin_sig_fmt_t sig_fmt)
+{
     int gammaValue = 0, ret = -1;
 
     if (SSMReadGammaValue(&gammaValue) < 0) {
@@ -1322,7 +1375,8 @@ int CVpp::Vpp_LoadGamma(tv_source_input_type_t source_type, tvin_sig_fmt_t sig_f
  return ret;
  }*/
 
-int CVpp::GetGammaValue() {
+int CVpp::GetGammaValue()
+{
     int gammaValue = 0;
 
     if (SSMReadGammaValue(&gammaValue) < 0) {
@@ -1344,7 +1398,8 @@ int CVpp::GetGammaValue() {
  return SetBaseColorMode ( VPP_COLOR_BASE_MODE_DEMO ,source_port,sig_fmt,status,trans_fmt);
  }*/
 
-vpp_color_demomode_t CVpp::GetColorDemoMode(void) {
+vpp_color_demomode_t CVpp::GetColorDemoMode(void)
+{
     vpp_color_demomode_t data = VPP_COLOR_DEMO_MODE_ALLON;
     unsigned char tmp_demo_mode = 0;
     SSMReadColorDemoMode(&tmp_demo_mode);
@@ -1358,13 +1413,14 @@ vpp_color_demomode_t CVpp::GetColorDemoMode(void) {
 }
 
 int CVpp::SetBaseColorModeWithoutSave(vpp_color_basemode_t basemode, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                                      tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     int ret = -1;
     am_regs_t regs;
 
     if (mbVppCfg_new_cm) {
         if (mpPqData->PQ_GetCM2Params((vpp_color_management2_t) basemode, source_port, sig_fmt,
-                is3d, trans_fmt, &regs) == 0) {
+                                      is3d, trans_fmt, &regs) == 0) {
             ret = Vpp_LoadRegs(regs);
         } else {
             LOGE("PQ_GetCM2Params failed!\n");
@@ -1374,7 +1430,8 @@ int CVpp::SetBaseColorModeWithoutSave(vpp_color_basemode_t basemode, tvin_port_t
     return ret;
 }
 
-int CVpp::SaveBaseColorMode(vpp_color_basemode_t basemode) {
+int CVpp::SaveBaseColorMode(vpp_color_basemode_t basemode)
+{
     int ret = -1;
 
     if (basemode == VPP_COLOR_BASE_MODE_DEMO) {
@@ -1387,7 +1444,8 @@ int CVpp::SaveBaseColorMode(vpp_color_basemode_t basemode) {
 }
 
 int CVpp::SetBaseColorMode(vpp_color_basemode_t basemode, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                           tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     if (0 == SetBaseColorModeWithoutSave(basemode, source_port, sig_fmt, is3d, trans_fmt)) {
         return SaveBaseColorMode(basemode);
     } else {
@@ -1397,7 +1455,8 @@ int CVpp::SetBaseColorMode(vpp_color_basemode_t basemode, tvin_port_t source_por
     return 0;
 }
 
-vpp_color_basemode_t CVpp::GetBaseColorMode(void) {
+vpp_color_basemode_t CVpp::GetBaseColorMode(void)
+{
     vpp_color_basemode_t data = VPP_COLOR_BASE_MODE_OFF;
     unsigned char tmp_base_mode = 0;
     SSMReadColorBaseMode(&tmp_base_mode);
@@ -1411,7 +1470,8 @@ vpp_color_basemode_t CVpp::GetBaseColorMode(void) {
 }
 
 int CVpp::SetColorTempWithoutSave(vpp_color_temperature_mode_t Tempmode,
-        tv_source_input_type_t source_type) {
+                                  tv_source_input_type_t source_type)
+{
     tcon_rgb_ogo_t rgbogo;
     int ret = -1;
 
@@ -1431,7 +1491,8 @@ int CVpp::SetColorTempWithoutSave(vpp_color_temperature_mode_t Tempmode,
 
 }
 
-int CVpp::SaveColorTemp(vpp_color_temperature_mode_t Tempmode, tv_source_input_type_t source_type) {
+int CVpp::SaveColorTemp(vpp_color_temperature_mode_t Tempmode, tv_source_input_type_t source_type)
+{
     int ret = -1;
     int tmp_temp_mode = 0;
     tcon_rgb_ogo_t rgbogo;
@@ -1460,7 +1521,8 @@ int CVpp::SaveColorTemp(vpp_color_temperature_mode_t Tempmode, tv_source_input_t
 }
 
 int CVpp::SetColorTemperature(vpp_color_temperature_mode_t Tempmode,
-        tv_source_input_type_t source_type, int is_save) {
+                              tv_source_input_type_t source_type, int is_save)
+{
     if (SetColorTempWithoutSave(Tempmode, source_type) < 0) {
         LOGE("%s, failed!", __FUNCTION__);
         return -1;
@@ -1473,7 +1535,8 @@ int CVpp::SetColorTemperature(vpp_color_temperature_mode_t Tempmode,
     }
 }
 
-vpp_color_temperature_mode_t CVpp::GetColorTemperature(tv_source_input_type_t source_type) {
+vpp_color_temperature_mode_t CVpp::GetColorTemperature(tv_source_input_type_t source_type)
+{
     vpp_color_temperature_mode_t data = VPP_COLOR_TEMPERATURE_MODE_STANDARD;
     int tmp_temp_mode = 0;
 
@@ -1492,12 +1555,13 @@ vpp_color_temperature_mode_t CVpp::GetColorTemperature(tv_source_input_type_t so
     return data;
 }
 
-int CVpp::VPP_SetNonLinearFactor(int value) {
+int CVpp::VPP_SetNonLinearFactor(int value)
+{
     FILE *fp = NULL;
 
     fp = fopen("/sys/class/video/nonlinear_factor", "w");
     LOGD("~~~fopen~~~##VPP_SetNonLinearFactor##%s : %d ##", "/sys/class/video/nonlinear_factor",
-            value);
+         value);
 
     if (fp == NULL) {
         LOGE("Open /sys/class/video/nonlinear_factor error(%s)!\n", strerror(errno));
@@ -1512,7 +1576,8 @@ int CVpp::VPP_SetNonLinearFactor(int value) {
     return 0;
 }
 
-vpp_display_mode_t CVpp::GetDisplayMode(tv_source_input_type_t source_type) {
+vpp_display_mode_t CVpp::GetDisplayMode(tv_source_input_type_t source_type)
+{
     vpp_display_mode_t data = VPP_DISPLAY_MODE_169;
     int tmp_dis_mode = 0;
 
@@ -1522,7 +1587,8 @@ vpp_display_mode_t CVpp::GetDisplayMode(tv_source_input_type_t source_type) {
     return data;
 }
 
-int CVpp::SetBacklightWithoutSave(int value, tv_source_input_type_t source_type) {
+int CVpp::SetBacklightWithoutSave(int value, tv_source_input_type_t source_type)
+{
     int backlight_value, backlight_reverse = 0;
     int ret = -1;
     int tmp_pic_mode = 0;
@@ -1542,11 +1608,12 @@ int CVpp::SetBacklightWithoutSave(int value, tv_source_input_type_t source_type)
     return VPP_SetBackLightLevel(backlight_value);
 }
 
-int CVpp::VPP_SetBackLightLevel(int value) {
+int CVpp::VPP_SetBackLightLevel(int value)
+{
     FILE *fp = NULL;
     fp = fopen("/sys/class/backlight/aml-bl/brightness", "w");
     LOGD("~~~fopen~~~##VPP_SetBackLightLevel##%s : %d ##",
-            "/sys/class/backlight/aml-bl/brightness", value);
+         "/sys/class/backlight/aml-bl/brightness", value);
 
     if (fp == NULL) {
         LOGE("Open /sys/class/backlight/aml-bl/brightness error(%s)!\n", strerror(errno));
@@ -1561,7 +1628,8 @@ int CVpp::VPP_SetBackLightLevel(int value) {
     return 0;
 }
 
-int CVpp::SetBacklight(int value, tv_source_input_type_t source_type, int is_save) {
+int CVpp::SetBacklight(int value, tv_source_input_type_t source_type, int is_save)
+{
     static const int MIN_BACKLIGHT_VALUE = 1;
     if (value >= MIN_BACKLIGHT_VALUE) {
         if (SetBacklightWithoutSave(value, source_type) < 0) {
@@ -1582,7 +1650,8 @@ int CVpp::SetBacklight(int value, tv_source_input_type_t source_type, int is_sav
     }
 }
 
-int CVpp::GetBacklight(tv_source_input_type_t source_type) {
+int CVpp::GetBacklight(tv_source_input_type_t source_type)
+{
     int data = 0;
     vpp_pq_para_t pq_para;
 
@@ -1607,7 +1676,8 @@ int CVpp::GetBacklight(tv_source_input_type_t source_type) {
     return data;
 }
 
-int CVpp::SaveBacklight(int value, tv_source_input_type_t source_type) {
+int CVpp::SaveBacklight(int value, tv_source_input_type_t source_type)
+{
     int backlight_value, backlight_reverse = 0;
     int ret = -1;
     int tmp_pic_mode = 0;
@@ -1625,11 +1695,12 @@ int CVpp::SaveBacklight(int value, tv_source_input_type_t source_type) {
     return ret;
 }
 
-int CVpp::VPP_SetBackLight_Switch(int value) {
+int CVpp::VPP_SetBackLight_Switch(int value)
+{
     FILE *fp = NULL;
     fp = fopen("/sys/class/backlight/aml-bl/bl_power", "w");
     LOGD("~~~fopen~~~##VPP_SetBackLight_Switch##%s : %d ##",
-            "/sys/class/backlight/aml-bl/bl_power", value);
+         "/sys/class/backlight/aml-bl/bl_power", value);
 
     if (fp == NULL) {
         LOGE("Open /sys/class/backlight/aml-bl/bl_power error(%s)!\n", strerror(errno));
@@ -1644,7 +1715,8 @@ int CVpp::VPP_SetBackLight_Switch(int value) {
     return 0;
 }
 
-int CVpp::VPP_GetBackLight_Switch(void) {
+int CVpp::VPP_GetBackLight_Switch(void)
+{
     FILE *fp = NULL;
     int value;
 
@@ -1657,7 +1729,7 @@ int CVpp::VPP_GetBackLight_Switch(void) {
 
     fscanf(fp, "%d", &value);
     LOGD("~~~fopen~~~##VPP_GetBackLight_Switch##%s : %d ##",
-            "/sys/class/backlight/aml-bl/bl_power", value);
+         "/sys/class/backlight/aml-bl/bl_power", value);
 
     fclose(fp);
     fp = NULL;
@@ -1669,7 +1741,8 @@ int CVpp::VPP_GetBackLight_Switch(void) {
 }
 
 int CVpp::SetDNLP(tv_source_input_type_t source_type, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                  tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     unsigned int dnlp_switch = 0;
 
     int ret = -1;
@@ -1680,13 +1753,13 @@ int CVpp::SetDNLP(tv_source_input_type_t source_type, tvin_port_t source_port,
     dnlp_switch = 1;
 
     if (mpPqData->PQ_GetDNLPParams(source_port, sig_fmt, is3d, trans_fmt, &dnlp, &newdnlp,
-            &dnlpFlag) == 0) {
+                                   &dnlpFlag) == 0) {
         newdnlp.en = dnlp_switch;
         LOGE("PQ_GetDNLPParams ok!\n");
         LOGE(
-                "newdnlp.en:%d,newdnlp.method:%d,newdnlp.cliprate:%d,newdnlp.lowrange:%d,newdnlp.hghrange:%d,newdnlp.lowalpha:%d,newdnlp.midalpha:%d,newdnlp.hghalpha:%d\n",
-                newdnlp.en, newdnlp.method, newdnlp.cliprate, newdnlp.lowrange, newdnlp.hghrange,
-                newdnlp.lowalpha, newdnlp.midalpha, newdnlp.hghalpha);
+            "newdnlp.en:%d,newdnlp.method:%d,newdnlp.cliprate:%d,newdnlp.lowrange:%d,newdnlp.hghrange:%d,newdnlp.lowalpha:%d,newdnlp.midalpha:%d,newdnlp.hghalpha:%d\n",
+            newdnlp.en, newdnlp.method, newdnlp.cliprate, newdnlp.lowrange, newdnlp.hghrange,
+            newdnlp.lowalpha, newdnlp.midalpha, newdnlp.hghalpha);
         if (source_type == SOURCE_TYPE_DTV) {
             SetFileAttrValue("/sys/module/am_vecm/parameters/dnlp_en", "0");
         } else {
@@ -1701,7 +1774,8 @@ int CVpp::SetDNLP(tv_source_input_type_t source_type, tvin_port_t source_port,
     return ret;
 }
 
-int CVpp::VPP_SetVEDNLP(const struct ve_dnlp_s *pDNLP) {
+int CVpp::VPP_SetVEDNLP(const struct ve_dnlp_s *pDNLP)
+{
     int rt = VPP_DeviceIOCtl(AMVECM_IOC_VE_DNLP, pDNLP);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetVEDNLP##AMVECM_IOC_VE_DNLP##");
 
@@ -1712,7 +1786,8 @@ int CVpp::VPP_SetVEDNLP(const struct ve_dnlp_s *pDNLP) {
     return rt;
 }
 
-int CVpp::VPP_SetVENewDNLP(const ve_dnlp_table_t *pDNLP) {
+int CVpp::VPP_SetVENewDNLP(const ve_dnlp_table_t *pDNLP)
+{
     int rt = VPP_DeviceIOCtl(AMVECM_IOC_VE_NEW_DNLP, pDNLP);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetVENewDNLP##AMVECM_IOC_VE_NEW_DNLP##");
 
@@ -1723,7 +1798,8 @@ int CVpp::VPP_SetVENewDNLP(const ve_dnlp_table_t *pDNLP) {
     return rt;
 }
 
-int CVpp::SetDnlp_OFF(void) {
+int CVpp::SetDnlp_OFF(void)
+{
     if (Vpp_SetDnlpOff() < 0) {
         LOGE("%s failed.\n", __FUNCTION__);
         return -1;
@@ -1733,7 +1809,8 @@ int CVpp::SetDnlp_OFF(void) {
         return 0;
     }
 }
-int CVpp::SetDnlp_ON(void) {
+int CVpp::SetDnlp_ON(void)
+{
     if (Vpp_SetDnlpOn() < 0) {
         LOGE("%s failed.\n", __FUNCTION__);
         return -1;
@@ -1744,7 +1821,8 @@ int CVpp::SetDnlp_ON(void) {
     }
 }
 
-int CVpp::Vpp_SetDnlpOff(void) {
+int CVpp::Vpp_SetDnlpOff(void)
+{
     //According linux driver to modify the AMSTREAM_IOC_VE_DNLP_DIS  to the AMVECM_IOC_VE_DNLP_DIS.
     //int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_VE_DNLP_DIS);
     int rt = VPP_DeviceIOCtl(AMVECM_IOC_VE_DNLP_DIS);
@@ -1757,7 +1835,8 @@ int CVpp::Vpp_SetDnlpOff(void) {
     return rt;
 }
 
-int CVpp::Vpp_SetDnlpOn(void) {
+int CVpp::Vpp_SetDnlpOn(void)
+{
     //According linux driver to modify the AMSTREAM_IOC_VE_DNLP_DIS  to the AMVECM_IOC_VE_DNLP_DIS.
     //int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_VE_DNLP_EN);
     int rt = VPP_DeviceIOCtl(AMVECM_IOC_VE_DNLP_EN);
@@ -1769,14 +1848,16 @@ int CVpp::Vpp_SetDnlpOn(void) {
 
     return rt;
 }
-int CVpp::GetDnlp_Status() {
+int CVpp::GetDnlp_Status()
+{
     unsigned char status = 0;
     SSMReadDnlpStart(&status);
     LOGD("%s, %d.", __FUNCTION__, status);
     return status;
 }
 
-int CVpp::VPP_SetRGBOGO(const struct tcon_rgb_ogo_s *rgbogo) {
+int CVpp::VPP_SetRGBOGO(const struct tcon_rgb_ogo_s *rgbogo)
+{
     int rt = VPP_DeviceIOCtl(AMVECM_IOC_S_RGB_OGO, rgbogo);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetRGBOGO##AMVECM_IOC_S_RGB_OGO##");
     usleep(50 * 1000);
@@ -1788,7 +1869,8 @@ int CVpp::VPP_SetRGBOGO(const struct tcon_rgb_ogo_s *rgbogo) {
     return rt;
 }
 
-int CVpp::VPP_GetRGBOGO(const struct tcon_rgb_ogo_s *rgbogo) {
+int CVpp::VPP_GetRGBOGO(const struct tcon_rgb_ogo_s *rgbogo)
+{
     int rt = VPP_DeviceIOCtl(AMVECM_IOC_G_RGB_OGO, rgbogo);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_GetRGBOGO##AMVECM_IOC_G_RGB_OGO##");
 
@@ -1834,16 +1916,17 @@ int CVpp::RGBOffsetValueSSMToRisterMapping(int offsetValue) //-128~127
     return mapValue;//-512~512
 }
 
-int CVpp::FactorySetPQMode_Brightness(int source_type, int pq_mode, int brightness) {
+int CVpp::FactorySetPQMode_Brightness(int source_type, int pq_mode, int brightness)
+{
     int ret = -1;
     vpp_pq_para_t pq_para;
 
     if (mpPqData->PQ_GetPQModeParams((tv_source_input_type_t) source_type,
-            (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
+                                     (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
         pq_para.brightness = brightness;
 
         if (mpPqData->PQ_SetPQModeParams((tv_source_input_type_t) source_type,
-                (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
+                                         (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
             ret = 0;
         } else {
             ret = 1;
@@ -1855,27 +1938,29 @@ int CVpp::FactorySetPQMode_Brightness(int source_type, int pq_mode, int brightne
     return ret;
 }
 
-int CVpp::FactoryGetPQMode_Brightness(int source_type, int pq_mode) {
+int CVpp::FactoryGetPQMode_Brightness(int source_type, int pq_mode)
+{
     vpp_pq_para_t pq_para;
 
     if (mpPqData->PQ_GetPQModeParams((tv_source_input_type_t) source_type,
-            (vpp_picture_mode_t) pq_mode, &pq_para) != 0) {
+                                     (vpp_picture_mode_t) pq_mode, &pq_para) != 0) {
         return -1;
     }
 
     return pq_para.brightness;
 }
 
-int CVpp::FactorySetPQMode_Contrast(int source_type, int pq_mode, int contrast) {
+int CVpp::FactorySetPQMode_Contrast(int source_type, int pq_mode, int contrast)
+{
     int ret = -1;
     vpp_pq_para_t pq_para;
 
     if (mpPqData->PQ_GetPQModeParams((tv_source_input_type_t) source_type,
-            (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
+                                     (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
         pq_para.contrast = contrast;
 
         if (mpPqData->PQ_SetPQModeParams((tv_source_input_type_t) source_type,
-                (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
+                                         (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
             ret = 0;
         } else {
             ret = 1;
@@ -1887,27 +1972,29 @@ int CVpp::FactorySetPQMode_Contrast(int source_type, int pq_mode, int contrast) 
     return ret;
 }
 
-int CVpp::FactoryGetPQMode_Contrast(int source_type, int pq_mode) {
+int CVpp::FactoryGetPQMode_Contrast(int source_type, int pq_mode)
+{
     vpp_pq_para_t pq_para;
 
     if (mpPqData->PQ_GetPQModeParams((tv_source_input_type_t) source_type,
-            (vpp_picture_mode_t) pq_mode, &pq_para) != 0) {
+                                     (vpp_picture_mode_t) pq_mode, &pq_para) != 0) {
         return -1;
     }
 
     return pq_para.contrast;
 }
 
-int CVpp::FactorySetPQMode_Saturation(int source_type, int pq_mode, int saturation) {
+int CVpp::FactorySetPQMode_Saturation(int source_type, int pq_mode, int saturation)
+{
     int ret = -1;
     vpp_pq_para_t pq_para;
 
     if (mpPqData->PQ_GetPQModeParams((tv_source_input_type_t) source_type,
-            (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
+                                     (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
         pq_para.saturation = saturation;
 
         if (mpPqData->PQ_SetPQModeParams((tv_source_input_type_t) source_type,
-                (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
+                                         (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
             ret = 0;
         } else {
             ret = 1;
@@ -1919,27 +2006,29 @@ int CVpp::FactorySetPQMode_Saturation(int source_type, int pq_mode, int saturati
     return ret;
 }
 
-int CVpp::FactoryGetPQMode_Saturation(int source_type, int pq_mode) {
+int CVpp::FactoryGetPQMode_Saturation(int source_type, int pq_mode)
+{
     vpp_pq_para_t pq_para;
 
     if (mpPqData->PQ_GetPQModeParams((tv_source_input_type_t) source_type,
-            (vpp_picture_mode_t) pq_mode, &pq_para) != 0) {
+                                     (vpp_picture_mode_t) pq_mode, &pq_para) != 0) {
         return -1;
     }
 
     return pq_para.saturation;
 }
 
-int CVpp::FactorySetPQMode_Hue(int source_type, int pq_mode, int hue) {
+int CVpp::FactorySetPQMode_Hue(int source_type, int pq_mode, int hue)
+{
     int ret = -1;
     vpp_pq_para_t pq_para;
 
     if (mpPqData->PQ_GetPQModeParams((tv_source_input_type_t) source_type,
-            (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
+                                     (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
         pq_para.hue = hue;
 
         if (mpPqData->PQ_SetPQModeParams((tv_source_input_type_t) source_type,
-                (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
+                                         (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
             ret = 0;
         } else {
             ret = 1;
@@ -1951,27 +2040,29 @@ int CVpp::FactorySetPQMode_Hue(int source_type, int pq_mode, int hue) {
     return ret;
 }
 
-int CVpp::FactoryGetPQMode_Hue(int source_type, int pq_mode) {
+int CVpp::FactoryGetPQMode_Hue(int source_type, int pq_mode)
+{
     vpp_pq_para_t pq_para;
 
     if (mpPqData->PQ_GetPQModeParams((tv_source_input_type_t) source_type,
-            (vpp_picture_mode_t) pq_mode, &pq_para) != 0) {
+                                     (vpp_picture_mode_t) pq_mode, &pq_para) != 0) {
         return -1;
     }
 
     return pq_para.hue;
 }
 
-int CVpp::FactorySetPQMode_Sharpness(int source_type, int pq_mode, int sharpness) {
+int CVpp::FactorySetPQMode_Sharpness(int source_type, int pq_mode, int sharpness)
+{
     int ret = -1;
     vpp_pq_para_t pq_para;
 
     if (mpPqData->PQ_GetPQModeParams((tv_source_input_type_t) source_type,
-            (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
+                                     (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
         pq_para.sharpness = sharpness;
 
         if (mpPqData->PQ_SetPQModeParams((tv_source_input_type_t) source_type,
-                (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
+                                         (vpp_picture_mode_t) pq_mode, &pq_para) == 0) {
             ret = 0;
         } else {
             ret = 1;
@@ -1983,18 +2074,20 @@ int CVpp::FactorySetPQMode_Sharpness(int source_type, int pq_mode, int sharpness
     return ret;
 }
 
-int CVpp::FactoryGetPQMode_Sharpness(int source_type, int pq_mode) {
+int CVpp::FactoryGetPQMode_Sharpness(int source_type, int pq_mode)
+{
     vpp_pq_para_t pq_para;
 
     if (mpPqData->PQ_GetPQModeParams((tv_source_input_type_t) source_type,
-            (vpp_picture_mode_t) pq_mode, &pq_para) != 0) {
+                                     (vpp_picture_mode_t) pq_mode, &pq_para) != 0) {
         return -1;
     }
 
     return pq_para.sharpness;
 }
 
-unsigned short CVpp::CalColorTemperatureParamsChecksum(void) {
+unsigned short CVpp::CalColorTemperatureParamsChecksum(void)
+{
     unsigned char data_buf[SSM_CR_RGBOGO_LEN];
     unsigned short sum = 0;
     int cnt;
@@ -2013,7 +2106,8 @@ unsigned short CVpp::CalColorTemperatureParamsChecksum(void) {
     return sum;
 }
 
-int CVpp::SetColorTempParamsChecksum(void) {
+int CVpp::SetColorTempParamsChecksum(void)
+{
     int ret = 0;
     USUC usuc;
 
@@ -2025,7 +2119,8 @@ int CVpp::SetColorTempParamsChecksum(void) {
 
     return ret;
 }
-unsigned short CVpp::GetColorTempParamsChecksum(void) {
+unsigned short CVpp::GetColorTempParamsChecksum(void)
+{
     USUC usuc;
 
     SSMReadRGBOGOValue(SSM_CR_RGBOGO_LEN, SSM_CR_RGBOGO_CHKSUM_LEN, usuc.c);
@@ -2036,7 +2131,8 @@ unsigned short CVpp::GetColorTempParamsChecksum(void) {
 
 }
 
-int CVpp::CheckTempDataLable(void) {
+int CVpp::CheckTempDataLable(void)
+{
     USUC usuc;
     USUC ret;
 
@@ -2054,7 +2150,8 @@ int CVpp::CheckTempDataLable(void) {
     }
 }
 
-int CVpp::SetTempDataLable(void) {
+int CVpp::SetTempDataLable(void)
+{
     USUC usuc;
     int ret = 0;
 
@@ -2066,13 +2163,15 @@ int CVpp::SetTempDataLable(void) {
     return ret;
 }
 
-int CVpp::GetColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tcon_rgb_ogo_t *params) {
+int CVpp::GetColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tcon_rgb_ogo_t *params)
+{
     //    CheckColorTemperatureParamAlldata(source_port,sig_fmt,trans_fmt);
 
     return ReadColorTemperatureParams(Tempmode, params);
 }
 
-int CVpp::ReadColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tcon_rgb_ogo_t *params) {
+int CVpp::ReadColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tcon_rgb_ogo_t *params)
+{
     SUC suc;
     USUC usuc;
     int ret = 0;
@@ -2167,13 +2266,14 @@ int CVpp::ReadColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tcon
     }
 
     LOGD("%s, rgain[%d], ggain[%d],bgain[%d],roffset[%d],goffset[%d],boffset[%d]\n", __FUNCTION__,
-            params->r_gain, params->g_gain, params->b_gain, params->r_post_offset,
-            params->g_post_offset, params->b_post_offset);
+         params->r_gain, params->g_gain, params->b_gain, params->r_post_offset,
+         params->g_post_offset, params->b_post_offset);
 
     return ret;
 }
 
-int CVpp::SetColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tcon_rgb_ogo_t params) {
+int CVpp::SetColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tcon_rgb_ogo_t params)
+{
     //    CheckColorTemperatureParamAlldata(source_port,sig_fmt,trans_fmt);
 
     SaveColorTemperatureParams(Tempmode, params);
@@ -2182,7 +2282,8 @@ int CVpp::SetColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tcon_
     return 0;
 }
 
-int CVpp::SaveColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tcon_rgb_ogo_t params) {
+int CVpp::SaveColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tcon_rgb_ogo_t params)
+{
     SUC suc;
     USUC usuc;
     int ret = 0;
@@ -2279,12 +2380,13 @@ int CVpp::SaveColorTemperatureParams(vpp_color_temperature_mode_t Tempmode, tcon
     }
 
     LOGD("%s, rgain[%d], ggain[%d],bgain[%d],roffset[%d],goffset[%d],boffset[%d]\n", __FUNCTION__,
-            params.r_gain, params.g_gain, params.b_gain, params.r_post_offset,
-            params.g_post_offset, params.b_post_offset);
+         params.r_gain, params.g_gain, params.b_gain, params.r_post_offset,
+         params.g_post_offset, params.b_post_offset);
     return ret;
 }
 
-int CVpp::CheckColorTemperatureParams(void) {
+int CVpp::CheckColorTemperatureParams(void)
+{
     int i = 0;
     tcon_rgb_ogo_t rgbogo;
 
@@ -2305,7 +2407,8 @@ int CVpp::CheckColorTemperatureParams(void) {
 }
 
 int CVpp::RestoeColorTemperatureParamsFromDB(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        tvin_trans_fmt_t trans_fmt) {
+        tvin_trans_fmt_t trans_fmt)
+{
     int i = 0;
     tcon_rgb_ogo_t rgbogo;
 
@@ -2313,7 +2416,7 @@ int CVpp::RestoeColorTemperatureParamsFromDB(tvin_port_t source_port, tvin_sig_f
 
     for (i = 0; i < 3; i++) {
         mpPqData->PQ_GetColorTemperatureParams((vpp_color_temperature_mode_t) i, source_port,
-                sig_fmt, trans_fmt, &rgbogo);
+                                               sig_fmt, trans_fmt, &rgbogo);
         SaveColorTemperatureParams((vpp_color_temperature_mode_t) i, rgbogo);
     }
 
@@ -2323,9 +2426,10 @@ int CVpp::RestoeColorTemperatureParamsFromDB(tvin_port_t source_port, tvin_sig_f
 }
 
 int CVpp::CheckColorTemperatureParamAlldata(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        tvin_trans_fmt_t trans_fmt) {
+        tvin_trans_fmt_t trans_fmt)
+{
     if (CheckTempDataLable() && (CalColorTemperatureParamsChecksum()
-            == GetColorTempParamsChecksum())) {
+                                 == GetColorTempParamsChecksum())) {
         LOGD("%s, color temperature param lable & checksum ok.\n", __FUNCTION__);
 
         if (CheckColorTemperatureParams() == 0) {
@@ -2342,13 +2446,14 @@ int CVpp::CheckColorTemperatureParamAlldata(tvin_port_t source_port, tvin_sig_fm
     return 0;
 }
 
-int CVpp::FactorySetColorTemp_Rgain(int source_type, int colortemp_mode, int rgain) {
+int CVpp::FactorySetColorTemp_Rgain(int source_type, int colortemp_mode, int rgain)
+{
     tcon_rgb_ogo_t rgbogo;
 
     GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo);
     rgbogo.r_gain = rgain;
     LOGD("%s, source_type[%d], colortemp_mode[%d], rgain[%d].", __FUNCTION__, source_type,
-            colortemp_mode, rgain);
+         colortemp_mode, rgain);
     rgbogo.en = 1;
 
     if (VPP_SetRGBOGO(&rgbogo) == 0) {
@@ -2358,7 +2463,8 @@ int CVpp::FactorySetColorTemp_Rgain(int source_type, int colortemp_mode, int rga
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Rgain(int source_type, int colortemp_mode, int rgain) {
+int CVpp::FactorySaveColorTemp_Rgain(int source_type, int colortemp_mode, int rgain)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2370,7 +2476,8 @@ int CVpp::FactorySaveColorTemp_Rgain(int source_type, int colortemp_mode, int rg
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Rgain(int source_type, int colortemp_mode) {
+int CVpp::FactoryGetColorTemp_Rgain(int source_type, int colortemp_mode)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2381,13 +2488,14 @@ int CVpp::FactoryGetColorTemp_Rgain(int source_type, int colortemp_mode) {
     return -1;
 }
 
-int CVpp::FactorySetColorTemp_Ggain(int source_type, int colortemp_mode, int ggain) {
+int CVpp::FactorySetColorTemp_Ggain(int source_type, int colortemp_mode, int ggain)
+{
     tcon_rgb_ogo_t rgbogo;
 
     GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo);
     rgbogo.g_gain = ggain;
     LOGD("%s, source_type[%d], colortemp_mode[%d], ggain[%d].", __FUNCTION__, source_type,
-            colortemp_mode, ggain);
+         colortemp_mode, ggain);
     rgbogo.en = 1;
 
     if (VPP_SetRGBOGO(&rgbogo) == 0) {
@@ -2397,7 +2505,8 @@ int CVpp::FactorySetColorTemp_Ggain(int source_type, int colortemp_mode, int gga
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Ggain(int source_type, int colortemp_mode, int ggain) {
+int CVpp::FactorySaveColorTemp_Ggain(int source_type, int colortemp_mode, int ggain)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2409,7 +2518,8 @@ int CVpp::FactorySaveColorTemp_Ggain(int source_type, int colortemp_mode, int gg
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Ggain(int source_type, int colortemp_mode) {
+int CVpp::FactoryGetColorTemp_Ggain(int source_type, int colortemp_mode)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2420,13 +2530,14 @@ int CVpp::FactoryGetColorTemp_Ggain(int source_type, int colortemp_mode) {
     return -1;
 }
 
-int CVpp::FactorySetColorTemp_Bgain(int source_type, int colortemp_mode, int bgain) {
+int CVpp::FactorySetColorTemp_Bgain(int source_type, int colortemp_mode, int bgain)
+{
     tcon_rgb_ogo_t rgbogo;
 
     GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo);
     rgbogo.b_gain = bgain;
     LOGD("%s, source_type[%d], colortemp_mode[%d], bgain[%d].", __FUNCTION__, source_type,
-            colortemp_mode, bgain);
+         colortemp_mode, bgain);
     rgbogo.en = 1;
 
     if (VPP_SetRGBOGO(&rgbogo) == 0) {
@@ -2436,7 +2547,8 @@ int CVpp::FactorySetColorTemp_Bgain(int source_type, int colortemp_mode, int bga
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Bgain(int source_type, int colortemp_mode, int bgain) {
+int CVpp::FactorySaveColorTemp_Bgain(int source_type, int colortemp_mode, int bgain)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2448,7 +2560,8 @@ int CVpp::FactorySaveColorTemp_Bgain(int source_type, int colortemp_mode, int bg
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Bgain(int source_type, int colortemp_mode) {
+int CVpp::FactoryGetColorTemp_Bgain(int source_type, int colortemp_mode)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2459,13 +2572,14 @@ int CVpp::FactoryGetColorTemp_Bgain(int source_type, int colortemp_mode) {
     return -1;
 }
 
-int CVpp::FactorySetColorTemp_Roffset(int source_type, int colortemp_mode, int roffset) {
+int CVpp::FactorySetColorTemp_Roffset(int source_type, int colortemp_mode, int roffset)
+{
     tcon_rgb_ogo_t rgbogo;
 
     GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo);
     rgbogo.r_post_offset = roffset;
     LOGD("%s, source_type[%d], colortemp_mode[%d], r_post_offset[%d].", __FUNCTION__, source_type,
-            colortemp_mode, roffset);
+         colortemp_mode, roffset);
     rgbogo.en = 1;
 
     if (VPP_SetRGBOGO(&rgbogo) == 0) {
@@ -2475,7 +2589,8 @@ int CVpp::FactorySetColorTemp_Roffset(int source_type, int colortemp_mode, int r
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Roffset(int source_type, int colortemp_mode, int roffset) {
+int CVpp::FactorySaveColorTemp_Roffset(int source_type, int colortemp_mode, int roffset)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2487,7 +2602,8 @@ int CVpp::FactorySaveColorTemp_Roffset(int source_type, int colortemp_mode, int 
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Roffset(int source_type, int colortemp_mode) {
+int CVpp::FactoryGetColorTemp_Roffset(int source_type, int colortemp_mode)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2498,13 +2614,14 @@ int CVpp::FactoryGetColorTemp_Roffset(int source_type, int colortemp_mode) {
     return -1;
 }
 
-int CVpp::FactorySetColorTemp_Goffset(int source_type, int colortemp_mode, int goffset) {
+int CVpp::FactorySetColorTemp_Goffset(int source_type, int colortemp_mode, int goffset)
+{
     tcon_rgb_ogo_t rgbogo;
 
     GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo);
     rgbogo.g_post_offset = goffset;
     LOGD("%s, source_type[%d], colortemp_mode[%d], g_post_offset[%d].", __FUNCTION__, source_type,
-            colortemp_mode, goffset);
+         colortemp_mode, goffset);
     rgbogo.en = 1;
 
     if (VPP_SetRGBOGO(&rgbogo) == 0) {
@@ -2514,7 +2631,8 @@ int CVpp::FactorySetColorTemp_Goffset(int source_type, int colortemp_mode, int g
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Goffset(int source_type, int colortemp_mode, int goffset) {
+int CVpp::FactorySaveColorTemp_Goffset(int source_type, int colortemp_mode, int goffset)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2526,7 +2644,8 @@ int CVpp::FactorySaveColorTemp_Goffset(int source_type, int colortemp_mode, int 
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Goffset(int source_type, int colortemp_mode) {
+int CVpp::FactoryGetColorTemp_Goffset(int source_type, int colortemp_mode)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2537,13 +2656,14 @@ int CVpp::FactoryGetColorTemp_Goffset(int source_type, int colortemp_mode) {
     return -1;
 }
 
-int CVpp::FactorySetColorTemp_Boffset(int source_type, int colortemp_mode, int boffset) {
+int CVpp::FactorySetColorTemp_Boffset(int source_type, int colortemp_mode, int boffset)
+{
     tcon_rgb_ogo_t rgbogo;
 
     GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo);
     rgbogo.b_post_offset = boffset;
     LOGD("%s, source_type[%d], colortemp_mode[%d], b_post_offset[%d].", __FUNCTION__, source_type,
-            colortemp_mode, boffset);
+         colortemp_mode, boffset);
     rgbogo.en = 1;
 
     if (VPP_SetRGBOGO(&rgbogo) == 0) {
@@ -2553,7 +2673,8 @@ int CVpp::FactorySetColorTemp_Boffset(int source_type, int colortemp_mode, int b
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Boffset(int source_type, int colortemp_mode, int boffset) {
+int CVpp::FactorySaveColorTemp_Boffset(int source_type, int colortemp_mode, int boffset)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2565,7 +2686,8 @@ int CVpp::FactorySaveColorTemp_Boffset(int source_type, int colortemp_mode, int 
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Boffset(int source_type, int colortemp_mode) {
+int CVpp::FactoryGetColorTemp_Boffset(int source_type, int colortemp_mode)
+{
     tcon_rgb_ogo_t rgbogo;
 
     if (0 == GetColorTemperatureParams((vpp_color_temperature_mode_t) colortemp_mode, &rgbogo)) {
@@ -2576,28 +2698,33 @@ int CVpp::FactoryGetColorTemp_Boffset(int source_type, int colortemp_mode) {
     return -1;
 }
 
-int CVpp::FactoryGetTestPattern(void) {
+int CVpp::FactoryGetTestPattern(void)
+{
     unsigned char data = VPP_TEST_PATTERN_NONE;
     SSMReadTestPattern(&data);
     return data;
 }
 
-int CVpp::FactoryResetPQMode(void) {
+int CVpp::FactoryResetPQMode(void)
+{
     mpPqData->PQ_ResetAllPQModeParams();
     return 0;
 }
 
-int CVpp::FactoryResetNonlinear(void) {
+int CVpp::FactoryResetNonlinear(void)
+{
     mpPqData->PQ_ResetAllNoLineParams();
     return 0;
 }
 
-int CVpp::FactoryResetColorTemp(void) {
+int CVpp::FactoryResetColorTemp(void)
+{
     mpPqData->PQ_ResetAllColorTemperatureParams();
     return 0;
 }
 
-int CVpp::FactorySetParamsDefault(void) {
+int CVpp::FactorySetParamsDefault(void)
+{
     FactoryResetPQMode();
     FactoryResetNonlinear();
     FactoryResetColorTemp();
@@ -2605,7 +2732,8 @@ int CVpp::FactorySetParamsDefault(void) {
     return 0;
 }
 
-int CVpp::FactorySetDDRSSC(int step) {
+int CVpp::FactorySetDDRSSC(int step)
+{
     int ret = -1;
 
     switch (step) {
@@ -2642,22 +2770,25 @@ int CVpp::FactorySetDDRSSC(int step) {
     return SSMSaveDDRSSC(step);
 }
 
-int CVpp::FactoryGetDDRSSC(void) {
+int CVpp::FactoryGetDDRSSC(void)
+{
     unsigned char data = 0;
     SSMReadDDRSSC(&data);
     return data;
 }
 
-int CVpp::SetLVDSSSC(int step) {
+int CVpp::SetLVDSSSC(int step)
+{
     int ret = -1;
     if (step > 4)
         step = 4;
     ret = TvMisc_SetLVDSSSC(step);
     return ret;
 }
-int CVpp::FactorySetLVDSSSC(int step) {
+int CVpp::FactorySetLVDSSSC(int step)
+{
     int ret = -1;
-    unsigned char data[2] = {0,0};
+    unsigned char data[2] = {0, 0};
     char cmd_tmp_1[128];
     int value = 0, panel_idx = 0, tmp = 0;
     const char *PanelIdx;
@@ -2666,37 +2797,39 @@ int CVpp::FactorySetLVDSSSC(int step) {
 
     PanelIdx = config_get_str ( CFG_SECTION_TV, "get.panel.index", "0" );
     panel_idx = strtoul(PanelIdx, NULL, 10);
-    LOGD ("%s, panel_idx = %x",__FUNCTION__, panel_idx);
+    LOGD ("%s, panel_idx = %x", __FUNCTION__, panel_idx);
     SSMReadLVDSSSC(data);
 
     //every 2 bits represent one panel, use 2 byte store 8 panels
-    value = (data[1]<<8)|data[0];
-    step = step&0x03;
-    panel_idx = panel_idx*2;
+    value = (data[1] << 8) | data[0];
+    step = step & 0x03;
+    panel_idx = panel_idx * 2;
     tmp = 3 << panel_idx;
-    value = (value&(~tmp)) | (step << panel_idx);
+    value = (value & (~tmp)) | (step << panel_idx);
     data[0] = value & 0xFF;
-    data[1] = (value >> 8)& 0xFF;
-    LOGD ("%s, tmp = %x, save value = %x",__FUNCTION__, tmp,value);
+    data[1] = (value >> 8) & 0xFF;
+    LOGD ("%s, tmp = %x, save value = %x", __FUNCTION__, tmp, value);
 
     SetLVDSSSC(step);
     return SSMSaveLVDSSSC(data);
 }
 
-int CVpp::FactoryGetLVDSSSC(void) {
-    unsigned char data[2] = {0,0};
+int CVpp::FactoryGetLVDSSSC(void)
+{
+    unsigned char data[2] = {0, 0};
     int value = 0, panel_idx = 0;
     const char *PanelIdx = config_get_str ( CFG_SECTION_TV, "get.panel.index", "0" );
 
     panel_idx = strtoul(PanelIdx, NULL, 10);
     SSMReadLVDSSSC(data);
-    value = (data[1]<<8)|data[0];
-    value = (value >> (2 * panel_idx))&0x03;
-    LOGD ("%s, panel_idx = %x, value= %d",__FUNCTION__, panel_idx, value);
+    value = (data[1] << 8) | data[0];
+    value = (value >> (2 * panel_idx)) & 0x03;
+    LOGD ("%s, panel_idx = %x, value= %d", __FUNCTION__, panel_idx, value);
     return value;
 }
 
-noline_params_t CVpp::FactoryGetNolineParams(int type, int source_type) {
+noline_params_t CVpp::FactoryGetNolineParams(int type, int source_type)
+{
     int ret = -1;
     noline_params_t noline_params;
 
@@ -2740,7 +2873,8 @@ noline_params_t CVpp::FactoryGetNolineParams(int type, int source_type) {
     return noline_params;
 }
 
-int CVpp::FactorySetNolineParams(int type, int source_type, noline_params_t noline_params) {
+int CVpp::FactorySetNolineParams(int type, int source_type, noline_params_t noline_params)
+{
     int ret = -1;
 
     switch (type) {
@@ -2784,10 +2918,11 @@ int CVpp::FactorySetNolineParams(int type, int source_type, noline_params_t noli
 }
 
 int CVpp::FactorySetOverscan(int source_type, int fmt, int status_3d, int trans_fmt,
-        tvin_cutwin_t cutwin_t) {
+                             tvin_cutwin_t cutwin_t)
+{
     int ret = -1;
     ret = mpPqData->PQ_SetOverscanParams((tv_source_input_type_t) source_type,
-            (tvin_sig_fmt_t) fmt, INDEX_2D, (tvin_trans_fmt_t) trans_fmt, cutwin_t);
+                                         (tvin_sig_fmt_t) fmt, INDEX_2D, (tvin_trans_fmt_t) trans_fmt, cutwin_t);
 
     if (ret == 0) {
     } else {
@@ -2796,7 +2931,8 @@ int CVpp::FactorySetOverscan(int source_type, int fmt, int status_3d, int trans_
     return ret;
 }
 
-tvin_cutwin_t CVpp::FactoryGetOverscan(int source_type, int fmt, is_3d_type_t is3d, int trans_fmt) {
+tvin_cutwin_t CVpp::FactoryGetOverscan(int source_type, int fmt, is_3d_type_t is3d, int trans_fmt)
+{
     int ret = -1;
     tvin_cutwin_t cutwin_t;
     memset(&cutwin_t, 0, sizeof(cutwin_t));
@@ -2806,8 +2942,8 @@ tvin_cutwin_t CVpp::FactoryGetOverscan(int source_type, int fmt, is_3d_type_t is
     }
 
     ret = mpPqData->PQ_GetOverscanParams((tv_source_input_type_t) source_type,
-            (tvin_sig_fmt_t) fmt, is3d, (tvin_trans_fmt_t) trans_fmt, VPP_DISPLAY_MODE_169,
-            &cutwin_t);
+                                         (tvin_sig_fmt_t) fmt, is3d, (tvin_trans_fmt_t) trans_fmt, VPP_DISPLAY_MODE_169,
+                                         &cutwin_t);
 
     if (ret == 0) {
     } else {
@@ -2817,84 +2953,99 @@ tvin_cutwin_t CVpp::FactoryGetOverscan(int source_type, int fmt, is_3d_type_t is
     return cutwin_t;
 }
 
-int CVpp::FactorySetBacklightPWM_Frequency(int freq) {
+int CVpp::FactorySetBacklightPWM_Frequency(int freq)
+{
     LOGD("%s,FactorySetBacklightPWM_Frequency set freq %d .\n", __FUNCTION__, freq);
     return 1;
 }
 
-int CVpp::FactoryGetBacklightPWM_Frequency(void) {
+int CVpp::FactoryGetBacklightPWM_Frequency(void)
+{
     int freq = 50;
     LOGD("%s,FactoryGetBacklightPWM_Frequency set freq %d .\n", CFG_SECTION_TV, freq);
     return freq;
 }
 
-int CVpp::FactorySetBacklight_Switch_status(int status) {
+int CVpp::FactorySetBacklight_Switch_status(int status)
+{
     LOGD("%s,FactorySetBacklight_Switch_status set status %d .\n", __FUNCTION__, status);
     return 1;
 }
 
-int CVpp::FactoryGetBacklight_Switch_status(void) {
+int CVpp::FactoryGetBacklight_Switch_status(void)
+{
     int status = 1;
     LOGD("%s,FactoryGetBacklight_Switch_status get status %d .\n", __FUNCTION__, status);
     return status;
 }
 
-int CVpp::FactorySetBacklightPWM_Duty(int duty) {
+int CVpp::FactorySetBacklightPWM_Duty(int duty)
+{
     LOGD("%s,FactorySetBacklight_Switch_status set duty %d .\n", __FUNCTION__, duty);
     return 1;
 }
 
-int CVpp::FactoryGetBacklightPWM_Duty(void) {
+int CVpp::FactoryGetBacklightPWM_Duty(void)
+{
     int duty = 1;
     LOGD("%s,FactoryGetBacklight_Switch_status get duty %d .\n", __FUNCTION__, duty);
     return duty;
 }
 
-int CVpp::FactorySetLVDS_ColorDepth(int depth) {
+int CVpp::FactorySetLVDS_ColorDepth(int depth)
+{
     LOGD("%s,FactorySetLVDS_ColorDepth set depth %d .\n", CFG_SECTION_TV, depth);
     return 1;
 }
 
-int CVpp::FactoryGetLVDS_ColorDepth(void) {
+int CVpp::FactoryGetLVDS_ColorDepth(void)
+{
     int depth = 1;
     LOGD("%s,FactorySetLVDS_ColorDepth get freq %d .\n", __FUNCTION__, depth);
     return depth;
 }
 
-int CVpp::FactorySetLVDS_ColorDither_status(int status) {
+int CVpp::FactorySetLVDS_ColorDither_status(int status)
+{
     LOGD("%s,FactorySetLVDS_ColorDither_status set status %d .\n", __FUNCTION__, status);
     return 1;
 }
 
-int CVpp::FactoryGetLVDS_ColorDither_status(void) {
+int CVpp::FactoryGetLVDS_ColorDither_status(void)
+{
     int status = 1;
     LOGD("%s,FactoryGetLVDS_ColorDither_status get status %d .\n", __FUNCTION__, status);
     return status;
 }
 
-int CVpp::FactorySetLVDS_Mapping_status(int status) {
+int CVpp::FactorySetLVDS_Mapping_status(int status)
+{
     LOGD("%s,FactorySetLVDS_Mapping_status set status %d .\n", __FUNCTION__, status);
     return 1;
 }
 
-int CVpp::FactoryGetLVDS_Mapping_status(void) {
+int CVpp::FactoryGetLVDS_Mapping_status(void)
+{
     int status = 1;
     LOGD("%s,FactoryGetLVDS_Mapping_status get status %d .\n", __FUNCTION__, status);
     return status;
 }
 
-int CVpp::FactorySetLVDS_PortSwap_status(int status) {
+int CVpp::FactorySetLVDS_PortSwap_status(int status)
+{
     LOGD("%s,FactorySetLVDS_PortSwap_status set status %d .\n", __FUNCTION__, status);
     return 1;
 }
 
-int CVpp::FactoryGetLVDS_PortSwap_status(void) {
+int CVpp::FactoryGetLVDS_PortSwap_status(void)
+{
     int status = 1;
     LOGD("%s,FactoryGetLVDS_PortSwap_status get status %d .\n", __FUNCTION__, status);
     return status;
 }
 
-int CVpp::VPPSSMRestoreDefault() {
+int CVpp::VPPSSMRestoreDefault()
+{
     int i = 0, tmp_val = 0;
     int tmp_panorama_nor = 0, tmp_panorama_full = 0;
     int offset_r = 0, offset_g = 0, offset_b = 0, gain_r = 1024, gain_g = 1024, gain_b = 1024;
@@ -2974,11 +3125,13 @@ int CVpp::VPPSSMRestoreDefault() {
     return 0;
 }
 
-int CVpp::VPPSSMFacRestoreDefault() {
+int CVpp::VPPSSMFacRestoreDefault()
+{
     return VPPSSMRestoreDefault();
 }
 
-int CVpp::SetRGBValue(vpp_color_temperature_mode_t temp_mode, unsigned char data_buf[]) {
+int CVpp::SetRGBValue(vpp_color_temperature_mode_t temp_mode, unsigned char data_buf[])
+{
     int8_t r_gain = 0, b_gain = 0, g_gain = 0, r_offset = 0, g_offset = 0, b_offset = 0;
     int ret = -1;
     tcon_rgb_ogo_t rgbogo;
@@ -3037,7 +3190,8 @@ int CVpp::SetRGBValue(vpp_color_temperature_mode_t temp_mode, unsigned char data
     return ret;
 }
 
-int CVpp::GetRGBValue(vpp_color_temperature_mode_t temp_mode, tcon_rgb_ogo_t *p_rgbogo) {
+int CVpp::GetRGBValue(vpp_color_temperature_mode_t temp_mode, tcon_rgb_ogo_t *p_rgbogo)
+{
     int8_t r_gain = 0, b_gain = 0, g_gain = 0, r_offset = 0, g_offset = 0, b_offset = 0;
     int ret = -1;
 
@@ -3094,11 +3248,12 @@ int CVpp::GetRGBValue(vpp_color_temperature_mode_t temp_mode, tcon_rgb_ogo_t *p_
 }
 
 #define PI 3.14159265358979
-void CVpp::video_set_saturation_hue(signed char saturation, signed char hue, signed long *mab) {
+void CVpp::video_set_saturation_hue(signed char saturation, signed char hue, signed long *mab)
+{
     signed short ma = (signed short) (cos((float) hue * PI / 128.0) * ((float) saturation / 128.0
-            + 1.0) * 256.0);
+                                      + 1.0) * 256.0);
     signed short mb = (signed short) (sin((float) hue * PI / 128.0) * ((float) saturation / 128.0
-            + 1.0) * 256.0);
+                                      + 1.0) * 256.0);
 
     if (ma > 511) {
         ma = 511;
@@ -3119,12 +3274,13 @@ void CVpp::video_set_saturation_hue(signed char saturation, signed char hue, sig
     *mab = ((ma & 0x3ff) << 16) | (mb & 0x3ff);
 }
 
-void CVpp::video_get_saturation_hue(signed char *sat, signed char *hue, signed long *mab) {
+void CVpp::video_get_saturation_hue(signed char *sat, signed char *hue, signed long *mab)
+{
     signed long temp = *mab;
     signed int ma = (signed int) ((temp << 6) >> 22);
     signed int mb = (signed int) ((temp << 22) >> 22);
     signed int sat16 = (signed int) ((sqrt(
-            ((float) ma * (float) ma + (float) mb * (float) mb) / 65536.0) - 1.0) * 128.0);
+                                          ((float) ma * (float) ma + (float) mb * (float) mb) / 65536.0) - 1.0) * 128.0);
     signed int hue16 = (signed int) (atan((float) mb / (float) ma) * 128.0 / PI);
 
     if (sat16 > 127) {
@@ -3147,13 +3303,14 @@ void CVpp::video_get_saturation_hue(signed char *sat, signed char *hue, signed l
     *hue = (signed char) hue16;
 }
 
-int CVpp::VPP_SetVideoSaturationHue(int satVal, int hueVal) {
+int CVpp::VPP_SetVideoSaturationHue(int satVal, int hueVal)
+{
     FILE *fp = NULL;
     signed long temp;
 
     fp = fopen("/sys/class/amvecm/saturation_hue", "w");
     LOGD("~~~fopen~~~##VPP_SetVideoSaturationHue##%s : %d %d##",
-            "/sys/class/amvecm/saturation_hue", satVal, hueVal);
+         "/sys/class/amvecm/saturation_hue", satVal, hueVal);
 
     if (fp == NULL) {
         LOGE("Open /sys/class/amvecm/saturation_hue error(%s)!\n", strerror(errno));
@@ -3169,12 +3326,13 @@ int CVpp::VPP_SetVideoSaturationHue(int satVal, int hueVal) {
     return 0;
 }
 
-int CVpp::VPP_SetVideoSaturation(int saturation) {
+int CVpp::VPP_SetVideoSaturation(int saturation)
+{
     FILE *fp = NULL;
 
     fp = fopen("/sys/class/amvecm/saturation_hue", "w");
     LOGD("~~~fopen~~~##VPP_SetVideoSaturation##%s : %d ##", "/sys/class/amvecm/saturation_hue",
-            saturation);
+         saturation);
 
     if (fp == NULL) {
         LOGE("Open /sys/class/amvecm/saturation_hue error(%s)!\n", strerror(errno));
@@ -3189,7 +3347,8 @@ int CVpp::VPP_SetVideoSaturation(int saturation) {
     return 0;
 }
 
-int CVpp::VPP_SetVideoHue(int hue) {
+int CVpp::VPP_SetVideoHue(int hue)
+{
     FILE *fp = NULL;
 
     fp = fopen("/sys/class/amvecm/saturation_hue", "w");
@@ -3207,7 +3366,8 @@ int CVpp::VPP_SetVideoHue(int hue) {
     return 0;
 }
 
-int CVpp::VPP_SetGammaTbl_R(unsigned short red[256]) {
+int CVpp::VPP_SetGammaTbl_R(unsigned short red[256])
+{
     struct tcon_gamma_table_s Redtbl;
     int rt = -1, i = 0;
 
@@ -3225,7 +3385,8 @@ int CVpp::VPP_SetGammaTbl_R(unsigned short red[256]) {
     return rt;
 }
 
-int CVpp::VPP_SetGammaTbl_G(unsigned short green[256]) {
+int CVpp::VPP_SetGammaTbl_G(unsigned short green[256])
+{
     struct tcon_gamma_table_s Greentbl;
     int rt = -1, i = 0;
 
@@ -3243,7 +3404,8 @@ int CVpp::VPP_SetGammaTbl_G(unsigned short green[256]) {
     return rt;
 }
 
-int CVpp::VPP_SetGammaTbl_B(unsigned short blue[256]) {
+int CVpp::VPP_SetGammaTbl_B(unsigned short blue[256])
+{
     struct tcon_gamma_table_s Bluetbl;
     int rt = -1, i = 0;
 
@@ -3261,7 +3423,8 @@ int CVpp::VPP_SetGammaTbl_B(unsigned short blue[256]) {
     return rt;
 }
 
-int CVpp::VPP_SetGammaOnOff(unsigned char onoff) {
+int CVpp::VPP_SetGammaOnOff(unsigned char onoff)
+{
     int rt = -1;
 
     if (onoff == 1) {
@@ -3281,7 +3444,8 @@ int CVpp::VPP_SetGammaOnOff(unsigned char onoff) {
     return rt;
 }
 
-int CVpp::VPP_SetGrayPattern(int value) {
+int CVpp::VPP_SetGrayPattern(int value)
+{
 
     FILE *fp = NULL;
     if (value < 0) {
@@ -3306,7 +3470,8 @@ int CVpp::VPP_SetGrayPattern(int value) {
     return 0;
 }
 
-int CVpp::VPP_GetGrayPattern() {
+int CVpp::VPP_GetGrayPattern()
+{
     FILE *fp = NULL;
     int value;
     fp = fopen("/sys/class/video/test_screen", "r+");
@@ -3333,7 +3498,8 @@ int CVpp::VPP_GetGrayPattern() {
 
 }
 
-int CVpp::VPP_SplitScreenEffect(int width, int v_register) {
+int CVpp::VPP_SplitScreenEffect(int width, int v_register)
+{
     FILE *fp = fopen("/sys/class/amlogic/debug", "w");
 
     if (fp == NULL) {
@@ -3347,12 +3513,13 @@ int CVpp::VPP_SplitScreenEffect(int width, int v_register) {
 
     return 0;
 }
-int CVpp::VPP_SetVideoNoiseReduction(int value) {
+int CVpp::VPP_SetVideoNoiseReduction(int value)
+{
     FILE *fp = NULL;
 
     fp = fopen("/sys/class/deinterlace/di0/parameters", "w");
     LOGD("~~~fopen~~~##VPP_SetVideoNoiseReduction##%s : %d ##",
-            "/sys/class/deinterlace/di0/parameters", value);
+         "/sys/class/deinterlace/di0/parameters", value);
 
     if (fp == NULL) {
         LOGE("Open /sys/class/deinterlace/di0/parameters ERROR(%s)!!\n", strerror(errno));
@@ -3366,16 +3533,17 @@ int CVpp::VPP_SetVideoNoiseReduction(int value) {
     return 0;
 }
 
-int CVpp::VPP_SetDeinterlaceMode(int value) {
+int CVpp::VPP_SetDeinterlaceMode(int value)
+{
     FILE *fp = NULL;
 
     fp = fopen("/sys/module/deinterlace/parameters/deinterlace_mode", "w");
     LOGD("~~~fopen~~~##VPP_SetDeinterlaceMode##%s : %d ##",
-            "/sys/module/deinterlace/parameters/deinterlace_mode", value);
+         "/sys/module/deinterlace/parameters/deinterlace_mode", value);
 
     if (fp == NULL) {
         LOGE("Open /sys/module/deinterlace/parameters/deinterlace_mode error(%s)!\n",
-                strerror(errno));
+             strerror(errno));
         return -1;
     }
 
@@ -3387,7 +3555,8 @@ int CVpp::VPP_SetDeinterlaceMode(int value) {
     return 0;
 }
 
-int CVpp::GetHistogram_AVE(void) {
+int CVpp::GetHistogram_AVE(void)
+{
     ve_hist_t hist;
     hist.sum = 0;
     hist.height = 0;
@@ -3403,7 +3572,8 @@ int CVpp::GetHistogram_AVE(void) {
     return hist.ave;
 }
 
-int CVpp::Vpp_GetAVGHistogram(struct ve_hist_s *hist) {
+int CVpp::Vpp_GetAVGHistogram(struct ve_hist_s *hist)
+{
     //int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_G_HIST_AVG, hist);
     int rt = VPP_DeviceIOCtl(AMVECM_IOC_G_HIST_AVG, hist);
     LOGD("~~~VPP_DeviceIOCtl~~~##Vpp_GetAVGHistogram##AMVECM_IOC_G_HIST_AVG##");
@@ -3415,7 +3585,8 @@ int CVpp::Vpp_GetAVGHistogram(struct ve_hist_s *hist) {
     return rt;
 }
 
-int CVpp::VPP_SetVEBlackExtension(const struct ve_bext_s *pBExt) {
+int CVpp::VPP_SetVEBlackExtension(const struct ve_bext_s *pBExt)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_VE_BEXT, pBExt);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetVEBlackExtension##AMSTREAM_IOC_VE_BEXT##");
 
@@ -3427,7 +3598,8 @@ int CVpp::VPP_SetVEBlackExtension(const struct ve_bext_s *pBExt) {
 }
 
 tvin_cutwin_t CVpp::GetOverscan(tv_source_input_type_t source_type, tvin_sig_fmt_t fmt,
-        is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt) {
+                                is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
+{
     int ret = -1;
     char tmp_buf[16];
     tvin_cutwin_t cutwin_t;
@@ -3443,14 +3615,15 @@ tvin_cutwin_t CVpp::GetOverscan(tv_source_input_type_t source_type, tvin_sig_fmt
     return cutwin_t;
 }
 
-int CVpp::VPP_SetVideoCrop(int Voffset0, int Hoffset0, int Voffset1, int Hoffset1) {
+int CVpp::VPP_SetVideoCrop(int Voffset0, int Hoffset0, int Voffset1, int Hoffset1)
+{
     int fd = -1;
     char set_str[32];
 
     fd = open("/sys/class/video/crop", O_RDWR);
 
     LOGD("~~~open~~~##VPP_SetVideoCrop##%s : %d %d %d %d##", "/sys/class/video/crop", Voffset0,
-            Hoffset0, Voffset1, Hoffset1);
+         Hoffset0, Voffset1, Hoffset1);
 
     if (fd < 0) {
         LOGE("Open /sys/class/video/crop error(%s)!\n", strerror(errno));
@@ -3465,7 +3638,8 @@ int CVpp::VPP_SetVideoCrop(int Voffset0, int Hoffset0, int Voffset1, int Hoffset
     return 0;
 }
 
-int CVpp::VPP_SetVESharpness(const struct ve_hsvs_s *pHSVS) {
+int CVpp::VPP_SetVESharpness(const struct ve_hsvs_s *pHSVS)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_VE_HSVS, pHSVS);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetVESharpness##AMSTREAM_IOC_VE_HSVS##");
 
@@ -3476,7 +3650,8 @@ int CVpp::VPP_SetVESharpness(const struct ve_hsvs_s *pHSVS) {
     return rt;
 }
 
-int CVpp::VPP_SetVEChromaCoring(const struct ve_ccor_s *pCCor) {
+int CVpp::VPP_SetVEChromaCoring(const struct ve_ccor_s *pCCor)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_VE_CCOR, pCCor);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetVEChromaCoring##AMSTREAM_IOC_VE_CCOR##");
 
@@ -3487,7 +3662,8 @@ int CVpp::VPP_SetVEChromaCoring(const struct ve_ccor_s *pCCor) {
     return rt;
 }
 
-int CVpp::VPP_SetVEBlueEnh(const struct ve_benh_s *pBEnh) {
+int CVpp::VPP_SetVEBlueEnh(const struct ve_benh_s *pBEnh)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_VE_BENH, pBEnh);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetVEBlueEnh##AMSTREAM_IOC_VE_BENH##");
 
@@ -3498,7 +3674,8 @@ int CVpp::VPP_SetVEBlueEnh(const struct ve_benh_s *pBEnh) {
     return rt;
 }
 
-int CVpp::VPP_SetVEDemo(const struct ve_demo_s *pDemo) {
+int CVpp::VPP_SetVEDemo(const struct ve_demo_s *pDemo)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_VE_DEMO, pDemo);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetVEDemo##AMSTREAM_IOC_VE_DEMO##");
 
@@ -3509,7 +3686,8 @@ int CVpp::VPP_SetVEDemo(const struct ve_demo_s *pDemo) {
     return rt;
 }
 
-int CVpp::VPP_SetVERegisterMap(const struct ve_regmap_s *pRegMap) {
+int CVpp::VPP_SetVERegisterMap(const struct ve_regmap_s *pRegMap)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_VE_REGMAP, pRegMap);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetVERegisterMap##AMSTREAM_IOC_VE_REGMAP##");
 
@@ -3520,7 +3698,8 @@ int CVpp::VPP_SetVERegisterMap(const struct ve_regmap_s *pRegMap) {
     return rt;
 }
 
-int CVpp::VPP_SetVEDebug(const unsigned long long *pLData) {
+int CVpp::VPP_SetVEDebug(const unsigned long long *pLData)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_VE_DEBUG, pLData);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetVEDebug##AMSTREAM_IOC_VE_DEBUG##");
 
@@ -3531,7 +3710,8 @@ int CVpp::VPP_SetVEDebug(const unsigned long long *pLData) {
     return rt;
 }
 
-int CVpp::VPP_SetCMRegion(const struct cm_region_s *pRegion) {
+int CVpp::VPP_SetCMRegion(const struct cm_region_s *pRegion)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_CM_REGION, pRegion);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetCMRegion##AMSTREAM_IOC_CM_REGION##");
 
@@ -3542,7 +3722,8 @@ int CVpp::VPP_SetCMRegion(const struct cm_region_s *pRegion) {
     return rt;
 }
 
-int CVpp::VPP_SetCMTopLayer(const struct cm_top_s *pTop) {
+int CVpp::VPP_SetCMTopLayer(const struct cm_top_s *pTop)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_CM_TOP, pTop);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetCMTopLayer##AMSTREAM_IOC_CM_TOP##");
 
@@ -3553,7 +3734,8 @@ int CVpp::VPP_SetCMTopLayer(const struct cm_top_s *pTop) {
     return rt;
 }
 
-int CVpp::VPP_SetCMDemo(const struct cm_demo_s *pDemo) {
+int CVpp::VPP_SetCMDemo(const struct cm_demo_s *pDemo)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_CM_DEMO, pDemo);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetCMDemo##AMSTREAM_IOC_CM_DEMO##");
 
@@ -3564,7 +3746,8 @@ int CVpp::VPP_SetCMDemo(const struct cm_demo_s *pDemo) {
     return rt;
 }
 
-int CVpp::VPP_SetCMRegisterMap(struct cm_regmap_s *pRegMap) {
+int CVpp::VPP_SetCMRegisterMap(struct cm_regmap_s *pRegMap)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_CM_REGMAP, pRegMap);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetCMRegisterMap##AMSTREAM_IOC_CM_REGMAP##");
 
@@ -3575,7 +3758,8 @@ int CVpp::VPP_SetCMRegisterMap(struct cm_regmap_s *pRegMap) {
     return rt;
 }
 
-int CVpp::VPP_SetCMDebug(const unsigned long long *pLData) {
+int CVpp::VPP_SetCMDebug(const unsigned long long *pLData)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_CM_DEBUG, pLData);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetCMDebug##AMSTREAM_IOC_CM_DEBUG##");
 
@@ -3586,7 +3770,8 @@ int CVpp::VPP_SetCMDebug(const unsigned long long *pLData) {
     return rt;
 }
 
-int CVpp::VPP_SetAVSyncEnable(const unsigned int enable) {
+int CVpp::VPP_SetAVSyncEnable(const unsigned int enable)
+{
     int rt = VPP_DeviceIOCtl(AMSTREAM_IOC_SYNCENABLE, enable);
     LOGD("~~~VPP_DeviceIOCtl~~~##VPP_SetAVSyncEnable##AMSTREAM_IOC_SYNCENABLE##");
 
@@ -3596,12 +3781,13 @@ int CVpp::VPP_SetAVSyncEnable(const unsigned int enable) {
 
     return rt;
 }
-int CVpp::VPP_SetScalerPathSel(const unsigned int value) {
+int CVpp::VPP_SetScalerPathSel(const unsigned int value)
+{
     FILE *fp = NULL;
 
     fp = fopen("/sys/class/video/video_scaler_path_sel", "w");
     LOGD("~~~fopen~~~##VPP_SetScalerPathSel##%s : %d ##", "/sys/class/video/video_scaler_path_sel",
-            value);
+         value);
     if (fp == NULL) {
         LOGE("Open /sys/class/video/video_scaler_path_sel error(%s)!\n", strerror(errno));
         return -1;

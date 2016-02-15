@@ -12,22 +12,22 @@ using namespace android;
 
 class ITvService : public IInterface {
 public:
-	enum {
-		CONNECT = IBinder::FIRST_CALL_TRANSACTION,
-	};
+    enum {
+        CONNECT = IBinder::FIRST_CALL_TRANSACTION,
+    };
 
 public:
-	DECLARE_META_INTERFACE(TvService);
+    DECLARE_META_INTERFACE(TvService);
 
-	virtual sp<ITv> connect(const sp<ITvClient> &tvClient) = 0;
+    virtual sp<ITv> connect(const sp<ITvClient> &tvClient) = 0;
 };
 
 class BnTvService: public BnInterface<ITvService> {
 public:
-	virtual status_t onTransact(uint32_t code,
-								const Parcel &data,
-								Parcel *reply,
-								uint32_t flags = 0);
+    virtual status_t onTransact(uint32_t code,
+                                const Parcel &data,
+                                Parcel *reply,
+                                uint32_t flags = 0);
 };
 
 #endif

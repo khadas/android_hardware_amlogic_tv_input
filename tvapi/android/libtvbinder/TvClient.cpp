@@ -14,7 +14,8 @@ sp<ITvService> TvClient::mTvService;
 sp<TvClient::DeathNotifier> TvClient::mDeathNotifier;
 
 // establish binder interface to tv service
-const sp<ITvService> &TvClient::getTvService() {
+const sp<ITvService> &TvClient::getTvService()
+{
     Mutex::Autolock _l(mLock);
     if (mTvService.get() == 0) {
         sp<IServiceManager> sm = defaultServiceManager();
@@ -36,12 +37,14 @@ const sp<ITvService> &TvClient::getTvService() {
     return mTvService;
 }
 
-TvClient::TvClient() {
+TvClient::TvClient()
+{
     init();
 }
 
 // construct a tv client from an existing tv remote
-sp<TvClient> TvClient::create(const sp<ITv> &tv) {
+sp<TvClient> TvClient::create(const sp<ITv> &tv)
+{
     ALOGD("create");
     if (tv == 0) {
         ALOGE("tv remote is a NULL pointer");
@@ -57,15 +60,18 @@ sp<TvClient> TvClient::create(const sp<ITv> &tv) {
     return c;
 }
 
-void TvClient::init() {
+void TvClient::init()
+{
     mStatus = UNKNOWN_ERROR;
 }
 
-TvClient::~TvClient() {
+TvClient::~TvClient()
+{
     disconnect();
 }
 
-sp<TvClient> TvClient::connect() {
+sp<TvClient> TvClient::connect()
+{
     ALOGD("Tv::connect------------------------------------------");
     sp<TvClient> c = new TvClient();
     const sp<ITvService> &cs = getTvService();
@@ -81,7 +87,8 @@ sp<TvClient> TvClient::connect() {
     return c;
 }
 
-void TvClient::disconnect() {
+void TvClient::disconnect()
+{
     ALOGD("disconnect");
     if (mTv != 0) {
         mTv->disconnect();
@@ -90,55 +97,64 @@ void TvClient::disconnect() {
     }
 }
 
-status_t TvClient::reconnect() {
+status_t TvClient::reconnect()
+{
     ALOGD("reconnect");
     sp <ITv> c = mTv;
     if (c == 0) return NO_INIT;
     return c->connect(this);
 }
 
-sp<ITv> TvClient::remote() {
+sp<ITv> TvClient::remote()
+{
     return mTv;
 }
 
-status_t TvClient::lock() {
+status_t TvClient::lock()
+{
     sp <ITv> c = mTv;
     if (c == 0) return NO_INIT;
     return c->lock();
 }
 
-status_t TvClient::unlock() {
+status_t TvClient::unlock()
+{
     sp <ITv> c = mTv;
     if (c == 0) return NO_INIT;
     return c->unlock();
 }
 
-status_t TvClient::processCmd(const Parcel &p, Parcel *r) {
+status_t TvClient::processCmd(const Parcel &p, Parcel *r)
+{
     sp <ITv> c = mTv;
     if (c == 0) return NO_INIT;
     return c->processCmd(p, r);
 }
 
-status_t TvClient::createSubtitle(const sp<IMemory> &share_mem) {
+status_t TvClient::createSubtitle(const sp<IMemory> &share_mem)
+{
     sp <ITv> c = mTv;
     if (c == 0) return NO_INIT;
     return c->createSubtitle(share_mem);
 }
 
-status_t TvClient::createVideoFrame(const sp<IMemory> &share_mem, int iSourceMode, int iCapVideoLayerOnly) {
+status_t TvClient::createVideoFrame(const sp<IMemory> &share_mem, int iSourceMode, int iCapVideoLayerOnly)
+{
     sp <ITv> c = mTv;
     if (c == 0) return NO_INIT;
     return c->createVideoFrame(share_mem, iSourceMode, iCapVideoLayerOnly);
 }
 
-void TvClient::setListener(const sp<TvListener> &listener) {
+void TvClient::setListener(const sp<TvListener> &listener)
+{
     ALOGD("tv------------Tv::setListener");
     Mutex::Autolock _l(mLock);
     mListener = listener;
 }
 
 // callback from tv service
-void TvClient::notifyCallback(int32_t msgType, const Parcel &p) {
+void TvClient::notifyCallback(int32_t msgType, const Parcel &p)
+{
     int size = p.dataSize();
     int pos = p.dataPosition();
     p.setDataPosition(0);
@@ -152,12 +168,14 @@ void TvClient::notifyCallback(int32_t msgType, const Parcel &p) {
     }
 }
 
-void TvClient::binderDied(const wp<IBinder> &who) {
+void TvClient::binderDied(const wp<IBinder> &who)
+{
     ALOGW("ITv died");
     //notifyCallback(1, 2, 0);
 }
 
-void TvClient::DeathNotifier::binderDied(const wp<IBinder> &who) {
+void TvClient::DeathNotifier::binderDied(const wp<IBinder> &who)
+{
     ALOGW("-----------------binderDied");
     Mutex::Autolock _l(TvClient::mLock);
     TvClient::mTvService.clear();

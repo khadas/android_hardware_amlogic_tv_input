@@ -24,27 +24,27 @@ CBlobDeviceE2prom::~CBlobDeviceE2prom()
 
 int CBlobDeviceE2prom::WriteBytes(int offset, int size, unsigned char *buf)
 {
-	return 0;
+    return 0;
 }
 int CBlobDeviceE2prom::ReadBytes(int offset, int size, unsigned char *buf)
 {
-	return 0;
+    return 0;
 }
 int CBlobDeviceE2prom::EraseAllData()
 {
-	return 0;
+    return 0;
 }
 int CBlobDeviceE2prom::InitCheck()
 {
-	return 0;
+    return 0;
 }
 int CBlobDeviceE2prom::OpenDevice()
 {
-	return 0;
+    return 0;
 }
 int CBlobDeviceE2prom::CloseDevice()
 {
-	return 0;
+    return 0;
 }
 //int CBlobDeviceE2prom::InitCheck() {
 

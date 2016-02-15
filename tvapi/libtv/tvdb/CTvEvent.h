@@ -20,66 +20,66 @@
 
 class CTvEvent : public LightRefBase<CTvEvent> {
 public:
-	CTvEvent(CTvDatabase::Cursor &c);
-	CTvEvent();
-	~CTvEvent();
+    CTvEvent(CTvDatabase::Cursor &c);
+    CTvEvent();
+    ~CTvEvent();
 
-	int getProgPresentEvent(int progSrc, int progID, long nowTime, CTvEvent &ev);
-	int getProgScheduleEvents(int progSrc, int progID, long start, long duration, Vector<sp<CTvEvent> > &vEv);
-	int getATVProgEvent(int progSrc, int progID, CTvEvent &ev);
-	int bookEvent(int evtId, bool bBookFlag);
-	static int selectByID(int id, CTvEvent &p);
-	static int CleanAllEvent();
-	String8 &getName()
-	{
-		return name;
-	};
-	String8 &getDescription()
-	{
-		return description;
-	};
-	String8 &getExtDescription()
-	{
-		return extDescription;
-	};
-	long getStartTime()
-	{
-		return start;
-	};
-	long getEndTime()
-	{
-		return end;
-	};
-	int getSubFlag()
-	{
-		return sub_flag;
-	};
-	int getProgramId()
-	{
-		return programID;
-	};
-	int getEventId()
-	{
-		return dvbEventID;
-	};
-	Vector<CTvDimension::VChipRating *> getVChipRatings();
+    int getProgPresentEvent(int progSrc, int progID, long nowTime, CTvEvent &ev);
+    int getProgScheduleEvents(int progSrc, int progID, long start, long duration, Vector<sp<CTvEvent> > &vEv);
+    int getATVProgEvent(int progSrc, int progID, CTvEvent &ev);
+    int bookEvent(int evtId, bool bBookFlag);
+    static int selectByID(int id, CTvEvent &p);
+    static int CleanAllEvent();
+    String8 &getName()
+    {
+        return name;
+    };
+    String8 &getDescription()
+    {
+        return description;
+    };
+    String8 &getExtDescription()
+    {
+        return extDescription;
+    };
+    long getStartTime()
+    {
+        return start;
+    };
+    long getEndTime()
+    {
+        return end;
+    };
+    int getSubFlag()
+    {
+        return sub_flag;
+    };
+    int getProgramId()
+    {
+        return programID;
+    };
+    int getEventId()
+    {
+        return dvbEventID;
+    };
+    Vector<CTvDimension::VChipRating *> getVChipRatings();
 
 private:
-	void InitFromCursor(CTvDatabase::Cursor &c);
+    void InitFromCursor(CTvDatabase::Cursor &c);
 
-	int id;
-	int dvbEventID;
-	String8 name;
-	String8 description;
-	String8 extDescription;
-	int programID;
-	long start;
-	long end;
-	int dvbContent;
-	int dvbViewAge;
-	int sub_flag;
-	int rating_len;
-	Vector<CTvDimension::VChipRating *> vchipRatings;
+    int id;
+    int dvbEventID;
+    String8 name;
+    String8 description;
+    String8 extDescription;
+    int programID;
+    long start;
+    long end;
+    int dvbContent;
+    int dvbViewAge;
+    int sub_flag;
+    int rating_len;
+    Vector<CTvDimension::VChipRating *> vchipRatings;
 };
 
 #endif  //_CTVEVENT_H

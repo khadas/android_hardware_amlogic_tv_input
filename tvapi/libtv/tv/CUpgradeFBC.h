@@ -82,60 +82,60 @@
 
 class CUpgradeFBC: public CThread {
 public:
-	CUpgradeFBC();
-	~CUpgradeFBC();
+    CUpgradeFBC();
+    ~CUpgradeFBC();
 
-	int start();
-	int stop();
-	int GetUpgradeFBCProgress();
-	int SetUpgradeFileName(char *file_name);
-	int SetUpgradeFileSize(int file_size);
-	int SetUpgradeBlockSize(int block_size);
-	int SetUpgradeMode(int mode);
+    int start();
+    int stop();
+    int GetUpgradeFBCProgress();
+    int SetUpgradeFileName(char *file_name);
+    int SetUpgradeFileSize(int file_size);
+    int SetUpgradeBlockSize(int block_size);
+    int SetUpgradeMode(int mode);
 
-	class IUpgradeFBCObserver {
-	public:
-		IUpgradeFBCObserver() {};
-		virtual ~IUpgradeFBCObserver() {};
-		virtual void onUpgradeStatus(int state, int param) {};
-	};
-	void setObserver(IUpgradeFBCObserver *pOb)
-	{
-		mpObserver = pOb;
-	};
+    class IUpgradeFBCObserver {
+    public:
+        IUpgradeFBCObserver() {};
+        virtual ~IUpgradeFBCObserver() {};
+        virtual void onUpgradeStatus(int state, int param) {};
+    };
+    void setObserver(IUpgradeFBCObserver *pOb)
+    {
+        mpObserver = pOb;
+    };
 
 private:
-	bool threadLoop();
+    bool threadLoop();
 
-	int AddCRCToDataBuf(unsigned char data_buf[], int data_len);
+    int AddCRCToDataBuf(unsigned char data_buf[], int data_len);
 
-	int mState;
-	int mUpgradeMode;
-	int mOPTotalSize;
-	int mBinFileSize;
-	int mUpgradeBlockSize;
-	unsigned char *mBinFileBuf;
-	char mFileName[256];
-	unsigned char mDataBuf[CC_UPGRADE_DATA_BUF_SIZE];
-	IUpgradeFBCObserver *mpObserver;
-	CFbcCommunication *mCfbcIns;
+    int mState;
+    int mUpgradeMode;
+    int mOPTotalSize;
+    int mBinFileSize;
+    int mUpgradeBlockSize;
+    unsigned char *mBinFileBuf;
+    char mFileName[256];
+    unsigned char mDataBuf[CC_UPGRADE_DATA_BUF_SIZE];
+    IUpgradeFBCObserver *mpObserver;
+    CFbcCommunication *mCfbcIns;
 
-	enum UpgradeState {
-		STATE_STOPED = 0,
-		STATE_RUNNING,
-		STATE_FINISHED,
-		STATE_ABORT,
-	};
+    enum UpgradeState {
+        STATE_STOPED = 0,
+        STATE_RUNNING,
+        STATE_FINISHED,
+        STATE_ABORT,
+    };
 
-	enum FBCUpgradeErrorCode {
-		ERR_SERIAL_CONNECT = -1,
-		ERR_OPEN_BIN_FILE = -2,
-		ERR_BIN_FILE_SIZE = -3,
-		ERR_READ_BIN_FILE = -4,
-		ERR_NOT_SUPPORT_UPGRADE_MDOE = -5,
-		ERR_NOT_CORRECT_UPGRADE_BLKSIZE = -6,
-		ERR_DATA_CRC_ERROR = -7,
-	};
+    enum FBCUpgradeErrorCode {
+        ERR_SERIAL_CONNECT = -1,
+        ERR_OPEN_BIN_FILE = -2,
+        ERR_BIN_FILE_SIZE = -3,
+        ERR_READ_BIN_FILE = -4,
+        ERR_NOT_SUPPORT_UPGRADE_MDOE = -5,
+        ERR_NOT_CORRECT_UPGRADE_BLKSIZE = -6,
+        ERR_DATA_CRC_ERROR = -7,
+    };
 };
 
 #endif  //__TV_UPGRADE_FBC_H__

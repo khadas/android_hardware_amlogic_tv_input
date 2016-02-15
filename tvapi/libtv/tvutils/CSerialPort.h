@@ -20,35 +20,35 @@ static const char *DEV_PATH_S1 = "/dev/ttyS1";
 static const char *DEV_PATH_S2 = "/dev/ttyS2";
 
 enum SerialDeviceID {
-	SERIAL_A = 0,
-	SERIAL_B,
-	SERIAL_C,
+    SERIAL_A = 0,
+    SERIAL_B,
+    SERIAL_C,
 };
 
 class CSerialPort: public CFile {
 public:
-	CSerialPort();
-	~CSerialPort();
+    CSerialPort();
+    ~CSerialPort();
 
-	int OpenDevice(int serial_dev_id);
-	int CloseDevice();
+    int OpenDevice(int serial_dev_id);
+    int CloseDevice();
 
-	int writeFile(const unsigned char *pData, unsigned int uLen);
-	int readFile(unsigned char *pBuf, unsigned int uLen);
-	int set_opt(int speed, int db, int sb, char pb, int overtime, bool raw_mode);
-	int setup_serial();
-	int getDevId()
-	{
-		return mDevId;
-	};
+    int writeFile(const unsigned char *pData, unsigned int uLen);
+    int readFile(unsigned char *pBuf, unsigned int uLen);
+    int set_opt(int speed, int db, int sb, char pb, int overtime, bool raw_mode);
+    int setup_serial();
+    int getDevId()
+    {
+        return mDevId;
+    };
 
 private:
-	int setdatabits(struct termios *s, int db);
-	int setstopbits(struct termios *s, int sb);
-	int setparity(struct termios *s, char pb);
-	int set_Parity (int fd, int databits, int stopbits, int parity);
-	void set_speed (int fd, int speed);
+    int setdatabits(struct termios *s, int db);
+    int setstopbits(struct termios *s, int sb);
+    int setparity(struct termios *s, char pb);
+    int set_Parity (int fd, int databits, int stopbits, int parity);
+    void set_speed (int fd, int speed);
 
-	int mDevId;
+    int mDevId;
 };
 #endif

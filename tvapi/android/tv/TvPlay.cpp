@@ -2,42 +2,49 @@
 #include "TvPlay.h"
 #include "../include/tvcmd.h"
 
-TvPlay::TvPlay() {
+TvPlay::TvPlay()
+{
     mpObserver = NULL;
     tvSession = TvClient::connect();
     tvSession->setListener(this);
 }
 
-TvPlay::~TvPlay() {
+TvPlay::~TvPlay()
+{
     tvSession.clear();
 }
 
-int TvPlay::setTvObserver ( TvPlayObserver *ob ) {
+int TvPlay::setTvObserver ( TvPlayObserver *ob )
+{
     mpObserver = ob;
     return 0;
 }
 
-void TvPlay::notify(int32_t msgType, const Parcel &p) {
+void TvPlay::notify(int32_t msgType, const Parcel &p)
+{
     ALOGD("TvPlay-------notify-------");
     if (mpObserver != NULL)
         mpObserver->onTvEvent(msgType, p);
 }
 
-int TvPlay::StartTv() {
+int TvPlay::StartTv()
+{
     Parcel p, r;
     p.writeInt32(START_TV);
     tvSession->processCmd(p, &r);
     return r.readInt32();
 }
 
-int TvPlay::StopTv() {
+int TvPlay::StopTv()
+{
     Parcel p, r;
     p.writeInt32(STOP_TV);
     tvSession->processCmd(p, &r);
     return r.readInt32();
 }
 
-int TvPlay::SwitchSourceInput(tv_source_input_t source_input) {
+int TvPlay::SwitchSourceInput(tv_source_input_t source_input)
+{
     Parcel p, r;
     p.writeInt32(SET_SOURCE_INPUT);
     p.writeInt32(source_input);
@@ -45,7 +52,8 @@ int TvPlay::SwitchSourceInput(tv_source_input_t source_input) {
     return r.readInt32();
 }
 
-int TvPlay::DoSuspend(int type) {
+int TvPlay::DoSuspend(int type)
+{
     Parcel p, r;
     p.writeInt32(DO_SUSPEND);
     p.writeInt32(type);
@@ -53,7 +61,8 @@ int TvPlay::DoSuspend(int type) {
     return r.readInt32();
 }
 
-int TvPlay::DoResume(int type) {
+int TvPlay::DoResume(int type)
+{
     Parcel p, r;
     p.writeInt32(DO_RESUME);
     p.writeInt32(type);
@@ -61,7 +70,8 @@ int TvPlay::DoResume(int type) {
     return r.readInt32();
 }
 
-int TvPlay::GetSourceConnectStatus(tv_source_input_t source_input) {
+int TvPlay::GetSourceConnectStatus(tv_source_input_t source_input)
+{
     Parcel p, r;
     p.writeInt32(GET_SOURCE_CONNECT_STATUS);
     p.writeInt32(source_input);
@@ -69,14 +79,16 @@ int TvPlay::GetSourceConnectStatus(tv_source_input_t source_input) {
     return r.readInt32();
 }
 
-int TvPlay::GetCurrentSourceInput() {
+int TvPlay::GetCurrentSourceInput()
+{
     Parcel p, r;
     p.writeInt32(SSM_READ_SOURCE_INPUT);
     tvSession->processCmd(p, &r);
     return r.readInt32();
 }
 
-int TvPlay::GetHdmiAvHotplugDetectOnoff() {
+int TvPlay::GetHdmiAvHotplugDetectOnoff()
+{
     Parcel p, r;
     p.writeInt32(HDMIAV_HOTPLUGDETECT_ONOFF);
     tvSession->processCmd(p, &r);

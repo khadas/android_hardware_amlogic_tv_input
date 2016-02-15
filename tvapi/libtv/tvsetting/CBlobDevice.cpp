@@ -12,7 +12,7 @@
 
 CBlobDevice::CBlobDevice()
 {
-	m_dev_path[0] = '\0';
+    m_dev_path[0] = '\0';
 }
 
 CBlobDevice::~CBlobDevice()
@@ -21,7 +21,7 @@ CBlobDevice::~CBlobDevice()
 
 int CBlobDevice::IsFileExist(const char *file_name)
 {
-	struct stat tmp_st;
+    struct stat tmp_st;
 
-	return stat(file_name, &tmp_st);
+    return stat(file_name, &tmp_st);
 }

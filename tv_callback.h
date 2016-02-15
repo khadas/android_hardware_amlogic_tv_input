@@ -3,12 +3,15 @@
 #include "tvapi/android/tv/TvPlay.h"
 class TvCallback : public TvPlayObserver {
 public:
-    TvCallback(void* data){ mPri = data; }
+    TvCallback(void *data)
+    {
+        mPri = data;
+    }
     ~TvCallback() {}
     void onTvEvent (int32_t msgType, const Parcel &p);
 
 private:
-    void* mPri;
+    void *mPri;
 };
 #endif
 

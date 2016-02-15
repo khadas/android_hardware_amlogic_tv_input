@@ -101,7 +101,8 @@ using namespace std;
  return temp.st_size;
  }*/
 
-CPqData::CPqData() {
+CPqData::CPqData()
+{
     int i = 0, j = 0;
 
     for (i = 0; i < 15; i++) {
@@ -154,10 +155,12 @@ CPqData::CPqData() {
     }
 }
 
-CPqData::~CPqData() {
+CPqData::~CPqData()
+{
 }
 
-int CPqData::openPqDB(const char *db_path) {
+int CPqData::openPqDB(const char *db_path)
+{
     int rval;
     project_info_t tmp_info;
     char SYSTEM_PQ[128] = { 0 };
@@ -211,7 +214,7 @@ int CPqData::reopenDB()
 }
 
 int CPqData::getRegValues(const char *table_name, tvin_port_t source, tvin_sig_fmt_t signal,
-    is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+                          is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
 {
     CSqlite::Cursor c_tablelist, c_reg_list;
     int index_am_reg = 0;
@@ -223,16 +226,16 @@ int CPqData::getRegValues(const char *table_name, tvin_port_t source, tvin_sig_f
     }
 
     getSqlParams(__FUNCTION__, sqlmaster,
-        "select TableName from %s where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d and "
-        "TVIN_TRANS_FMT = %d ;", table_name, source, signal, mode);
+                 "select TableName from %s where "
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d ;", table_name, source, signal, mode);
     this->select(sqlmaster, c_tablelist);
     if (c_tablelist.moveToFirst()) { //for table list
         do {
             getSqlParams(__FUNCTION__, sqlmaster,
-                "select RegType, RegAddr, RegMask, RegValue from %s;",
-                c_tablelist.getString(0).string());
+                         "select RegType, RegAddr, RegMask, RegValue from %s;",
+                         c_tablelist.getString(0).string());
             this->select(sqlmaster, c_reg_list);
 
             if (c_reg_list.moveToFirst()) { //reg list for each table
@@ -257,19 +260,20 @@ int CPqData::getRegValues(const char *table_name, tvin_port_t source, tvin_sig_f
 }
 
 int CPqData::getRegValuesByValue(const char *name, const char *f_name, const char *f2_name,
-        const int val, const int val2, am_regs_t *regs) {
+                                 const int val, const int val2, am_regs_t *regs)
+{
     CSqlite::Cursor c_reg_list;
     char sqlmaster[256];
     int rval = -1;
     //first  get table name
     if ((strlen(f2_name) == 0) && (val2 == 0))
         getSqlParams(__FUNCTION__, sqlmaster,
-                "select RegType, RegAddr, RegMask, RegValue from %s where %s = %d;", name, f_name,
-                val);
+                     "select RegType, RegAddr, RegMask, RegValue from %s where %s = %d;", name, f_name,
+                     val);
     else
         getSqlParams(__FUNCTION__, sqlmaster,
-                "select RegType, RegAddr, RegMask, RegValue from %s where %s = %d and %s = %d;",
-                name, f_name, val, f2_name, val2);
+                     "select RegType, RegAddr, RegMask, RegValue from %s where %s = %d and %s = %d;",
+                     name, f_name, val, f2_name, val2);
 
     rval = this->select(sqlmaster, c_reg_list);
     int count = c_reg_list.getCount();
@@ -299,19 +303,20 @@ int CPqData::getRegValuesByValue(const char *name, const char *f_name, const cha
 }
 
 int CPqData::getRegValuesByValue_long(const char *name, const char *f_name, const char *f2_name,
-        const int val, const int val2, am_regs_t *regs, am_regs_t *regs_1) {
+                                      const int val, const int val2, am_regs_t *regs, am_regs_t *regs_1)
+{
     CSqlite::Cursor c_reg_list;
     char sqlmaster[256];
     int rval = -1;
     //first  get table name
     if ((strlen(f2_name) == 0) && (val2 == 0))
         getSqlParams(__FUNCTION__, sqlmaster,
-                "select RegType, RegAddr, RegMask, RegValue from %s where %s = %d;", name, f_name,
-                val);
+                     "select RegType, RegAddr, RegMask, RegValue from %s where %s = %d;", name, f_name,
+                     val);
     else
         getSqlParams(__FUNCTION__, sqlmaster,
-                "select RegType, RegAddr, RegMask, RegValue from %s where %s = %d and %s = %d;",
-                name, f_name, val, f2_name, val2);
+                     "select RegType, RegAddr, RegMask, RegValue from %s where %s = %d and %s = %d;",
+                     name, f_name, val, f2_name, val2);
 
     rval = this->select(sqlmaster, c_reg_list);
 
@@ -354,29 +359,31 @@ int CPqData::getRegValuesByValue_long(const char *name, const char *f_name, cons
     return rval;
 }
 int CPqData::PQ_GetBaseColorParams(vpp_color_basemode_t basemode, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs) {
+                                   tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int mode = is2dOr3d;//Check2Dor3D(status, trans_fmt);
     int rval = -1;
     getSqlParams(__FUNCTION__, sqlmaster,
-            "select TableName from GeneralColormanagementTable where "
-                "TVIN_PORT = %d and "
-                "TVIN_SIG_FMT = %d and "
-                "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
+                 "select TableName from GeneralColormanagementTable where "
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
 
     this->select(sqlmaster, c);
 
     if (c.moveToFirst()) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         rval = getRegValuesByValue(c.getString(index_TableName), CM_LEVEL_NAME, "", (int) basemode,
-                0, regs);
+                                   0, regs);
     }
     return rval;
 }
 
 int CPqData::PQ_GetCM2Params(vpp_color_management2_t basemode, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs) {
+                             tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int mode = is2dOr3d;//Check2Dor3D(status, trans_fmt);
@@ -396,22 +403,23 @@ int CPqData::PQ_GetCM2Params(vpp_color_management2_t basemode, tvin_port_t sourc
     }
 
     getSqlParams(__FUNCTION__, sqlmaster, "select TableName from GeneralCM2Table where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d and "
-        "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
 
     rval = this->select(sqlmaster, c);
 
     if (c.moveToFirst()) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         rval = getRegValuesByValue(c.getString(index_TableName), CM_LEVEL_NAME, "", (int) basemode,
-                0, regs);
+                                   0, regs);
     }
     return rval;
 }
 
 int CPqData::PQ_GetNR2Params(vpp_noise_reduction2_mode_t nr_mode, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs) {
+                             tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int mode = is2dOr3d;//Check2Dor3D(status, trans_fmt);
@@ -428,23 +436,24 @@ int CPqData::PQ_GetNR2Params(vpp_noise_reduction2_mode_t nr_mode, tvin_port_t so
     }
 
     getSqlParams(__FUNCTION__, sqlmaster, "select TableName from GeneralNR2Table where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d and "
-        "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
 
     rval = this->select(sqlmaster, c);
 
     if (c.moveToFirst()) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         rval = getRegValuesByValue(c.getString(index_TableName), LEVEL_NAME, "", (int) nr_mode, 0,
-                regs);
+                                   regs);
     }
     return rval;
 }
 
 int CPqData::PQ_GetXVYCCParams(vpp_xvycc_mode_t xvycc_mode, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs,
-        am_regs_t *regs_1) {
+                               tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs,
+                               am_regs_t *regs_1)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int mode = is2dOr3d;//Check2Dor3D(status, trans_fmt);
@@ -461,22 +470,23 @@ int CPqData::PQ_GetXVYCCParams(vpp_xvycc_mode_t xvycc_mode, tvin_port_t source_p
     }
 
     getSqlParams(__FUNCTION__, sqlmaster, "select TableName from GeneralXVYCCTable where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d and "
-        "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
 
     rval = this->select(sqlmaster, c);
 
     if (c.moveToFirst()) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         rval = getRegValuesByValue_long(c.getString(index_TableName), LEVEL_NAME, "",
-                (int) xvycc_mode, 0, regs, regs_1);
+                                        (int) xvycc_mode, 0, regs, regs_1);
     }
     return rval;
 }
 
 int CPqData::PQ_GetMCDIParams(vpp_mcdi_mode_t mcdi_mode, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs) {
+                              tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int mode = is2dOr3d;//Check2Dor3D(status, trans_fmt);
@@ -493,22 +503,22 @@ int CPqData::PQ_GetMCDIParams(vpp_mcdi_mode_t mcdi_mode, tvin_port_t source_port
     }
 
     getSqlParams(__FUNCTION__, sqlmaster, "select TableName from GeneralMCDITable where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d and "
-        "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
 
     rval = this->select(sqlmaster, c);
 
     if (c.moveToFirst()) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         rval = getRegValuesByValue(c.getString(index_TableName), LEVEL_NAME, "", (int) mcdi_mode,
-                0, regs);
+                                   0, regs);
     }
     return rval;
 }
 
 int CPqData::PQ_GetDeblockParams(vpp_deblock_mode_t deb_mode, tvin_port_t source_port,
-    tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+                                 tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
 {
     CSqlite::Cursor c;
     char sqlmaster[256];
@@ -516,9 +526,9 @@ int CPqData::PQ_GetDeblockParams(vpp_deblock_mode_t deb_mode, tvin_port_t source
     int rval = -1;
 
     getSqlParams(__FUNCTION__, sqlmaster, "select TableName from GeneralDeblockTable where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d and "
-        "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, is2dOr3d);
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, is2dOr3d);
 
     rval = this->select(sqlmaster, c);
 
@@ -530,7 +540,8 @@ int CPqData::PQ_GetDeblockParams(vpp_deblock_mode_t deb_mode, tvin_port_t source
 
 int CPqData::PQ_GetColorTemperatureParams(vpp_color_temperature_mode_t Tempmode,
         tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, tvin_trans_fmt_t trans_fmt,
-        tcon_rgb_ogo_t *params) {
+        tcon_rgb_ogo_t *params)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
 
@@ -549,20 +560,20 @@ int CPqData::PQ_GetColorTemperatureParams(vpp_color_temperature_mode_t Tempmode,
     params->b_post_offset = 0;
 
     getSqlParams(__FUNCTION__, sqlmaster, "select TableName from GeneralWhiteBalanceTable where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d and "
-        "TVIN_TRANS_FMT = %d;", source_port, sig_fmt, trans_fmt);
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d;", source_port, sig_fmt, trans_fmt);
 
     rval = this->select(sqlmaster, c);
 
     if (c.moveToFirst()) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         getSqlParams(
-                __FUNCTION__,
-                sqlmaster,
-                "select Enable, R_Pre_Offset, G_Pre_Offset, B_Pre_Offset, R_Gain, G_Gain, B_Gain, R_Post_Offset, G_Post_Offset, B_Post_Offset  from %s where "
-                    "Level = %d and def = 0;", c.getString(index_TableName).string(),
-                (int) Tempmode);
+            __FUNCTION__,
+            sqlmaster,
+            "select Enable, R_Pre_Offset, G_Pre_Offset, B_Pre_Offset, R_Gain, G_Gain, B_Gain, R_Post_Offset, G_Post_Offset, B_Post_Offset  from %s where "
+            "Level = %d and def = 0;", c.getString(index_TableName).string(),
+            (int) Tempmode);
 
         rval = this->select(sqlmaster, c);
 
@@ -583,7 +594,8 @@ int CPqData::PQ_GetColorTemperatureParams(vpp_color_temperature_mode_t Tempmode,
 }
 int CPqData::PQ_SetColorTemperatureParams(vpp_color_temperature_mode_t Tempmode,
         tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, tvin_trans_fmt_t trans_fmt,
-        tcon_rgb_ogo_t params) {
+        tcon_rgb_ogo_t params)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     char sql[512];
@@ -591,38 +603,39 @@ int CPqData::PQ_SetColorTemperatureParams(vpp_color_temperature_mode_t Tempmode,
     int rval = -1;
 
     getSqlParams(__FUNCTION__, sqlmaster, "select TableName from GeneralWhiteBalanceTable where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d and "
-        "TVIN_TRANS_FMT = %d;", source_port, sig_fmt, trans_fmt);
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d;", source_port, sig_fmt, trans_fmt);
 
     rval = this->select(sqlmaster, c);
 
     if (c.moveToFirst()) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         getSqlParams(
-                __FUNCTION__,
-                sql,
-                "update %s set Enable = %d, "
-                    "R_Pre_Offset = %d, G_Pre_Offset = %d, B_Pre_Offset = %d, R_Gain = %d, G_Gain = %d, B_Gain = %d, "
-                    "R_Post_Offset = %d, G_Post_Offset = %d, B_Post_Offset = %d  where Level = %d and def = 0;",
-                c.getString(index_TableName).string(), params.en, params.r_pre_offset,
-                params.g_pre_offset, params.b_pre_offset, params.r_gain, params.g_gain,
-                params.b_gain, params.r_post_offset, params.g_post_offset, params.b_post_offset,
-                Tempmode);
+            __FUNCTION__,
+            sql,
+            "update %s set Enable = %d, "
+            "R_Pre_Offset = %d, G_Pre_Offset = %d, B_Pre_Offset = %d, R_Gain = %d, G_Gain = %d, B_Gain = %d, "
+            "R_Post_Offset = %d, G_Post_Offset = %d, B_Post_Offset = %d  where Level = %d and def = 0;",
+            c.getString(index_TableName).string(), params.en, params.r_pre_offset,
+            params.g_pre_offset, params.b_pre_offset, params.r_gain, params.g_gain,
+            params.b_gain, params.r_post_offset, params.g_post_offset, params.b_post_offset,
+            Tempmode);
 
         rval = this->exeSql(sql);
     }
     return rval;
 }
 
-int CPqData::PQ_ResetAllColorTemperatureParams(void) {
+int CPqData::PQ_ResetAllColorTemperatureParams(void)
+{
     CSqlite::Cursor c;
     char sqlmaster[512];
 
     int rval = -1;
 
     getSqlParams(__FUNCTION__, sqlmaster,
-            "select distinct TableName from GeneralWhiteBalanceTable ;");
+                 "select distinct TableName from GeneralWhiteBalanceTable ;");
 
     rval = this->select(sqlmaster, c);
 
@@ -630,13 +643,13 @@ int CPqData::PQ_ResetAllColorTemperatureParams(void) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         do { //delete
             getSqlParams(
-                    __FUNCTION__,
-                    sqlmaster,
-                    "delete from %s where def = 0;"
-                        "insert into %s( Level , Enable , R_Pre_Offset, G_Pre_Offset, B_Pre_Offset, R_Gain, G_Gain, B_Gain, R_Post_Offset, G_Post_Offset, B_Post_Offset, def ) "
-                        "select Level, Enable, R_Pre_Offset, G_Pre_Offset, B_Pre_Offset, R_Gain, G_Gain, B_Gain, R_Post_Offset, G_Post_Offset, B_Post_Offset, 0 from %s where def = 1;",
-                    c.getString(index_TableName).string(), c.getString(index_TableName).string(),
-                    c.getString(index_TableName).string());
+                __FUNCTION__,
+                sqlmaster,
+                "delete from %s where def = 0;"
+                "insert into %s( Level , Enable , R_Pre_Offset, G_Pre_Offset, B_Pre_Offset, R_Gain, G_Gain, B_Gain, R_Post_Offset, G_Post_Offset, B_Post_Offset, def ) "
+                "select Level, Enable, R_Pre_Offset, G_Pre_Offset, B_Pre_Offset, R_Gain, G_Gain, B_Gain, R_Post_Offset, G_Post_Offset, B_Post_Offset, 0 from %s where def = 1;",
+                c.getString(index_TableName).string(), c.getString(index_TableName).string(),
+                c.getString(index_TableName).string());
             rval = this->exeSql(sqlmaster);
         } while (c.moveToNext());
     }
@@ -644,7 +657,8 @@ int CPqData::PQ_ResetAllColorTemperatureParams(void) {
 }
 
 int CPqData::PQ_GetDNLPParams(tvin_port_t source_port, tvin_sig_fmt_t fmt, is_3d_type_t is2dOr3d,
-        tvin_trans_fmt_t trans_fmt, ve_dnlp_t *params, ve_dnlp_table_t *newParams, int *dnlpFlag) {
+                              tvin_trans_fmt_t trans_fmt, ve_dnlp_t *params, ve_dnlp_table_t *newParams, int *dnlpFlag)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int mode = is2dOr3d;//Check2Dor3D(status, trans_fmt);
@@ -659,16 +673,16 @@ int CPqData::PQ_GetDNLPParams(tvin_port_t source_port, tvin_sig_fmt_t fmt, is_3d
     mode = is2dOr3d;//Check2Dor3D(status, trans_fmt);//(status << 16)|trans_fmt;
 
     getSqlParams(__FUNCTION__, sqlmaster, "select TableName from GeneralDNLPTable where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d and "
-        "TVIN_TRANS_FMT = %d ;", source_port, fmt, mode);
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d ;", source_port, fmt, mode);
 
     rval = this->select(sqlmaster, c);
 
     if (c.moveToFirst()) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         getSqlParams(__FUNCTION__, sqlmaster, "select value  from %s ",
-                c.getString(index_TableName).string());
+                     c.getString(index_TableName).string());
 
         rval = this->select(sqlmaster, c);
         int count = c.getCount();
@@ -733,11 +747,13 @@ int CPqData::PQ_GetDNLPParams(tvin_port_t source_port, tvin_sig_fmt_t fmt, is_3d
 }
 
 int CPqData::PQ_SetNoLineAllBrightnessParams(tv_source_input_type_t source_type, int osd0,
-        int osd25, int osd50, int osd75, int osd100) {
+        int osd25, int osd50, int osd75, int osd100)
+{
     return SetNonlinearMapping(TVPQ_DATA_BRIGHTNESS, source_type, osd0, osd25, osd50, osd75, osd100);
 }
 int CPqData::PQ_GetNoLineAllBrightnessParams(tv_source_input_type_t source_type, int *osd0,
-        int *osd25, int *osd50, int *osd75, int *osd100) {
+        int *osd25, int *osd50, int *osd75, int *osd100)
+{
     int osdvalue[5] = { 0 };
     int rval;
     rval = GetNonlinearMappingByOSDFac(TVPQ_DATA_BRIGHTNESS, source_type, osdvalue);
@@ -754,7 +770,8 @@ int CPqData::PQ_GetNoLineAllBrightnessParams(tv_source_input_type_t source_type,
 }
 
 int CPqData::PQ_GetBrightnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params) {
+                                    is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params)
+{
     int val;
 
     GetNonlinearMapping(TVPQ_DATA_BRIGHTNESS, source_port, level, &val);
@@ -763,16 +780,19 @@ int CPqData::PQ_GetBrightnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_
 
 }
 int CPqData::PQ_SetBrightnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params) {
+                                    is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params)
+{
     return 0;
 }
 
 int CPqData::PQ_SetNoLineAllContrastParams(tv_source_input_type_t source_type, int osd0, int osd25,
-        int osd50, int osd75, int osd100) {
+        int osd50, int osd75, int osd100)
+{
     return SetNonlinearMapping(TVPQ_DATA_CONTRAST, source_type, osd0, osd25, osd50, osd75, osd100);
 }
 int CPqData::PQ_GetNoLineAllContrastParams(tv_source_input_type_t source_type, int *osd0,
-        int *osd25, int *osd50, int *osd75, int *osd100) {
+        int *osd25, int *osd50, int *osd75, int *osd100)
+{
     int osdvalue[5] = { 0 };
     int rval;
     rval = GetNonlinearMappingByOSDFac(TVPQ_DATA_CONTRAST, source_type, osdvalue);
@@ -788,23 +808,27 @@ int CPqData::PQ_GetNoLineAllContrastParams(tv_source_input_type_t source_type, i
 }
 
 int CPqData::PQ_GetContrastParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params) {
+                                  is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params)
+{
     int val;
     GetNonlinearMapping(TVPQ_DATA_CONTRAST, source_port, level, &val);
     *params = CaculateLevelParam(pq_con_data, con_nodes, val);
     return 0;
 }
 int CPqData::PQ_SetContrastParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params) {
+                                  is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params)
+{
     return 0;
 }
 
 int CPqData::PQ_SetNoLineAllSaturationParams(tv_source_input_type_t source_type, int osd0,
-        int osd25, int osd50, int osd75, int osd100) {
+        int osd25, int osd50, int osd75, int osd100)
+{
     return SetNonlinearMapping(TVPQ_DATA_SATURATION, source_type, osd0, osd25, osd50, osd75, osd100);
 }
 int CPqData::PQ_GetNoLineAllSaturationParams(tv_source_input_type_t source_type, int *osd0,
-        int *osd25, int *osd50, int *osd75, int *osd100) {
+        int *osd25, int *osd50, int *osd75, int *osd100)
+{
     int osdvalue[5] = { 0 };
     int rval;
     rval = GetNonlinearMappingByOSDFac(TVPQ_DATA_SATURATION, source_type, osdvalue);
@@ -820,23 +844,27 @@ int CPqData::PQ_GetNoLineAllSaturationParams(tv_source_input_type_t source_type,
 }
 
 int CPqData::PQ_GetSaturationParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params) {
+                                    is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params)
+{
     int val;
     GetNonlinearMapping(TVPQ_DATA_SATURATION, source_port, level, &val);
     *params = CaculateLevelParam(pq_sat_data, sat_nodes, val);
     return 0;
 }
 int CPqData::PQ_SetSaturationParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params) {
+                                    is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params)
+{
     return 0;
 }
 
 int CPqData::PQ_SetNoLineAllHueParams(tv_source_input_type_t source_type, int osd0, int osd25,
-        int osd50, int osd75, int osd100) {
+                                      int osd50, int osd75, int osd100)
+{
     return SetNonlinearMapping(TVPQ_DATA_HUE, source_type, osd0, osd25, osd50, osd75, osd100);
 }
 int CPqData::PQ_GetNoLineAllHueParams(tv_source_input_type_t source_type, int *osd0, int *osd25,
-        int *osd50, int *osd75, int *osd100) {
+                                      int *osd50, int *osd75, int *osd100)
+{
     int osdvalue[5] = { 0 };
     int rval;
     rval = GetNonlinearMappingByOSDFac(TVPQ_DATA_HUE, source_type, osdvalue);
@@ -852,23 +880,27 @@ int CPqData::PQ_GetNoLineAllHueParams(tv_source_input_type_t source_type, int *o
 }
 
 int CPqData::PQ_GetHueParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params) {
+                             is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params)
+{
     int val;
     GetNonlinearMapping(TVPQ_DATA_HUE, source_port, level, &val);
     *params = CaculateLevelParam(pq_hue_data, hue_nodes, val);
     return 0;
 }
 int CPqData::PQ_SetHueParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params) {
+                             is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params)
+{
     return 0;
 }
 
 int CPqData::PQ_SetNoLineAllSharpnessParams(tv_source_input_type_t source_type, int osd0,
-        int osd25, int osd50, int osd75, int osd100) {
+        int osd25, int osd50, int osd75, int osd100)
+{
     return SetNonlinearMapping(TVPQ_DATA_SHARPNESS, source_type, osd0, osd25, osd50, osd75, osd100);
 }
 int CPqData::PQ_GetNoLineAllSharpnessParams(tv_source_input_type_t source_type, int *osd0,
-        int *osd25, int *osd50, int *osd75, int *osd100) {
+        int *osd25, int *osd50, int *osd75, int *osd100)
+{
     int osdvalue[5] = { 0 };
     int rval;
     rval = GetNonlinearMappingByOSDFac(TVPQ_DATA_SHARPNESS, source_type, osdvalue);
@@ -884,7 +916,8 @@ int CPqData::PQ_GetNoLineAllSharpnessParams(tv_source_input_type_t source_type, 
 }
 
 int CPqData::PQ_GetSharpnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, am_regs_t *regs, am_regs_t *regs_l) {
+                                   is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, am_regs_t *regs, am_regs_t *regs_l)
+{
     int val;
     GetNonlinearMapping(TVPQ_DATA_SHARPNESS, source_port, level, &val);
     LOGD("val = %d\n", val);
@@ -894,7 +927,8 @@ int CPqData::PQ_GetSharpnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_f
     }
     return 0;
 }
-int CPqData::PQ_GetPLLParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, am_regs_t *regs) {
+int CPqData::PQ_GetPLLParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, am_regs_t *regs)
+{
     int ret = -1;
     int i = 0;
 
@@ -917,7 +951,8 @@ int CPqData::PQ_GetPLLParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, am
     }
     return ret;
 }
-int CPqData::PQ_GetCVD2Params(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, am_regs_t *regs) {
+int CPqData::PQ_GetCVD2Params(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, am_regs_t *regs)
+{
     int ret = -1;
     int i = 0;
     ret = getRegValuesByValue(CVD2_SETTING, PORT, FORMAT, source_port, sig_fmt, regs);
@@ -941,16 +976,19 @@ int CPqData::PQ_GetCVD2Params(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, a
     return ret;
 }
 int CPqData::PQ_SetSharpnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, am_regs_t regs) {
+                                   is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, am_regs_t regs)
+{
     return 0;
 }
 
 int CPqData::PQ_SetNoLineAllVolumeParams(tv_source_input_type_t source_type, int osd0, int osd25,
-        int osd50, int osd75, int osd100) {
+        int osd50, int osd75, int osd100)
+{
     return SetNonlinearMapping(TVPQ_DATA_VOLUME, source_type, osd0, osd25, osd50, osd75, osd100);
 }
 int CPqData::PQ_GetNoLineAllVolumeParams(tv_source_input_type_t source_type, int *osd0, int *osd25,
-        int *osd50, int *osd75, int *osd100) {
+        int *osd50, int *osd75, int *osd100)
+{
     int osdvalue[5] = { 0 };
     int rval;
     rval = GetNonlinearMappingByOSDFac(TVPQ_DATA_VOLUME, source_type, osdvalue);
@@ -966,44 +1004,47 @@ int CPqData::PQ_GetNoLineAllVolumeParams(tv_source_input_type_t source_type, int
 }
 
 int CPqData::PQ_SetVolumeParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params) {
+                                is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params)
+{
     return 0;
 }
 
-int CPqData::PQ_ResetAllNoLineParams(void) {
+int CPqData::PQ_ResetAllNoLineParams(void)
+{
     int rval;
     char sqlmaster[256];
     char *err = NULL;
 
     getSqlParams(
-            __FUNCTION__,
-            sqlmaster,
-            "delete from NonlinearMapping; "
-                "insert into NonlinearMapping(TVIN_PORT, Item_ID, Level, Value) select TVIN_PORT, Item_ID, Level, Value from NonlinearMapping_Default;");
+        __FUNCTION__,
+        sqlmaster,
+        "delete from NonlinearMapping; "
+        "insert into NonlinearMapping(TVIN_PORT, Item_ID, Level, Value) select TVIN_PORT, Item_ID, Level, Value from NonlinearMapping_Default;");
 
     rval = this->exeSql(sqlmaster);
     return rval;
 }
 
 int CPqData::PQ_GetNoiseReductionParams(vpp_noise_reduction_mode_t nr_mode,
-        tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
-        tvin_trans_fmt_t trans_fmt, int *params) {
+                                        tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
+                                        tvin_trans_fmt_t trans_fmt, int *params)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int mode = is2dOr3d;//Check2Dor3D(status, trans_fmt);
     int rval = -1;
 
     getSqlParams(__FUNCTION__, sqlmaster, "select TableName from GeneralNoiseReductionTable where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d and "
-        "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d ;", source_port, sig_fmt, mode);
 
     rval = this->select(sqlmaster, c);
 
     if (c.moveToFirst()) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         getSqlParams(__FUNCTION__, sqlmaster, "select NRValue from %s where NRLevel = %d;",
-                c.getString(index_TableName).string(), (int) nr_mode);
+                     c.getString(index_TableName).string(), (int) nr_mode);
 
         rval = this->select(sqlmaster, c);
 
@@ -1015,14 +1056,16 @@ int CPqData::PQ_GetNoiseReductionParams(vpp_noise_reduction_mode_t nr_mode,
 }
 
 int CPqData::PQ_SetNoiseReductionParams(vpp_noise_reduction_mode_t nr_mode,
-        tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
-        tvin_trans_fmt_t trans_fmt, int *params) {
+                                        tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
+                                        tvin_trans_fmt_t trans_fmt, int *params)
+{
     return 0;
 }
 
 int CPqData::PQ_GetOverscanParams(tv_source_input_type_t source_type, tvin_sig_fmt_t fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, vpp_display_mode_t dmode,
-        tvin_cutwin_t *cutwin_t) {
+                                  is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, vpp_display_mode_t dmode,
+                                  tvin_cutwin_t *cutwin_t)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int mode = is2dOr3d;//Check2Dor3D(status, trans_fmt);
@@ -1034,9 +1077,9 @@ int CPqData::PQ_GetOverscanParams(tv_source_input_type_t source_type, tvin_sig_f
     cutwin_t->ve = 0;
 
     getSqlParams(__FUNCTION__, sqlmaster, "select Hs, He, Vs, Ve from OVERSCAN where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d and "
-        "TVIN_TRANS_FMT = %d ;", source_type, fmt, mode);
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d and "
+                 "TVIN_TRANS_FMT = %d ;", source_type, fmt, mode);
 
     rval = this->select(sqlmaster, c);
 
@@ -1049,62 +1092,65 @@ int CPqData::PQ_GetOverscanParams(tv_source_input_type_t source_type, tvin_sig_f
     return rval;
 }
 int CPqData::PQ_SetOverscanParams(tv_source_input_type_t source_type, tvin_sig_fmt_t fmt,
-        is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, tvin_cutwin_t cutwin_t) {
+                                  is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, tvin_cutwin_t cutwin_t)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int mode = is2dOr3d;//Check2Dor3D(status, trans_fmt);
     int rval = -1;
 
     getSqlParams(
-            __FUNCTION__,
-            sqlmaster,
-            "select * from OVERSCAN where TVIN_PORT = %d and TVIN_SIG_FMT = %d and TVIN_TRANS_FMT = %d;",
-            source_type, fmt, mode);
+        __FUNCTION__,
+        sqlmaster,
+        "select * from OVERSCAN where TVIN_PORT = %d and TVIN_SIG_FMT = %d and TVIN_TRANS_FMT = %d;",
+        source_type, fmt, mode);
 
     rval = this->select(sqlmaster, c);
 
     if (c.moveToFirst()) {
         getSqlParams(
-                __FUNCTION__,
-                sqlmaster,
-                "update OVERSCAN set Hs = %d, He = %d, Vs = %d, Ve = %d where TVIN_PORT = %d and TVIN_SIG_FMT = %d and TVIN_TRANS_FMT = %d;",
-                cutwin_t.hs, cutwin_t.he, cutwin_t.vs, cutwin_t.ve, source_type, fmt, mode);
+            __FUNCTION__,
+            sqlmaster,
+            "update OVERSCAN set Hs = %d, He = %d, Vs = %d, Ve = %d where TVIN_PORT = %d and TVIN_SIG_FMT = %d and TVIN_TRANS_FMT = %d;",
+            cutwin_t.hs, cutwin_t.he, cutwin_t.vs, cutwin_t.ve, source_type, fmt, mode);
     } else {
         getSqlParams(
-                __FUNCTION__,
-                sqlmaster,
-                "Insert into OVERSCAN(TVIN_PORT, TVIN_SIG_FMT, TVIN_TRANS_FMT, Hs, He, Vs, Ve) values(%d, %d, %d ,%d ,%d, %d, %d);",
-                source_type, fmt, mode, cutwin_t.hs, cutwin_t.he, cutwin_t.vs, cutwin_t.ve);
+            __FUNCTION__,
+            sqlmaster,
+            "Insert into OVERSCAN(TVIN_PORT, TVIN_SIG_FMT, TVIN_TRANS_FMT, Hs, He, Vs, Ve) values(%d, %d, %d ,%d ,%d, %d, %d);",
+            source_type, fmt, mode, cutwin_t.hs, cutwin_t.he, cutwin_t.vs, cutwin_t.ve);
     }
     rval = this->exeSql(sqlmaster);
 
     return rval;
 }
 
-int CPqData::PQ_ResetAllOverscanParams(void) {
+int CPqData::PQ_ResetAllOverscanParams(void)
+{
     int rval;
     char sqlmaster[256];
 
     getSqlParams(
-            __FUNCTION__,
-            sqlmaster,
-            "delete from OVERSCAN; insert into OVERSCAN(TVIN_PORT, TVIN_SIG_FMT, TVIN_TRANS_FMT, hs, he, vs, ve) select TVIN_PORT, TVIN_SIG_FMT, TVIN_TRANS_FMT, hs, he, vs, ve from OVERSCAN_default;");
+        __FUNCTION__,
+        sqlmaster,
+        "delete from OVERSCAN; insert into OVERSCAN(TVIN_PORT, TVIN_SIG_FMT, TVIN_TRANS_FMT, hs, he, vs, ve) select TVIN_PORT, TVIN_SIG_FMT, TVIN_TRANS_FMT, hs, he, vs, ve from OVERSCAN_default;");
     rval = this->exeSql(sqlmaster);
 
     return rval;
 }
 
 int CPqData::PQ_GetPQModeParams(tv_source_input_type_t source_type, vpp_picture_mode_t pq_mode,
-        vpp_pq_para_t *params) {
+                                vpp_pq_para_t *params)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
 
     int rval = -1;
 
     getSqlParams(__FUNCTION__, sqlmaster,
-            "select Brightness, Contrast, Saturation, Hue, Sharpness, Backlight, NR from Picture_Mode where "
-                "TVIN_PORT = %d and "
-                "Mode = %d ;", source_type, pq_mode);
+                 "select Brightness, Contrast, Saturation, Hue, Sharpness, Backlight, NR from Picture_Mode where "
+                 "TVIN_PORT = %d and "
+                 "Mode = %d ;", source_type, pq_mode);
 
     rval = this->select(sqlmaster, c);
 
@@ -1120,51 +1166,55 @@ int CPqData::PQ_GetPQModeParams(tv_source_input_type_t source_type, vpp_picture_
     return rval;
 }
 int CPqData::PQ_SetPQModeParams(tv_source_input_type_t source_type, vpp_picture_mode_t pq_mode,
-        vpp_pq_para_t *params) {
+                                vpp_pq_para_t *params)
+{
     int rval;
     char sql[256];
 
     getSqlParams(
-            __FUNCTION__,
-            sql,
-            "update Picture_Mode set Brightness = %d, Contrast = %d, Saturation = %d, Hue = %d, Sharpness = %d, Backlight = %d, NR= %d "
-                " where TVIN_PORT = %d and Mode = %d;", params->brightness, params->contrast,
-            params->saturation, params->hue, params->sharpness, params->backlight, params->nr,
-            source_type, pq_mode);
+        __FUNCTION__,
+        sql,
+        "update Picture_Mode set Brightness = %d, Contrast = %d, Saturation = %d, Hue = %d, Sharpness = %d, Backlight = %d, NR= %d "
+        " where TVIN_PORT = %d and Mode = %d;", params->brightness, params->contrast,
+        params->saturation, params->hue, params->sharpness, params->backlight, params->nr,
+        source_type, pq_mode);
     rval = this->exeSql(sql);
     return 0;
 }
 
 int CPqData::PQ_SetPQModeParamsByName(const char *name, tv_source_input_type_t source_type,
-        vpp_picture_mode_t pq_mode, vpp_pq_para_t *params) {
+                                      vpp_picture_mode_t pq_mode, vpp_pq_para_t *params)
+{
     int rval;
     char sql[256];
 
     getSqlParams(__FUNCTION__, sql,
-            "insert into %s(TVIN_PORT, Mode, Brightness, Contrast, Saturation, Hue, Sharpness, Backlight, NR)"
-                " values(%d,%d,%d,%d,%d,%d,%d,%d,%d);", name, source_type, pq_mode,
-            params->brightness, params->contrast, params->saturation, params->hue,
-            params->sharpness, params->backlight, params->nr);
+                 "insert into %s(TVIN_PORT, Mode, Brightness, Contrast, Saturation, Hue, Sharpness, Backlight, NR)"
+                 " values(%d,%d,%d,%d,%d,%d,%d,%d,%d);", name, source_type, pq_mode,
+                 params->brightness, params->contrast, params->saturation, params->hue,
+                 params->sharpness, params->backlight, params->nr);
 
     rval = this->exeSql(sql);
     return 0;
 }
 
-int CPqData::PQ_ResetAllPQModeParams(void) {
+int CPqData::PQ_ResetAllPQModeParams(void)
+{
     int rval;
     char sqlmaster[256];
 
     getSqlParams(
-            __FUNCTION__,
-            sqlmaster,
-            "delete from picture_mode; insert into picture_mode(TVIN_PORT, Mode, Brightness, Contrast, Saturation, Hue, Sharpness, Backlight, NR) select TVIN_PORT, Mode, Brightness, Contrast, Saturation, Hue, Sharpness, Backlight, NR from picture_mode_default;");
+        __FUNCTION__,
+        sqlmaster,
+        "delete from picture_mode; insert into picture_mode(TVIN_PORT, Mode, Brightness, Contrast, Saturation, Hue, Sharpness, Backlight, NR) select TVIN_PORT, Mode, Brightness, Contrast, Saturation, Hue, Sharpness, Backlight, NR from picture_mode_default;");
 
     rval = this->exeSql(sqlmaster);
     return rval;
 }
 
 int CPqData::PQ_GetGammaSpecialTable(int gammaValue, const char *f_name,
-        tcon_gamma_table_t *gamma_value) {
+                                     tcon_gamma_table_t *gamma_value)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int rval = -1;
@@ -1184,37 +1234,41 @@ int CPqData::PQ_GetGammaSpecialTable(int gammaValue, const char *f_name,
 }
 
 int CPqData::PQ_GetGammaTableR(int panel_id, tvin_port_t source_port, tvin_sig_fmt_t fmt,
-        tcon_gamma_table_t *gamma_r) {
+                               tcon_gamma_table_t *gamma_r)
+{
     return PQ_GetGammaTable(panel_id, source_port, fmt, "Red", gamma_r);
 }
 
 int CPqData::PQ_GetGammaTableG(int panel_id, tvin_port_t source_port, tvin_sig_fmt_t fmt,
-        tcon_gamma_table_t *gamma_g) {
+                               tcon_gamma_table_t *gamma_g)
+{
     return PQ_GetGammaTable(panel_id, source_port, fmt, "Green", gamma_g);
 }
 
 int CPqData::PQ_GetGammaTableB(int panel_id, tvin_port_t source_port, tvin_sig_fmt_t fmt,
-        tcon_gamma_table_t *gamma_b) {
+                               tcon_gamma_table_t *gamma_b)
+{
     return PQ_GetGammaTable(panel_id, source_port, fmt, "Blue", gamma_b);
 }
 
 int CPqData::PQ_GetGammaTable(int panel_id, tvin_port_t source_port, tvin_sig_fmt_t fmt,
-        const char *f_name, tcon_gamma_table_t *val) {
+                              const char *f_name, tcon_gamma_table_t *val)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
 
     int rval = -1;
 
     getSqlParams(__FUNCTION__, sqlmaster, "select TableName from GeneralGammaTable where "
-        "TVIN_PORT = %d and "
-        "TVIN_SIG_FMT = %d;", source_port, fmt);
+                 "TVIN_PORT = %d and "
+                 "TVIN_SIG_FMT = %d;", source_port, fmt);
 
     rval = this->select(sqlmaster, c);
 
     if (c.moveToFirst()) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         getSqlParams(__FUNCTION__, sqlmaster, "select %s from %s;", f_name,
-                c.getString(index_TableName).string());
+                     c.getString(index_TableName).string());
 
         rval = this->select(sqlmaster, c);
         if (c.moveToFirst()) {
@@ -1228,7 +1282,8 @@ int CPqData::PQ_GetGammaTable(int panel_id, tvin_port_t source_port, tvin_sig_fm
     return rval;
 }
 
-int CPqData::PQ_GetVGAAjustPara(tvin_sig_fmt_t vga_fmt, tvafe_vga_parm_t *adjparam) {
+int CPqData::PQ_GetVGAAjustPara(tvin_sig_fmt_t vga_fmt, tvafe_vga_parm_t *adjparam)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int rval = -1;
@@ -1240,10 +1295,10 @@ int CPqData::PQ_GetVGAAjustPara(tvin_sig_fmt_t vga_fmt, tvafe_vga_parm_t *adjpar
     adjparam->vga_in_clean = 0;
 
     getSqlParams(
-            __FUNCTION__,
-            sqlmaster,
-            "select Clk, Phase, HPos, VPos, Vga_in_clean from VGA_AutoParams where TVIN_SIG_FMT = %d",
-            vga_fmt);
+        __FUNCTION__,
+        sqlmaster,
+        "select Clk, Phase, HPos, VPos, Vga_in_clean from VGA_AutoParams where TVIN_SIG_FMT = %d",
+        vga_fmt);
 
     rval = this->select(sqlmaster, c);
 
@@ -1256,36 +1311,38 @@ int CPqData::PQ_GetVGAAjustPara(tvin_sig_fmt_t vga_fmt, tvafe_vga_parm_t *adjpar
     }
     return rval;
 }
-int CPqData::PQ_SetVGAAjustPara(tvin_sig_fmt_t vga_fmt, tvafe_vga_parm_t adjparam) {
+int CPqData::PQ_SetVGAAjustPara(tvin_sig_fmt_t vga_fmt, tvafe_vga_parm_t adjparam)
+{
     CSqlite::Cursor c;
     char sql[256];
     int rval = -1;
 
     getSqlParams(__FUNCTION__, sql, "select * from VGA_AutoParams where TVIN_SIG_FMT = %d;",
-            vga_fmt);
+                 vga_fmt);
 
     rval = this->select(sql, c);
 
     if (c.moveToFirst()) {
         getSqlParams(
-                __FUNCTION__,
-                sql,
-                "Insert into VGA_AutoParams(TVIN_SIG_FMT, Clk, Phase, HPos, VPos, Vga_in_clean) values(%d, %d, %d ,%d ,%d, %d);",
-                vga_fmt, adjparam.clk_step, adjparam.phase, adjparam.hpos_step, adjparam.vpos_step,
-                adjparam.vga_in_clean);
+            __FUNCTION__,
+            sql,
+            "Insert into VGA_AutoParams(TVIN_SIG_FMT, Clk, Phase, HPos, VPos, Vga_in_clean) values(%d, %d, %d ,%d ,%d, %d);",
+            vga_fmt, adjparam.clk_step, adjparam.phase, adjparam.hpos_step, adjparam.vpos_step,
+            adjparam.vga_in_clean);
     } else {
         getSqlParams(
-                __FUNCTION__,
-                sql,
-                "update VGA_AutoParams set Clk = %d, Phase = %d, HPos = %d, VPos = %d, Vga_in_clean = %d where TVIN_SIG_FMT = %d;",
-                adjparam.clk_step, adjparam.phase, adjparam.hpos_step, adjparam.vpos_step,
-                adjparam.vga_in_clean, vga_fmt);
+            __FUNCTION__,
+            sql,
+            "update VGA_AutoParams set Clk = %d, Phase = %d, HPos = %d, VPos = %d, Vga_in_clean = %d where TVIN_SIG_FMT = %d;",
+            adjparam.clk_step, adjparam.phase, adjparam.hpos_step, adjparam.vpos_step,
+            adjparam.vga_in_clean, vga_fmt);
     }
     rval = this->exeSql(sql);
     return rval;
 }
 
-int CPqData::CaculateLevelParam(tvpq_data_t *pq_data, int nodes, int level) {
+int CPqData::CaculateLevelParam(tvpq_data_t *pq_data, int nodes, int level)
+{
     int i;
 
     for (i = 0; i < nodes; i++) {
@@ -1303,7 +1360,8 @@ int CPqData::CaculateLevelParam(tvpq_data_t *pq_data, int nodes, int level) {
     }
 }
 
-am_regs_t CPqData::CaculateLevelRegsParam(tvpq_sharpness_regs_t *pq_regs, int level, int flag) {
+am_regs_t CPqData::CaculateLevelRegsParam(tvpq_sharpness_regs_t *pq_regs, int level, int flag)
+{
     am_regs_t regs;
     int i;
     int *pq_nodes = NULL;
@@ -1343,7 +1401,7 @@ am_regs_t CPqData::CaculateLevelRegsParam(tvpq_sharpness_regs_t *pq_regs, int le
             regs.am_reg[j].addr = pq_regs[i - 1].reg_data[j].Value.addr;
             regs.am_reg[j].mask = pq_regs[i - 1].reg_data[j].Value.mask;
             regs.am_reg[j].val = pq_regs[i - 1].reg_data[j].Value.val + (level
-                    - pq_regs[i - 1].reg_data[j].IndexValue) * pq_regs[i - 1].reg_data[j].step;
+                                 - pq_regs[i - 1].reg_data[j].IndexValue) * pq_regs[i - 1].reg_data[j].step;
         }
     }
 
@@ -1351,7 +1409,8 @@ am_regs_t CPqData::CaculateLevelRegsParam(tvpq_sharpness_regs_t *pq_regs, int le
 }
 
 int CPqData::GetNonlinearMapping(tvpq_data_type_t data_type, tvin_port_t source_port, int level,
-        int *params) {
+                                 int *params)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int rval = -1;
@@ -1361,9 +1420,9 @@ int CPqData::GetNonlinearMapping(tvpq_data_type_t data_type, tvin_port_t source_
     type = CTvin::Tvin_SourcePortToSourceInputType(source_port);//???
 
     getSqlParams(__FUNCTION__, sqlmaster, "select Value from NonlinearMapping where "
-        "TVIN_PORT = %d and "
-        "Item_ID = %d and "
-        "Level = %d ;", type, data_type, level);
+                 "TVIN_PORT = %d and "
+                 "Item_ID = %d and "
+                 "Level = %d ;", type, data_type, level);
 
     rval = this->select(sqlmaster, c);
 
@@ -1374,16 +1433,17 @@ int CPqData::GetNonlinearMapping(tvpq_data_type_t data_type, tvin_port_t source_
 }
 
 int CPqData::GetNonlinearMappingByOSDFac(tvpq_data_type_t data_type,
-        tv_source_input_type_t source_type, int *params) {
+        tv_source_input_type_t source_type, int *params)
+{
     CSqlite::Cursor c;
     char sqlmaster[256];
     int rval = -1;
 
     getSqlParams(__FUNCTION__, sqlmaster, "select Value from NonlinearMapping where "
-        "TVIN_PORT = %d and "
-        "Item_ID = %d and ("
-        "Level = 0 or Level = 25 or Level = 50 or Level = 75 or Level = 100);", source_type,
-            data_type);
+                 "TVIN_PORT = %d and "
+                 "Item_ID = %d and ("
+                 "Level = 0 or Level = 25 or Level = 50 or Level = 75 or Level = 100);", source_type,
+                 data_type);
 
     rval = this->select(sqlmaster, c);
 
@@ -1398,7 +1458,8 @@ int CPqData::GetNonlinearMappingByOSDFac(tvpq_data_type_t data_type,
 }
 
 int CPqData::SetNonlinearMapping(tvpq_data_type_t data_type, tv_source_input_type_t source_type,
-        int osd0, int osd25, int osd50, int osd75, int osd100) {
+                                 int osd0, int osd25, int osd50, int osd75, int osd100)
+{
 
     int rval;
     char *err = NULL;
@@ -1424,10 +1485,10 @@ int CPqData::SetNonlinearMapping(tvpq_data_type_t data_type, tv_source_input_typ
             osdvalue[i] = osd75 + (int) ((i - 75) * step[3]);
         }
         getSqlParams(
-                __FUNCTION__,
-                sql,
-                "update NonLinearMapping set Value = %d where TVIN_PORT = %d and Item_ID = %d and Level = %d ;",
-                osdvalue[i], source_type, data_type, i);
+            __FUNCTION__,
+            sql,
+            "update NonLinearMapping set Value = %d where TVIN_PORT = %d and Item_ID = %d and Level = %d ;",
+            osdvalue[i], source_type, data_type, i);
         if (!(this->exeSql(sql))) {
             return -1;
         }
@@ -1436,7 +1497,8 @@ int CPqData::SetNonlinearMapping(tvpq_data_type_t data_type, tv_source_input_typ
 }
 
 int CPqData::SetNonlinearMappingByName(const char *name, tvpq_data_type_t data_type,
-        tv_source_input_type_t source_type, int osd0, int osd25, int osd50, int osd75, int osd100) {
+                                       tv_source_input_type_t source_type, int osd0, int osd25, int osd50, int osd75, int osd100)
+{
     int rval;
     char *err = NULL;
     int osdvalue[101];
@@ -1462,19 +1524,21 @@ int CPqData::SetNonlinearMappingByName(const char *name, tvpq_data_type_t data_t
         }
         memset(sql, '\0', 256);
         getSqlParams(__FUNCTION__, sql,
-                "insert into %s(TVIN_PORT, Item_ID, Level, Value) values(%d,%d,%d,%d);", name,
-                source_type, data_type, i, osdvalue[i]);
+                     "insert into %s(TVIN_PORT, Item_ID, Level, Value) values(%d,%d,%d,%d);", name,
+                     source_type, data_type, i, osdvalue[i]);
         if (!(this->exeSql(sql))) {
             return -1;
         }
     }
     return 0;
 }
-int CPqData::getSharpnessFlag() {
+int CPqData::getSharpnessFlag()
+{
     return sha_diff_flag;
 }
 
-int CPqData::loadSharpnessData(char *sqlmaster, char *table_name) {
+int CPqData::loadSharpnessData(char *sqlmaster, char *table_name)
+{
     LOGD("%s, table_name: %s, sqlmaster: %s\n", __FUNCTION__, table_name, sqlmaster);
     CSqlite::Cursor c;
     int rval;
@@ -1508,19 +1572,19 @@ int CPqData::loadSharpnessData(char *sqlmaster, char *table_name) {
             }
             do {
                 pq_sharpness_reg_data[index / length].reg_data[index % length].TotalNode
-                        = c.getInt(0);
+                    = c.getInt(0);
                 pq_sharpness_reg_data[index / length].reg_data[index % length].NodeValue
-                        = c.getInt(1);
+                    = c.getInt(1);
                 pq_sharpness_reg_data[index / length].reg_data[index % length].Value.type
-                        = c.getUInt(2);
+                    = c.getUInt(2);
                 pq_sharpness_reg_data[index / length].reg_data[index % length].Value.addr
-                        = c.getUInt(3);
+                    = c.getUInt(3);
                 pq_sharpness_reg_data[index / length].reg_data[index % length].Value.mask
-                        = c.getUInt(4);
+                    = c.getUInt(4);
                 pq_sharpness_reg_data[index / length].reg_data[index % length].IndexValue
-                        = c.getInt(5);
+                    = c.getInt(5);
                 pq_sharpness_reg_data[index / length].reg_data[index % length].Value.val
-                        = c.getUInt(6);
+                    = c.getUInt(6);
                 pq_sharpness_reg_data[index / length].reg_data[index % length].step = c.getF(7);
                 index++;
             } while (c.moveToNext());
@@ -1534,19 +1598,19 @@ int CPqData::loadSharpnessData(char *sqlmaster, char *table_name) {
             }
             do {
                 pq_sharpness_reg_data_1[index / length].reg_data[index % length].TotalNode
-                        = c.getInt(0);
+                    = c.getInt(0);
                 pq_sharpness_reg_data_1[index / length].reg_data[index % length].NodeValue
-                        = c.getInt(1);
+                    = c.getInt(1);
                 pq_sharpness_reg_data_1[index / length].reg_data[index % length].Value.type
-                        = c.getUInt(2);
+                    = c.getUInt(2);
                 pq_sharpness_reg_data_1[index / length].reg_data[index % length].Value.addr
-                        = c.getUInt(3);
+                    = c.getUInt(3);
                 pq_sharpness_reg_data_1[index / length].reg_data[index % length].Value.mask
-                        = c.getUInt(4);
+                    = c.getUInt(4);
                 pq_sharpness_reg_data_1[index / length].reg_data[index % length].IndexValue
-                        = c.getInt(5);
+                    = c.getInt(5);
                 pq_sharpness_reg_data_1[index / length].reg_data[index % length].Value.val
-                        = c.getUInt(6);
+                    = c.getUInt(6);
                 pq_sharpness_reg_data_1[index / length].reg_data[index % length].step = c.getF(7);
                 index++;
             } while (c.moveToNext());
@@ -1556,7 +1620,8 @@ int CPqData::loadSharpnessData(char *sqlmaster, char *table_name) {
 }
 
 int CPqData::LoadPQData(tvpq_data_type_t data_type, tvin_port_t source_port,
-        tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int flag) {
+                        tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int flag)
+{
     CSqlite::Cursor c;
     int rval;
     char sqlmaster[256];
@@ -1568,52 +1633,52 @@ int CPqData::LoadPQData(tvpq_data_type_t data_type, tvin_port_t source_port,
     switch (data_type) {
     case TVPQ_DATA_BRIGHTNESS:
         getSqlParams(__FUNCTION__, sqlmaster,
-                "select TableName from GeneralContrastBrightnessTable where "
-                    "TVIN_PORT = %d and "
-                    "TVIN_SIG_FMT = %d and "
-                    "TVIN_TRANS_FMT = %d and "
-                    "%s = %d;", source_port, sig_fmt, mode, ID_FIELD, BRIGHTNESS_ID);
+                     "select TableName from GeneralContrastBrightnessTable where "
+                     "TVIN_PORT = %d and "
+                     "TVIN_SIG_FMT = %d and "
+                     "TVIN_TRANS_FMT = %d and "
+                     "%s = %d;", source_port, sig_fmt, mode, ID_FIELD, BRIGHTNESS_ID);
         pq_data = pq_bri_data;
         pq_nodes = &bri_nodes;
         break;
     case TVPQ_DATA_CONTRAST:
         getSqlParams(__FUNCTION__, sqlmaster,
-                "select TableName from GeneralContrastBrightnessTable where "
-                    "TVIN_PORT = %d and "
-                    "TVIN_SIG_FMT = %d and "
-                    "TVIN_TRANS_FMT = %d and "
-                    "%s = %d;", source_port, sig_fmt, mode, ID_FIELD, CONTRAST_ID);
+                     "select TableName from GeneralContrastBrightnessTable where "
+                     "TVIN_PORT = %d and "
+                     "TVIN_SIG_FMT = %d and "
+                     "TVIN_TRANS_FMT = %d and "
+                     "%s = %d;", source_port, sig_fmt, mode, ID_FIELD, CONTRAST_ID);
         pq_data = pq_con_data;
         pq_nodes = &con_nodes;
         break;
     case TVPQ_DATA_HUE:
         getSqlParams(__FUNCTION__, sqlmaster,
-                "select TableName from GeneralSaturationHueTable where "
-                    "TVIN_PORT = %d and "
-                    "TVIN_SIG_FMT = %d and "
-                    "TVIN_TRANS_FMT = %d and "
-                    "%s = %d;", source_port, sig_fmt, mode, ID_FIELD, HUE_ID);
+                     "select TableName from GeneralSaturationHueTable where "
+                     "TVIN_PORT = %d and "
+                     "TVIN_SIG_FMT = %d and "
+                     "TVIN_TRANS_FMT = %d and "
+                     "%s = %d;", source_port, sig_fmt, mode, ID_FIELD, HUE_ID);
         pq_data = pq_hue_data;
         pq_nodes = &hue_nodes;
         break;
     case TVPQ_DATA_SATURATION:
         getSqlParams(__FUNCTION__, sqlmaster,
-                "select TableName from GeneralSaturationHueTable where "
-                    "TVIN_PORT = %d and "
-                    "TVIN_SIG_FMT = %d and "
-                    "TVIN_TRANS_FMT = %d and "
-                    "%s = %d;", source_port, sig_fmt, mode, ID_FIELD, SATURATION_ID);
+                     "select TableName from GeneralSaturationHueTable where "
+                     "TVIN_PORT = %d and "
+                     "TVIN_SIG_FMT = %d and "
+                     "TVIN_TRANS_FMT = %d and "
+                     "%s = %d;", source_port, sig_fmt, mode, ID_FIELD, SATURATION_ID);
         pq_data = pq_sat_data;
         pq_nodes = &sat_nodes;
         break;
     case TVPQ_DATA_SHARPNESS:
         //sprintf(sqlmaster, "select TableName from GeneralSharpnessTable where "
-        getSqlParams(__FUNCTION__,sqlmaster,
-                "select TableName from GeneralSharpnessG9Table where "
-                "TVIN_PORT = %d and "
-                "TVIN_SIG_FMT = %d and "
-                "TVIN_TRANS_FMT = %d and "
-                "%s = %d;", source_port, sig_fmt, mode, ID_FIELD, SHARPNESS_ID);
+        getSqlParams(__FUNCTION__, sqlmaster,
+                     "select TableName from GeneralSharpnessG9Table where "
+                     "TVIN_PORT = %d and "
+                     "TVIN_SIG_FMT = %d and "
+                     "TVIN_TRANS_FMT = %d and "
+                     "%s = %d;", source_port, sig_fmt, mode, ID_FIELD, SHARPNESS_ID);
         pq_data = NULL;
         pq_nodes = &sha_nodes;
         break;
@@ -1630,17 +1695,17 @@ int CPqData::LoadPQData(tvpq_data_type_t data_type, tvin_port_t source_port,
         case TVPQ_DATA_HUE:
         case TVPQ_DATA_SATURATION:
             getSqlParams(
-                    __FUNCTION__,
-                    sqlmaster,
-                    "select TotalNode, NodeNumber, IndexValue, RegValue, StepUp from %s order by NodeNumber asc;",
-                    c.getString(0).string());
+                __FUNCTION__,
+                sqlmaster,
+                "select TotalNode, NodeNumber, IndexValue, RegValue, StepUp from %s order by NodeNumber asc;",
+                c.getString(0).string());
             break;
         case TVPQ_DATA_SHARPNESS:
             do {
                 getSqlParams(__FUNCTION__, sqlmaster,
-                    "select TotalNode, NodeNumber, RegType, RegAddr, RegMask,"
-                    "IndexValue, RegValue, StepUp from %s order by NodeNumber asc;",
-                    c.getString(0).string());
+                             "select TotalNode, NodeNumber, RegType, RegAddr, RegMask,"
+                             "IndexValue, RegValue, StepUp from %s order by NodeNumber asc;",
+                             c.getString(0).string());
                 c.getString(table_name, 0);
                 rval = loadSharpnessData(sqlmaster, table_name);
             } while (c.moveToNext());
@@ -1664,16 +1729,16 @@ int CPqData::LoadPQData(tvpq_data_type_t data_type, tvin_port_t source_port,
                 if (flag == 1) {
                     if (data_type == TVPQ_DATA_BRIGHTNESS) {
                         LOGD("%s, bri pq_data[%d].RegValue = %d\n", "TV", index,
-                                pq_data[index].RegValue);
+                             pq_data[index].RegValue);
                         pq_data[index].RegValue -= 64;
                         LOGD("%s, bri pq_data[%d].RegValue + 64 = %d\n", "TV", index,
-                                pq_data[index].RegValue);
+                             pq_data[index].RegValue);
                     } else if (data_type == TVPQ_DATA_CONTRAST) {
                         LOGD("%s, con pq_data[%d].RegValue = %d\n", "TV", index,
-                                pq_data[index].RegValue);
+                             pq_data[index].RegValue);
                         pq_data[index].RegValue += 64;
                         LOGD("%s, con pq_data[%d].RegValue + 64 = %d\n", "TV", index,
-                                pq_data[index].RegValue);
+                             pq_data[index].RegValue);
                     }
                 }
                 index++;
@@ -1686,7 +1751,8 @@ int CPqData::LoadPQData(tvpq_data_type_t data_type, tvin_port_t source_port,
 }
 
 int CPqData::LoadAllPQData(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
-        tvin_trans_fmt_t trans_fmt, int flag) {
+                           tvin_trans_fmt_t trans_fmt, int flag)
+{
     int rval = -1;
     rval = LoadPQData(TVPQ_DATA_BRIGHTNESS, source_port, sig_fmt, is2dOr3d, trans_fmt, flag);
     if (rval) {
@@ -1721,9 +1787,11 @@ typedef enum initial_type_e {
 } initial_type_t;
 
 const char *Pmode_name[6] = { "Picture_Mode", "Picture_Mode_Default", "NonlinearMapping",
-        "NonlinearMapping_Default", "VGA_AutoParams", "OVERSCAN" };
+                              "NonlinearMapping_Default", "VGA_AutoParams", "OVERSCAN"
+                            };
 
-void CPqData::initialTable(int type) {
+void CPqData::initialTable(int type)
+{
     vpp_pq_para_t pmode_default;
 
     pmode_default.backlight = 100;
@@ -1740,7 +1808,7 @@ void CPqData::initialTable(int type) {
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 4; j++) {
                 PQ_SetPQModeParamsByName(Pmode_name[type], (tv_source_input_type_t) i,
-                        (vpp_picture_mode_t) j, &pmode_default);
+                                         (vpp_picture_mode_t) j, &pmode_default);
             }
         }
         break;
@@ -1749,8 +1817,8 @@ void CPqData::initialTable(int type) {
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < 5; j++) {
                 SetNonlinearMappingByName(Pmode_name[type], (tvpq_data_type_t) j,
-                        (tv_source_input_type_t) i, 0, (int) 255 / 4.0, (int) 255 * 2 / 4.0,
-                        (int) 255 * 3 / 4.0, 255);
+                                          (tv_source_input_type_t) i, 0, (int) 255 / 4.0, (int) 255 * 2 / 4.0,
+                                          (int) 255 * 3 / 4.0, 255);
             }
         }
         break;
@@ -1827,7 +1895,8 @@ void CPqData::initialTable(int type) {
  }
  */
 
-int CPqData::replacePqDb(const char *newFilePath) {
+int CPqData::replacePqDb(const char *newFilePath)
+{
 
     CFile::delFile( PQ_DB_PATH);
     if (newFilePath == NULL) {
@@ -1840,7 +1909,8 @@ int CPqData::replacePqDb(const char *newFilePath) {
         return ret;
     }
 }
-int CPqData::PQ_GetPhaseArray(am_phase_t *am_phase) {
+int CPqData::PQ_GetPhaseArray(am_phase_t *am_phase)
+{
     CSqlite::Cursor c;
     int iOutRet = 0;
     char sqlmaster[256];

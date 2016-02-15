@@ -170,44 +170,42 @@ void TvCallback::onTvEvent (int32_t msgType, const Parcel &p)
 {
     tv_input_private_t *priv = (tv_input_private_t *)(mPri);
     switch (msgType) {
-        case SOURCE_CONNECT_CALLBACK: {
-            int source = p.readInt32();
-            int connectState = p.readInt32();
-            LOGD("TvCallback::onTvEvent  source = %d, status = %d", source, connectState)
+    case SOURCE_CONNECT_CALLBACK: {
+        int source = p.readInt32();
+        int connectState = p.readInt32();
+        LOGD("TvCallback::onTvEvent  source = %d, status = %d", source, connectState)
 
-            switch (source) {
-                case SOURCE_HDMI1:
-                case SOURCE_HDMI2:
-                case SOURCE_HDMI3: {
-                    if (connectState == 1) {
-                        notify_HDMI_device_available(priv, (tv_source_input_t)source, 1, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-                        notify_HDMI_stream_configurations_change(priv, (tv_source_input_t)source, 1);
-                    }
-                    else {
-                        notify_HDMI_device_available(priv, (tv_source_input_t)source, 1, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
-                    }
-                }
-                break;
+        switch (source) {
+        case SOURCE_HDMI1:
+        case SOURCE_HDMI2:
+        case SOURCE_HDMI3: {
+            if (connectState == 1) {
+                notify_HDMI_device_available(priv, (tv_source_input_t)source, 1, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+                notify_HDMI_stream_configurations_change(priv, (tv_source_input_t)source, 1);
+            } else {
+                notify_HDMI_device_available(priv, (tv_source_input_t)source, 1, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
+            }
+        }
+        break;
 
-                case SOURCE_AV1:
-                case SOURCE_AV2: {
-                    if (connectState == 1) {
-                        notify_AV_device_available(priv, (tv_source_input_t)source, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-                        notify_AV_stream_configurations_change(priv, (tv_source_input_t)source);
-                    }
-                    else {
-                        notify_AV_device_available(priv, (tv_source_input_t)source, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
-                    }
-                }
-                break;
-
-                default:
-                break;
+        case SOURCE_AV1:
+        case SOURCE_AV2: {
+            if (connectState == 1) {
+                notify_AV_device_available(priv, (tv_source_input_t)source, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+                notify_AV_stream_configurations_change(priv, (tv_source_input_t)source);
+            } else {
+                notify_AV_device_available(priv, (tv_source_input_t)source, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
             }
         }
         break;
 
         default:
+            break;
+        }
+    }
+    break;
+
+    default:
         break;
     }
 }
@@ -291,7 +289,7 @@ static int get_stream_configs(int dev_id, int *num_configurations, const tv_stre
         *num_configurations = 2;
         *configs = mconfig;
         break;
-        default:
+    default:
         break;
     }
     return 0;
@@ -318,7 +316,7 @@ static int get_tv_stream(tv_stream_t *stream)
 }
 
 static int tv_input_device_open(const struct hw_module_t *module,
-                                    const char *name, struct hw_device_t **device);
+                                const char *name, struct hw_device_t **device);
 
 static struct hw_module_methods_t tv_input_module_methods = {
 open:
@@ -326,20 +324,26 @@ open:
 };
 
 tv_input_module_t HAL_MODULE_INFO_SYM = {
-    common: {
-        tag: HARDWARE_MODULE_TAG,
+common:
+    {
+tag:
+        HARDWARE_MODULE_TAG,
         version_major: 0,
         version_minor: 1,
-        id: TV_INPUT_HARDWARE_MODULE_ID,
-        name: "TVInput module",
-        author: "Amlogic",
-        methods: &tv_input_module_methods,
+id:
+        TV_INPUT_HARDWARE_MODULE_ID,
+name: "TVInput module"
+        ,
+author: "Amlogic"
+        ,
+methods:
+        &tv_input_module_methods,
     }
 };
 
 /*****************************************************************************/
 static int tv_input_initialize(struct tv_input_device *dev,
-                                const tv_input_callback_ops_t *callback, void *data)
+                               const tv_input_callback_ops_t *callback, void *data)
 {
     if (dev == NULL || callback == NULL) {
         return -EINVAL;
@@ -425,7 +429,7 @@ static int tv_input_get_stream_configurations(const struct tv_input_device *dev,
 }
 
 static int tv_input_open_stream(struct tv_input_device *dev, int device_id,
-                                    tv_stream_t *stream)
+                                tv_stream_t *stream)
 {
     tv_input_private_t *priv = (tv_input_private_t *)dev;
     if (priv) {
@@ -443,7 +447,7 @@ static int tv_input_open_stream(struct tv_input_device *dev, int device_id,
 }
 
 static int tv_input_close_stream(struct tv_input_device *dev, int device_id,
-                                    int stream_id)
+                                 int stream_id)
 {
     tv_input_private_t *priv = (tv_input_private_t *)dev;
     if (stream_id == NORMAL_STREAM_ID) {
@@ -483,7 +487,7 @@ static int tv_input_device_close(struct hw_device_t *dev)
 /*****************************************************************************/
 
 static int tv_input_device_open(const struct hw_module_t *module,
-                                    const char *name, struct hw_device_t **device)
+                                const char *name, struct hw_device_t **device)
 {
     int status = -EINVAL;
     if (!strcmp(name, TV_INPUT_DEFAULT_DEVICE)) {
@@ -501,7 +505,7 @@ static int tv_input_device_open(const struct hw_module_t *module,
 
         dev->device.initialize = tv_input_initialize;
         dev->device.get_stream_configurations =
-        tv_input_get_stream_configurations;
+            tv_input_get_stream_configurations;
         dev->device.open_stream = tv_input_open_stream;
         dev->device.close_stream = tv_input_close_stream;
         dev->device.request_capture = tv_input_request_capture;

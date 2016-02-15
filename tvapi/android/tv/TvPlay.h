@@ -33,7 +33,7 @@ public:
     virtual void onTvEvent (int32_t msgType, const Parcel &p) = 0;
 };
 
-class TvPlay : public TvListener{
+class TvPlay : public TvListener {
 public:
     TvPlay();
     ~TvPlay();

@@ -22,25 +22,25 @@
 using namespace android;
 
 struct buffer {
-	void *start;
-	size_t length;
+    void *start;
+    size_t length;
 };
 
 
 struct camera {
-	char *device_name;
-	int fd;
-	int width;
-	int height;
-	int display_depth;
-	int image_size;
-	int frame_number; //fps
-	int bitrate ;  // bitrate
-	struct v4l2_capability v4l2_cap;
-	struct v4l2_cropcap v4l2_cropcap;
-	struct v4l2_format v4l2_fmt;
-	struct v4l2_crop crop;
-	struct buffer *buffers;
+    char *device_name;
+    int fd;
+    int width;
+    int height;
+    int display_depth;
+    int image_size;
+    int frame_number; //fps
+    int bitrate ;  // bitrate
+    struct v4l2_capability v4l2_cap;
+    struct v4l2_cropcap v4l2_cropcap;
+    struct v4l2_format v4l2_fmt;
+    struct v4l2_crop crop;
+    struct buffer *buffers;
 };
 
 /*
@@ -107,71 +107,71 @@ GE2D_FORMAT_S24_RGB
 #define AMVIDEOCAP_IOR_SET_SRC_HEIGHT           _IOR(AMVIDEOCAP_IOC_MAGIC, 0x43, int)
 
 enum amvideocap_state {
-	AMVIDEOCAP_STATE_INIT = 0,
-	AMVIDEOCAP_STATE_ON_CAPTURE = 200,
-	AMVIDEOCAP_STATE_FINISHED_CAPTURE = 300,
-	AMVIDEOCAP_STATE_ERROR = 0xffff,
+    AMVIDEOCAP_STATE_INIT = 0,
+    AMVIDEOCAP_STATE_ON_CAPTURE = 200,
+    AMVIDEOCAP_STATE_FINISHED_CAPTURE = 300,
+    AMVIDEOCAP_STATE_ERROR = 0xffff,
 };
 
 class CTvScreenCapture {
 public:
-	CTvScreenCapture();
-	~CTvScreenCapture();
+    CTvScreenCapture();
+    ~CTvScreenCapture();
 
-	int InitVCap(sp<IMemory> Mem);
-	int SetVideoParameter(int width, int height, int frame);
-	int VideoStart();
-	int GetVideoData( int *length);
-	int VideoStop();
-	int DeinitVideoCap();
-	int CapMediaPlayerVideoLayerOnly(int width, int height);
-	int CapOsdAndVideoLayer(int width, int height);
-	class CapEvent : public CTvEv {
-	public:
-		CapEvent(): CTvEv(CTvEv::TV_EVENT_HDMI_IN_CAP) {};
-		~CapEvent() {};
+    int InitVCap(sp<IMemory> Mem);
+    int SetVideoParameter(int width, int height, int frame);
+    int VideoStart();
+    int GetVideoData( int *length);
+    int VideoStop();
+    int DeinitVideoCap();
+    int CapMediaPlayerVideoLayerOnly(int width, int height);
+    int CapOsdAndVideoLayer(int width, int height);
+    class CapEvent : public CTvEv {
+    public:
+        CapEvent(): CTvEv(CTvEv::TV_EVENT_HDMI_IN_CAP) {};
+        ~CapEvent() {};
 
-		int mFrameNum;
-		int mFrameWide;
-		int mFrameHeight;
-		int mFrameSize;
-	};
+        int mFrameNum;
+        int mFrameWide;
+        int mFrameHeight;
+        int mFrameSize;
+    };
 
-	class TvIObserver {
-	public:
-		TvIObserver() {};
-		virtual ~TvIObserver() {};
-		virtual void onTvEvent ( const CTvEv &ev ) = 0;
-	};
+    class TvIObserver {
+    public:
+        TvIObserver() {};
+        virtual ~TvIObserver() {};
+        virtual void onTvEvent ( const CTvEv &ev ) = 0;
+    };
 
-	int setObserver(TvIObserver *ob)
-	{
-		mpObserver = ob;
-		return 0;
-	}
+    int setObserver(TvIObserver *ob)
+    {
+        mpObserver = ob;
+        return 0;
+    }
 
 private:
 
-	int xioctl(int fd, int request, void *arg);
-	int OpenCamera(struct camera *pCameraDev);
-	int InitMmap(struct camera *cam) ;
-	//int SetFrameRate( struct camera *cam);
-	int InitCamera(struct camera *cam) ;
-	int StartCapturing(struct camera *cam);
-	int StopCapturing(struct camera *cam);
-	int UninitCamera(struct camera *cam);
-	int CloseCamera(struct camera *cam);
-	void yuv_to_rgb32(unsigned char y, unsigned char u, unsigned char v, unsigned char *rgb);
-	void nv21_to_rgb32(unsigned char *buf, unsigned char *rgb, int width, int height, int *len);
-	int AmvideocapCapFrame(char *buf, int size, int *w, int *h, int *ret_size);
+    int xioctl(int fd, int request, void *arg);
+    int OpenCamera(struct camera *pCameraDev);
+    int InitMmap(struct camera *cam) ;
+    //int SetFrameRate( struct camera *cam);
+    int InitCamera(struct camera *cam) ;
+    int StartCapturing(struct camera *cam);
+    int StopCapturing(struct camera *cam);
+    int UninitCamera(struct camera *cam);
+    int CloseCamera(struct camera *cam);
+    void yuv_to_rgb32(unsigned char y, unsigned char u, unsigned char v, unsigned char *rgb);
+    void nv21_to_rgb32(unsigned char *buf, unsigned char *rgb, int width, int height, int *len);
+    int AmvideocapCapFrame(char *buf, int size, int *w, int *h, int *ret_size);
 private:
-	sp<IMemory> m_pMem;
-	camera m_capV4l2Cam;
-	unsigned int m_capNumBuffers;
+    sp<IMemory> m_pMem;
+    camera m_capV4l2Cam;
+    unsigned int m_capNumBuffers;
 
-	char *m_pData;
-	TvIObserver *mpObserver;
-	CapEvent mCapEvt;
+    char *m_pData;
+    TvIObserver *mpObserver;
+    CapEvent mCapEvt;
 };
 #endif
 

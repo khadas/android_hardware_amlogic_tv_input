@@ -24,26 +24,26 @@
 // TV ATSC rating dimension
 class CTvVchipCheck: public CThread {
 public:
-	CTvVchipCheck();
-	~CTvVchipCheck();
-	bool CheckProgramBlock(int id);
-	static void *VchipCheckingThread ( void *arg );
-	int startVChipCheck();
-	int stopVChipCheck();
-	int pauseVChipCheck();
-	int resumeVChipCheck();
-	int requestAndWaitPauseVChipCheck();
+    CTvVchipCheck();
+    ~CTvVchipCheck();
+    bool CheckProgramBlock(int id);
+    static void *VchipCheckingThread ( void *arg );
+    int startVChipCheck();
+    int stopVChipCheck();
+    int pauseVChipCheck();
+    int resumeVChipCheck();
+    int requestAndWaitPauseVChipCheck();
 private:
-	bool  threadLoop();
-	mutable CMutex           mLock;
-	CCondition       mDetectPauseCondition;
-	CCondition       mRequestPauseCondition;
-	volatile bool m_request_pause_detect;
-	enum DetectState {
-		STATE_STOPED = 0,
-		STATE_RUNNING,
-		STATE_PAUSE
-	};
-	int mDetectState;
+    bool  threadLoop();
+    mutable CMutex           mLock;
+    CCondition       mDetectPauseCondition;
+    CCondition       mRequestPauseCondition;
+    volatile bool m_request_pause_detect;
+    enum DetectState {
+        STATE_STOPED = 0,
+        STATE_RUNNING,
+        STATE_PAUSE
+    };
+    int mDetectState;
 };
 #endif  //_CTVDIMENSION_H

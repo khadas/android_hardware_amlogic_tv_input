@@ -25,59 +25,59 @@
 // ??????/ ???
 class CTvBooking : public LightRefBase<CTvBooking> {
 public:
-	CTvBooking(CTvDatabase::Cursor &c);
-	CTvBooking();
-	~CTvBooking();
+    CTvBooking(CTvDatabase::Cursor &c);
+    CTvBooking();
+    ~CTvBooking();
 
-	static int selectByID(int id, CTvBooking &CtvBook);
+    static int selectByID(int id, CTvBooking &CtvBook);
 
-	int bookEvent(int evtId, bool bBookFlag);
-	int getBookedEventList(Vector<sp<CTvBooking> > &vBv);
+    int bookEvent(int evtId, bool bBookFlag);
+    int getBookedEventList(Vector<sp<CTvBooking> > &vBv);
 
-	int getBookId()
-	{
-		return id;
-	};
-	int getProgramId()
-	{
-		return programId;
-	};
-	int getEventId()
-	{
-		return eventId;
-	};
-	int getStartTime()
-	{
-		return start;
-	};
-	int getDurationTime()
-	{
-		return duration;
-	};
-	String8 &getProgName()
-	{
-		return progName;
-	};
-	String8 &getEvtName()
-	{
-		return evtName;
-	};
+    int getBookId()
+    {
+        return id;
+    };
+    int getProgramId()
+    {
+        return programId;
+    };
+    int getEventId()
+    {
+        return eventId;
+    };
+    int getStartTime()
+    {
+        return start;
+    };
+    int getDurationTime()
+    {
+        return duration;
+    };
+    String8 &getProgName()
+    {
+        return progName;
+    };
+    String8 &getEvtName()
+    {
+        return evtName;
+    };
 
 private:
-	int deleteBook(int evtIdFlag) ;
-	int bookProgram(CTvProgram &prog, CTvEvent &evt);
-	int InitFromCursor(CTvDatabase::Cursor &c);
+    int deleteBook(int evtIdFlag) ;
+    int bookProgram(CTvProgram &prog, CTvEvent &evt);
+    int InitFromCursor(CTvDatabase::Cursor &c);
 private:
-	int id;
-	int programId;
-	int eventId;
-	int flag;
-	int status;
-	int repeat;
-	long start;
-	long duration;
-	String8 progName;
-	String8 evtName;
+    int id;
+    int programId;
+    int eventId;
+    int flag;
+    int status;
+    int repeat;
+    long start;
+    long duration;
+    String8 progName;
+    String8 evtName;
 };
 
 #endif  //_CTVBOOKING_H
