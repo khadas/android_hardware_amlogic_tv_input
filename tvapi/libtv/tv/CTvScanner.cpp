@@ -186,7 +186,6 @@ void CTvScanner::am_scan_atv_store(AM_SCAN_Result_t *result)
 		m_s_Scanner->mCurEv.mFrequency = ts->analog.freq;
 		//
 		m_s_Scanner->sendEvent(m_s_Scanner->mCurEv);
-		LOGD("ATV: > freq:%d", m_s_Scanner->mCurEv.mFrequency);
 	}
 }
 
@@ -546,7 +545,6 @@ void CTvScanner::scan_extract_srv_info_from_sdt(AM_SCAN_Result_t *result, dvbpsi
 				AM_SI_ConvertDVBTextCode((char *)psd->i_service_name, psd->i_service_name_length, \
 										 name, AM_DB_MAX_SRV_NAME_LEN);
 				name[AM_DB_MAX_SRV_NAME_LEN] = 0;
-				LOGD("found name [%s]", name);
 
 				/*3bytes language code, using xxx to simulate*/
 				COPY_NAME("xxx", 3);
@@ -577,7 +575,6 @@ void CTvScanner::scan_extract_srv_info_from_sdt(AM_SCAN_Result_t *result, dvbpsi
 										 pmsnd->p_service_name[i].i_service_name_length,
 										 name, AM_DB_MAX_SRV_NAME_LEN);
 				name[AM_DB_MAX_SRV_NAME_LEN] = 0;
-				LOGD("found name [%s]", name);
 
 				if (curr_name_len > 0) {
 					/*extra split mark*/
