@@ -177,8 +177,7 @@ int CVpp::Vpp_LoadRegs(am_regs_t regs)
 
 int CVpp::isPreviewWindow()
 {
-    char prop_value[PROPERTY_VALUE_MAX];
-    memset(prop_value, '\0', PROPERTY_VALUE_MAX);
+    char prop_value[PROPERTY_VALUE_MAX] = {0};
     property_get("tv.is.preview.window", prop_value, "false");
     LOGD("%s, prop tv.is.preview.window is \"%s\".\n", __FUNCTION__, prop_value);
     return (strcmp(prop_value, "true") == 0) ? 1 : 0;
@@ -248,13 +247,8 @@ int CVpp::LoadVppSettings(tv_source_input_type_t source_type, tvin_sig_fmt_t sig
 int CVpp::Vpp_GetVppConfig(void)
 {
     const char *config_value;
-    int cfg_item_count = 0;
-    char *token = NULL;
-    const char *strDelimit = ",";
-    char data_str[CC_CFG_VALUE_STR_MAX_LEN] = { 0 };
 
     config_value = config_get_str(CFG_SECTION_TV, "vpp.pqmode.depend.bklight", "null");
-
     if (strcmp(config_value, "enable") == 0) {
         mbVppCfg_pqmode_depend_bklight = true;
     } else {
@@ -262,7 +256,6 @@ int CVpp::Vpp_GetVppConfig(void)
     }
 
     config_value = config_get_str(CFG_SECTION_TV, "vpp.color.temp.bysource", "enable");
-
     if (strcmp(config_value, "enable") == 0) {
         mbVppCfg_colortemp_by_source = true;
     } else {
@@ -270,7 +263,6 @@ int CVpp::Vpp_GetVppConfig(void)
     }
 
     config_value = config_get_str(CFG_SECTION_TV, "vpp.panoroma.switch", "null");
-
     if (strcmp(config_value, "enable") == 0) {
         mbVppCfg_panorama_switch = true;
     } else {
@@ -278,7 +270,6 @@ int CVpp::Vpp_GetVppConfig(void)
     }
 
     config_value = config_get_str(CFG_SECTION_TV, "vpp.backlight.reverse", "null");
-
     if (strcmp(config_value, "enable") == 0) {
         mbVppCfg_backlight_reverse = true;
     } else {
@@ -286,7 +277,6 @@ int CVpp::Vpp_GetVppConfig(void)
     }
 
     config_value = config_get_str(CFG_SECTION_TV, "vpp.backlight.init", "null");
-
     if (strcmp(config_value, "enable") == 0) {
         mbVppCfg_backlight_init = true;
     } else {
@@ -294,7 +284,6 @@ int CVpp::Vpp_GetVppConfig(void)
     }
 
     config_value = config_get_str(CFG_SECTION_TV, "vpp.pqwithout.hue", "null");
-
     if (strcmp(config_value, "enable") == 0) {
         mbVppCfg_pqmode_without_hue = true;
     } else {
@@ -302,7 +291,6 @@ int CVpp::Vpp_GetVppConfig(void)
     }
 
     config_value = config_get_str(CFG_SECTION_TV, "vpp.hue.reverse", "null");
-
     if (strcmp(config_value, "enable") == 0) {
         mbVppCfg_hue_reverse = true;
     } else {
@@ -310,7 +298,6 @@ int CVpp::Vpp_GetVppConfig(void)
     }
 
     config_value = config_get_str(CFG_SECTION_TV, "vpp.gamma.onoff", "null");
-
     if (strcmp(config_value, "disable") == 0) {
         mbVppCfg_gamma_onoff = true;
     } else {
@@ -318,7 +305,6 @@ int CVpp::Vpp_GetVppConfig(void)
     }
 
     config_value = config_get_str(CFG_SECTION_TV, "vpp.whitebalance.same_param", "null");
-
     if (strcmp(config_value, "enable") == 0) {
         mbVppCfg_whitebalance_sameparam = true;
     } else {
@@ -326,7 +312,6 @@ int CVpp::Vpp_GetVppConfig(void)
     }
 
     config_value = config_get_str(CFG_SECTION_TV, "vpp.new.cm", "disable");
-
     if (strcmp(config_value, "enable") == 0) {
         mbVppCfg_new_cm = true;
     } else {
@@ -334,7 +319,6 @@ int CVpp::Vpp_GetVppConfig(void)
     }
 
     config_value = config_get_str(CFG_SECTION_TV, "vpp.new.nr", "disable");
-
     if (strcmp(config_value, "enable") == 0) {
         mbVppCfg_new_nr = true;
     } else {
@@ -366,7 +350,7 @@ int CVpp::Vpp_LoadBasicRegs(tv_source_input_type_t source_type, tvin_sig_fmt_t s
                             is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
 {
     am_regs_t regs;
-    int ret = -1, rangeRet = -1, formatRet = -1, enableFlag = -1;
+    int ret = -1, enableFlag = -1;
 
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceType(source_type);
 
@@ -1353,26 +1337,26 @@ int CVpp::Vpp_LoadGamma(tv_source_input_type_t source_type, tvin_sig_fmt_t sig_f
 
 /*int CVpp::SetGammaValue(int gammaValue)
  {
- int ret = -1;
- tvin_sig_fmt_t sig_fmt = TVIN_SIG_FMT_NULL;
- tv_source_input_type_t source_type = SOURCE_TYPE_TV;
- sig_fmt = Tvin_GetSigFormat();
- source_type = Tvin_GetSrcInputType();
- LOGD("%s, source_type = %d, sig_fmt = %d, gammaValue = %d\n", __FUNCTION__, (int)source_type,
- (int)sig_fmt, gammaValue);
- if (gammaValue >= -4 || gammaValue <= 4) {
- switch (gammaValue) {
- case 0:
- ret = Vpp_LoadGammaDefault(source_type, sig_fmt);
- break;
- default:
- ret = Vpp_LoadGammaSpecial(gammaValue);
- break;
- }
- if (0 == ret)
- ret = SSMSaveGammaValue(gammaValue);
- }
- return ret;
+     int ret = -1;
+     tvin_sig_fmt_t sig_fmt = TVIN_SIG_FMT_NULL;
+     tv_source_input_type_t source_type = SOURCE_TYPE_TV;
+     sig_fmt = Tvin_GetSigFormat();
+     source_type = Tvin_GetSrcInputType();
+     LOGD("%s, source_type = %d, sig_fmt = %d, gammaValue = %d\n", __FUNCTION__, (int)source_type,
+            (int)sig_fmt, gammaValue);
+     if (gammaValue >= -4 || gammaValue <= 4) {
+         switch (gammaValue) {
+         case 0:
+             ret = Vpp_LoadGammaDefault(source_type, sig_fmt);
+             break;
+         default:
+             ret = Vpp_LoadGammaSpecial(gammaValue);
+             break;
+        }
+        if (0 == ret)
+            ret = SSMSaveGammaValue(gammaValue);
+     }
+     return ret;
  }*/
 
 int CVpp::GetGammaValue()

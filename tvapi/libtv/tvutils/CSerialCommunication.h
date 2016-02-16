@@ -3,8 +3,7 @@
 
 #include "CThread.h"
 #include "CSerialPort.h"
-
-#define CC_MAX_SERIAL_RD_BUF_LEN   (1200)
+#include "../tv/CTvEv.h"
 
 class CSerialCommunication: public CThread {
 public:

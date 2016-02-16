@@ -4,20 +4,21 @@
 //  @ File Name :
 //  @ Date : 2014-02
 //  @ Author :
-//电视通知消息的基类
-#if !defined(_CTVEV_H)
-#define _CTVEV_H
+#ifndef _CTVEV_H_
+#define _CTVEV_H_
+
 #include <utils/String8.h>
 #define CC_MAX_SERIAL_RD_BUF_LEN   (1200)
+
 using namespace android;
 
 class CTvEv {
 public:
     static const int TV_EVENT_COMMOM = 0;//通用消息
     static const int TV_EVENT_SCANNER = 1;//搜索消息
-    static const int TV_EVENT_EPG = 2;//EPG状态消息
+    static const int TV_EVENT_EPG = 2;//EPG
     static const int TV_EVENT_SOURCE_SWITCH = 3;//信源切换
-    static const int TV_EVENT_SIGLE_DETECT = 4;//信号检测
+    static const int TV_EVENT_SIGLE_DETECT = 4;
     static const int TV_EVENT_ADC_CALIBRATION = 5;//ADC校准
     static const int TV_EVENT_VGA = 6;//VGA
     static const int TV_EVENT_3D_STATE = 7;//3D
@@ -36,8 +37,7 @@ public:
 
     CTvEv(int type);
     virtual ~CTvEv() {};
-    int getEvType() const
-    {
+	int getEvType() const {
         return mEvType;
     };
 private:
@@ -48,12 +48,8 @@ namespace  TvEvent {
     //events
     class SignalInfoEvent: public CTvEv {
     public:
-        SignalInfoEvent() : CTvEv ( CTvEv::TV_EVENT_SIGLE_DETECT )
-        {
-        }
-        ~SignalInfoEvent()
-        {
-        }
+        SignalInfoEvent() : CTvEv ( CTvEv::TV_EVENT_SIGLE_DETECT ) {}
+        ~SignalInfoEvent() {}
         int mTrans_fmt;
         int mFmt;
         int mStatus;
@@ -62,35 +58,23 @@ namespace  TvEvent {
 
     class VGAEvent: public CTvEv {
     public:
-        VGAEvent() : CTvEv ( CTvEv::TV_EVENT_VGA )
-        {
-        }
-        ~VGAEvent()
-        {
-        }
+        VGAEvent() : CTvEv ( CTvEv::TV_EVENT_VGA ) {}
+        ~VGAEvent() {}
         int mState;
     };
 
     class ADCCalibrationEvent: public CTvEv {
     public:
-        ADCCalibrationEvent() : CTvEv ( CTvEv::TV_EVENT_ADC_CALIBRATION )
-        {
-        }
-        ~ADCCalibrationEvent()
-        {
-        }
+        ADCCalibrationEvent() : CTvEv ( CTvEv::TV_EVENT_ADC_CALIBRATION ) {}
+        ~ADCCalibrationEvent() {}
         int mState;
     };
 
     class SerialCommunicationEvent: public CTvEv {
     public:
-        SerialCommunicationEvent(): CTvEv(CTvEv::TV_EVENT_SERIAL_COMMUNICATION)
-        {
-        }
-        ~SerialCommunicationEvent()
-        {
-        }
-    public:
+        SerialCommunicationEvent(): CTvEv(CTvEv::TV_EVENT_SERIAL_COMMUNICATION) {}
+        ~SerialCommunicationEvent() {}
+
         int mDevId;
         int mDataCount;
         unsigned char mDataBuf[CC_MAX_SERIAL_RD_BUF_LEN];
@@ -98,54 +82,38 @@ namespace  TvEvent {
 
     class SourceConnectEvent: public CTvEv {
     public:
-        SourceConnectEvent() : CTvEv ( CTvEv::TV_EVENT_SOURCE_CONNECT )
-        {
-        }
-        ~SourceConnectEvent()
-        {
-        }
+        SourceConnectEvent() : CTvEv ( CTvEv::TV_EVENT_SOURCE_CONNECT ) {}
+        ~SourceConnectEvent() {}
         int mSourceInput;
         int connectionState;
     };
 
     class HDMIRxCECEvent: public CTvEv {
     public:
-        HDMIRxCECEvent() : CTvEv ( CTvEv::TV_EVENT_HDMIRX_CEC )
-        {
-        }
-        ~HDMIRxCECEvent()
-        {
-        }
+        HDMIRxCECEvent() : CTvEv ( CTvEv::TV_EVENT_HDMIRX_CEC ) {}
+        ~HDMIRxCECEvent() {}
         int mDataCount;
         int mDataBuf[32];
     };
 
     class AVPlaybackEvent: public CTvEv {
     public:
-        AVPlaybackEvent() : CTvEv ( CTvEv::TV_EVENT_AV_PLAYBACK )
-        {
-        }
-        ~AVPlaybackEvent()
-        {
-        }
-        static const int EVENT_AV_PLAYBACK_NODATA            = 1;
-        static const int EVENT_AV_PLAYBACK_RESUME           = 2;
-        static const int EVENT_AV_SCAMBLED               = 3;
-        static const int EVENT_AV_UNSUPPORT               = 4;
+        AVPlaybackEvent() : CTvEv ( CTvEv::TV_EVENT_AV_PLAYBACK ) {}
+        ~AVPlaybackEvent() {}
+        static const int EVENT_AV_PLAYBACK_NODATA       = 1;
+        static const int EVENT_AV_PLAYBACK_RESUME       = 2;
+        static const int EVENT_AV_SCAMBLED              = 3;
+        static const int EVENT_AV_UNSUPPORT             = 4;
 
-    public:
         int mMsgType;
         int mProgramId;
     };
+
     class BlockEvent: public CTvEv {
     public:
-        BlockEvent() : CTvEv ( CTvEv::TV_EVENT_BLOCK )
-        {
-        }
-        ~BlockEvent()
-        {
-        }
-    public:
+        BlockEvent() : CTvEv ( CTvEv::TV_EVENT_BLOCK ) {}
+        ~BlockEvent() {}
+
         bool block_status;
         int programBlockType;
         String8 vchipDimension;
@@ -155,38 +123,28 @@ namespace  TvEvent {
 
     class UpgradeFBCEvent: public CTvEv {
     public:
-        UpgradeFBCEvent() : CTvEv ( CTvEv::TV_EVENT_UPGRADE_FBC )
-        {
-        }
-        ~UpgradeFBCEvent()
-        {
-        }
+        UpgradeFBCEvent() : CTvEv ( CTvEv::TV_EVENT_UPGRADE_FBC ) {}
+        ~UpgradeFBCEvent() {}
         int mState;
         int param;
     };
 
     class HeadSetOf2d4GEvent: public CTvEv {
     public:
-        HeadSetOf2d4GEvent(): CTvEv(CTvEv::TV_EVENT_2d4G_HEADSET)
-        {
-        }
-        ~HeadSetOf2d4GEvent()
-        {
-        }
-    public:
+        HeadSetOf2d4GEvent(): CTvEv(CTvEv::TV_EVENT_2d4G_HEADSET) {}
+        ~HeadSetOf2d4GEvent() {}
+
         int state;
         int para;
     };
+
     class SubtitleEvent: public CTvEv {
     public:
-        SubtitleEvent(): CTvEv(CTvEv::TV_EVENT_SUBTITLE)
-        {
-        }
-        ~SubtitleEvent()
-        {
-        }
+        SubtitleEvent(): CTvEv(CTvEv::TV_EVENT_SUBTITLE) {}
+        ~SubtitleEvent() {}
         int pic_width;
         int pic_height;
     };
 };
 #endif
+

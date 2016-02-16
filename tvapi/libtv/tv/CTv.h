@@ -797,10 +797,9 @@ protected:
     tv_dtv_scan_running_status_t mDtvScanRunningStatus;
     volatile  tv_config_t gTvinConfig;
     int dtv_auto_3d_flag;
-    int m_hdmiav_hotplugdetect_en;
-    bool m_autoset_displayfreq;
+    bool mAutoSetDisplayFreq;
     int m_sig_stable_nums;
-    bool m_is_set_hdmi_edid;
+    bool mSetHdmiEdid;
     /** for L/R or B/T 3d mode overscan **/
     /** for 3D **/
     VIDEO_3D_MODE_T m_mode_3d;
