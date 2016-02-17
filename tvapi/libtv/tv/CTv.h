@@ -25,6 +25,7 @@
 #include "../vpp/CVpp.h"
 #include "../vpp/CPQdb.h"
 #include "../tvin/CTvin.h"
+#include "../tvin/CHDMIRxCEC.h"
 #include "../tvutils/CMsgQueue.h"
 #include "../tvutils/CSerialCommunication.h"
 #include "../tvutils/serial_operate.h"
@@ -98,7 +99,7 @@ typedef enum TvRunStatus_s {
     TV_CLOSE_ED,
 } TvRunStatus_t;
 
-class CTv : public CTvin::CTvinSigDetect::ISigDetectObserver, public CSourceConnectDetect::ISourceConnectObserver, public CTvin::CHDMIRxCEC::IHDMIRxCECObserver, public CUpgradeFBC::IUpgradeFBCObserver, public CSerialCommunication::ISerialCommunicationObserver, public CTvSubtitle::IObserver, public  CTv2d4GHeadSetDetect::IHeadSetObserver {
+class CTv : public CTvin::CTvinSigDetect::ISigDetectObserver, public CSourceConnectDetect::ISourceConnectObserver, public CHDMIRxCEC::IHDMIRxCECObserver, public CUpgradeFBC::IUpgradeFBCObserver, public CSerialCommunication::ISerialCommunicationObserver, public CTvSubtitle::IObserver, public  CTv2d4GHeadSetDetect::IHeadSetObserver {
 public:
     static const int TV_ACTION_NULL = 0x0000;
     static const int TV_ACTION_STARTING = 0x0001;
@@ -232,7 +233,7 @@ public:
 
     CTvin::CTvinSigDetect mSigDetectThread;
     CSourceConnectDetect mSourceConnectDetectThread;
-    CTvin::CHDMIRxCEC mHDMIRxCEC;
+    CHDMIRxCEC mHDMIRxCEC;
     CUpgradeFBC *mpUpgradeFBC;
     CSerialCommunication mSerialA;
     CSerialCommunication mSerialB;
@@ -759,8 +760,6 @@ protected:
     CTvScanner mTvScanner;
     mutable Mutex mLock;
     CTvTime mTvTime;
-    CVpp mVpp;
-    CTvin mTvin;
     CTvRecord mTvRec;
     CFrontEnd mFrontDev;
     CTvDimension mTvVchip;

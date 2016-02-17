@@ -18,10 +18,9 @@
 #define LOG_TAG "CSourceConnectDetect"
 #endif
 
-CSourceConnectDetect::CSourceConnectDetect(CTvin *pTvin)
+CSourceConnectDetect::CSourceConnectDetect()
 {
     mpObserver = NULL;
-    mpTvin = pTvin;
     if (mEpoll.create() < 0) {
         return;
     }
@@ -59,7 +58,7 @@ int CSourceConnectDetect::startDetect()
 int CSourceConnectDetect::SourceInputMaptoChipHdmiPort(tv_source_input_t source_input)
 {
     tvin_port_t source_port = TVIN_PORT_NULL;
-    source_port = mpTvin->Tvin_GetSourcePortBySourceInput(source_input);
+    source_port = CTvin::getInstance()->Tvin_GetSourcePortBySourceInput(source_input);
     switch (source_port) {
     case TVIN_PORT_HDMI0:
         return HDMI_DETECT_STATUS_BIT_A;
@@ -84,19 +83,19 @@ tv_source_input_t CSourceConnectDetect::ChipHdmiPortMaptoSourceInput(int port)
 {
     switch (port) {
     case HDMI_DETECT_STATUS_BIT_A:
-        return mpTvin->Tvin_PortToSourceInput(TVIN_PORT_HDMI0);
+        return CTvin::getInstance()->Tvin_PortToSourceInput(TVIN_PORT_HDMI0);
         break;
     case HDMI_DETECT_STATUS_BIT_B:
-        return mpTvin->Tvin_PortToSourceInput(TVIN_PORT_HDMI1);
+        return CTvin::getInstance()->Tvin_PortToSourceInput(TVIN_PORT_HDMI1);
         break;
     case HDMI_DETECT_STATUS_BIT_C:
-        return mpTvin->Tvin_PortToSourceInput(TVIN_PORT_HDMI2);
+        return CTvin::getInstance()->Tvin_PortToSourceInput(TVIN_PORT_HDMI2);
         break;
     case HDMI_DETECT_STATUS_BIT_D:
-        return mpTvin->Tvin_PortToSourceInput(TVIN_PORT_HDMI3);
+        return CTvin::getInstance()->Tvin_PortToSourceInput(TVIN_PORT_HDMI3);
         break;
     default:
-        return mpTvin->Tvin_PortToSourceInput(TVIN_PORT_HDMI0);
+        return CTvin::getInstance()->Tvin_PortToSourceInput(TVIN_PORT_HDMI0);
         break;
     }
 }

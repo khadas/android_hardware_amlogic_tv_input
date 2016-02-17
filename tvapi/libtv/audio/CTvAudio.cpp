@@ -14,8 +14,6 @@
 #include "audio_effect.h"
 #include "CTvAudio.h"
 
-#include <xxxconfig.h>
-
 #define LOG_TAG "CTvAudio"
 #include "CTvLog.h"
 

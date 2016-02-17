@@ -26,7 +26,7 @@ public:
     static const int AM_ATSC_ATTENNA_TYPE_CABLE_STD = 2;
     static const int AM_ATSC_ATTENNA_TYPE_CABLE_IRC = 3;
     static const int AM_ATSC_ATTENNA_TYPE_CABLE_HRC = 4;
-    CTvScanner(CTvin *pTvin);
+    CTvScanner();
     ~CTvScanner();
     void setGlobalScanerObject(CTvScanner *);
     int startScan();

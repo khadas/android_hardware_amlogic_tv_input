@@ -13,7 +13,6 @@
 #include "audio_amaudio.h"
 #include "audio_effect.h"
 
-#include <xxxconfig.h>
 #define LOG_TAG "CAudioEffect"
 #include "CTvLog.h"
 

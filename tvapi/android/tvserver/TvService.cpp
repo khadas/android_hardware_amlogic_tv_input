@@ -19,7 +19,6 @@
 #include "../include/tvcmd.h"
 #include "tv/CTvLog.h"
 #include <tvdb/CTvRegion.h>
-#include <xxxconfig.h>
 extern "C" {
 #include <stdio.h>
 #include <sys/types.h>

@@ -20,11 +20,9 @@
 #define LOG_TAG "AutoBackLight"
 #endif
 
-AutoBackLight::AutoBackLight( CVpp *mVpp, CTvin *pTvin )
+AutoBackLight::AutoBackLight()
 {
     mAutoBacklightSource = SOURCE_TYPE_TV;
-    myVpp = mVpp;
-    myTvin = pTvin;
     mCur_source_default_backlight = 100;
     mCur_sig_state == SIG_STATE_NOSIG;
     mAutoBacklight_OnOff_Flag = false;
@@ -51,9 +49,9 @@ void AutoBackLight::updateSigState(int state)
 void AutoBackLight::startAutoBacklight( tv_source_input_type_t source_type )
 {
     mAutoBacklightSource = source_type;
-    mCur_source_default_backlight = myVpp->GetBacklight(source_type);
+    mCur_source_default_backlight = CVpp::getInstance()->GetBacklight(source_type);
     mCurrent_backlight = mCur_source_default_backlight;
-    myVpp->SetBacklight(mCur_source_default_backlight, source_type, 1);
+    CVpp::getInstance()->SetBacklight(mCur_source_default_backlight, source_type, 1);
 
     /*
     mDefault_auto_bl_value = def_source_bl_value;
@@ -74,7 +72,7 @@ void AutoBackLight::stopAutoBacklight()
 {
     if (mAutoBacklight_OnOff_Flag) {
         mAutoBacklight_OnOff_Flag = false;
-        myVpp->SetBacklight(mCur_source_default_backlight, mAutoBacklightSource, 1);
+        CVpp::getInstance()->SetBacklight(mCur_source_default_backlight, mAutoBacklightSource, 1);
     }
 }
 
@@ -115,7 +113,7 @@ void AutoBackLight::adjustDstBacklight()
         close(fd);
     } else {
         mCurrent_backlight = mCur_dest_backlight = mCur_source_default_backlight;
-        myVpp->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
+        CVpp::getInstance()->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
     }
 
     /*
@@ -161,13 +159,13 @@ void AutoBackLight::adjustBacklight()
         return;
     } else if ((mCurrent_backlight - mCur_dest_backlight) > -2 && (mCurrent_backlight - mCur_dest_backlight) < 2) {
         mCurrent_backlight = mCur_dest_backlight;
-        myVpp->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
+        CVpp::getInstance()->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
     } else if (mCurrent_backlight < mCur_dest_backlight) {
         mCurrent_backlight = mCurrent_backlight + 2;
-        myVpp->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
+        CVpp::getInstance()->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
     } else if (mCurrent_backlight > mCur_dest_backlight) {
         mCurrent_backlight = mCurrent_backlight - 2;
-        myVpp->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
+        CVpp::getInstance()->SetBacklight(mCurrent_backlight, mAutoBacklightSource, 0);
     }
 
     //LOGD("mCurrent_backlight = %d", mCurrent_backlight);
@@ -181,7 +179,7 @@ int AutoBackLight::HistogramGet_AVE()
 {
     int hist_ave = 0;
     tvin_parm_t vdinParam;
-    if (0 == myTvin->VDIN_GetVdinParam(&vdinParam)) {
+    if (0 == CTvin::getInstance()->VDIN_GetVdinParam(&vdinParam)) {
         if (vdinParam.pixel_sum != 0) {
             hist_ave = vdinParam.luma_sum / vdinParam.pixel_sum;
             LOGD("[hist_ave][%d].", hist_ave);

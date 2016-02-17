@@ -35,10 +35,8 @@ public:
         SIG_STATE_STABLE = 1,
         SIG_STATE_NOSIG = 2,
     };
-    CVpp *myVpp;
-    CTvin *myTvin;
 
-    AutoBackLight( CVpp *mVpp, CTvin *pTvin );
+    AutoBackLight();
     ~AutoBackLight();
     void updateSigState(int state);
     void startAutoBacklight( tv_source_input_type_t source_type );

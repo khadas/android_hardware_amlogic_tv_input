@@ -45,7 +45,6 @@
 #include "../tvutils/CFile.h"
 #include <hardware_legacy/power.h>
 #include "../tvutils/serial_operate.h"
-#include <xxxconfig.h>
 
 extern "C" {
 #include "am_ver.h"
@@ -72,14 +71,8 @@ static void sqliteLogCallback(void *data, int iErrCode, const char *zMsg)
 }
 
 CTv::CTv() :
-    mSigDetectThread(&mTvin),
-    mSourceConnectDetectThread(&mTvin),
-    mHDMIRxCEC ( &mTvin ),
-    mTvScanner ( &mTvin ),
     mTvMsgQueue(this),
-    mAutoBackLight( &mVpp, &mTvin ),
-    mTvScannerDetectObserver(this),
-    mAutoPQparam( &mVpp, &mTvin, &mAv )
+    mTvScannerDetectObserver(this)
 {
     mAudioMuteStatusForTv = CC_AUDIO_UNMUTE;
     mAudioMuteStatusForSystem = CC_AUDIO_UNMUTE;
@@ -265,7 +258,7 @@ void CTv::onEvent ( const CFrontEnd::FEEvent &ev )
             }
 
             if ( mAutoSetDisplayFreq) {
-                mTvin.VDIN_SetDisplayVFreq ( 50, mAv.getVideoDisplayResolution() , mHdmiOutFbc);
+                CTvin::getInstance()->VDIN_SetDisplayVFreq (50, mAv.getVideoDisplayResolution() , mHdmiOutFbc);
             }
             TvEvent::SignalInfoEvent ev;
             ev.mStatus = TVIN_SIG_STATUS_STABLE;
@@ -274,7 +267,7 @@ void CTv::onEvent ( const CFrontEnd::FEEvent &ev )
             ev.mReserved = 0;
             sendTvEvent ( ev );
             //if (mAv.WaittingVideoPlaying() == 0) {
-            SetDisplayMode ( mVpp.GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) ), CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mAv.getVideoResolutionToFmt());
+            SetDisplayMode ( CVpp::getInstance()->GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) ), CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mAv.getVideoResolutionToFmt());
             usleep(50 * 1000);
             mAv.EnableVideoNow();
             SetAudioMuteForTv ( CC_AUDIO_UNMUTE );
@@ -351,7 +344,7 @@ void CTv::onEvent(const CAv::AVEvent &ev)
 
     case CAv::AVEvent::EVENT_AV_RESUEM: {
         //if (mAv.WaittingVideoPlaying() == 0) {
-        SetDisplayMode ( mVpp.GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) ),
+        SetDisplayMode ( CVpp::getInstance()->GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) ),
                          CTvin::Tvin_SourceInputToSourceInputType(m_source_input),
                          mAv.getVideoResolutionToFmt());
         usleep(50 * 1000);
@@ -639,7 +632,7 @@ int CTv::atvAutoScan(int videoStd, int audioStd, int searchType)
     mSigDetectThread.setVdinNoSigCheckKeepTimes(1000, false);
     mSigDetectThread.requestAndWaitPauseDetect();
     mSigDetectThread.setObserver(&mTvScannerDetectObserver);
-    mTvin.Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_StopDecoder();
     //if  set std null AUTO, use default PAL/DK
     //if(videoStd == CC_ATV_VIDEO_STD_AUTO) {
     //   vStd = CC_ATV_VIDEO_STD_PAL;
@@ -648,12 +641,12 @@ int CTv::atvAutoScan(int videoStd, int audioStd, int searchType)
     vStd = CC_ATV_VIDEO_STD_PAL;
     aStd = CC_ATV_AUDIO_STD_DK;
     //}
-    tvin_port_t source_port = mTvin.Tvin_GetSourcePortBySourceInput(SOURCE_TV);
-    mTvin.VDIN_OpenPort ( source_port );
+    tvin_port_t source_port = CTvin::getInstance()->Tvin_GetSourcePortBySourceInput(SOURCE_TV);
+    CTvin::getInstance()->VDIN_OpenPort ( source_port );
     v4l2_std_id stdAndColor = mFrontDev.enumToStdAndColor(vStd, aStd);
 
     int fmt = CFrontEnd::stdEnumToCvbsFmt (vStd, aStd);
-    mTvin.AFE_SetCVBSStd ( ( tvin_sig_fmt_t ) TVIN_SIG_FMT_NULL );
+    CTvin::getInstance()->AFE_SetCVBSStd ( ( tvin_sig_fmt_t ) TVIN_SIG_FMT_NULL );
 
     if (searchType == 0) {
         CTvProgram::CleanAllProgramBySrvType ( CTvProgram::TYPE_ATV );
@@ -707,11 +700,11 @@ int CTv::atvMunualScan ( int startFreq, int endFreq, int videoStd, int audioStd,
     SetAudioMuteForTv ( CC_AUDIO_MUTE );
     v4l2_std_id stdAndColor = mFrontDev.enumToStdAndColor(vStd, aStd);
 
-    tvin_port_t source_port = mTvin.Tvin_GetSourcePortBySourceInput(SOURCE_TV);
-    mTvin.VDIN_OpenPort ( source_port );
+    tvin_port_t source_port = CTvin::getInstance()->Tvin_GetSourcePortBySourceInput(SOURCE_TV);
+    CTvin::getInstance()->VDIN_OpenPort ( source_port );
 
     int fmt = CFrontEnd::stdEnumToCvbsFmt (vStd, aStd);
-    mTvin.AFE_SetCVBSStd ( ( tvin_sig_fmt_t ) TVIN_SIG_FMT_NULL );
+    CTvin::getInstance()->AFE_SetCVBSStd ( ( tvin_sig_fmt_t ) TVIN_SIG_FMT_NULL );
     LOGD("%s, atv manual scan vstd=%d, astd=%d stdandcolor=%lld", __FUNCTION__, vStd, aStd, stdAndColor);
     mFrontDev.Open(FE_ANALOG);
     return mTvScanner.ATVManualScan ( minScanFreq, maxScanFreq, stdAndColor, store_Type, channel_num);
@@ -1061,11 +1054,11 @@ int CTv::playAtvProgram (int  freq, int videoStd, int audioStd, int fineTune, in
     SetAudioMuteForTv ( CC_AUDIO_MUTE );
     //image selecting channel
     mSigDetectThread.requestAndWaitPauseDetect();
-    mTvin.Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_StopDecoder();
     mFrontDev.Open(FE_ANALOG);
     //set CVBS
     int fmt = CFrontEnd::stdEnumToCvbsFmt (videoStd, audioStd);
-    mTvin.AFE_SetCVBSStd ( ( tvin_sig_fmt_t ) fmt );
+    CTvin::getInstance()->AFE_SetCVBSStd ( ( tvin_sig_fmt_t ) fmt );
 
     v4l2_std_id stdAndColor = mFrontDev.enumToStdAndColor (videoStd, audioStd);
     //set TUNER
@@ -1094,11 +1087,11 @@ int CTv::resetFrontEndPara ( frontend_para_set_t feParms )
 
         //set frontend parameters to tuner dev
         mSigDetectThread.requestAndWaitPauseDetect();
-        mTvin.Tvin_StopDecoder();
+        CTvin::getInstance()->Tvin_StopDecoder();
 
         //set CVBS
         int fmt = CFrontEnd::stdEnumToCvbsFmt (feParms.videoStd, feParms.audioStd );
-        mTvin.AFE_SetCVBSStd ( ( tvin_sig_fmt_t ) fmt );
+        CTvin::getInstance()->AFE_SetCVBSStd ( ( tvin_sig_fmt_t ) fmt );
 
         //set TUNER
         usleep(400 * 1000);
@@ -1519,17 +1512,17 @@ int CTv::OpenTv ( void )
         reboot_sys_by_fbc_uart_panel_info(fbcIns);
     }
 
-    mTvin.Tvin_LoadSourceInputToPortMap();
+    CTvin::getInstance()->Tvin_LoadSourceInputToPortMap();
 
     SSMHandlePreCopying();
     if ( SSMDeviceMarkCheck() < 0 ) {
         SSMRestoreDeviceMarkValues();
         Tv_SSMRestoreDefaultSetting();
     }
-    mTvin.OpenTvin();
-    mTvin.init_vdin();
-    mTvin.Tv_init_afe();
-    mVpp.Vpp_Init(getPqDbPath());
+    CTvin::getInstance()->OpenTvin();
+    CTvin::getInstance()->init_vdin();
+    CTvin::getInstance()->Tv_init_afe();
+    CVpp::getInstance()->Vpp_Init(getPqDbPath());
     TvAudioOpen();
     SetAudioVolDigitLUTTable(SOURCE_MPEG);
 
@@ -1617,9 +1610,9 @@ int CTv::CloseTv ( void )
     if (mpUpgradeFBC != NULL) {
         mpUpgradeFBC->stop();
     }
-    mTvin.Tv_uninit_afe();
-    mTvin.uninit_vdin();
-    mVpp.Vpp_Uninit();
+    CTvin::getInstance()->Tv_uninit_afe();
+    CTvin::getInstance()->uninit_vdin();
+    CVpp::getInstance()->Vpp_Uninit();
     TvMisc_DisableWDT ( gTvinConfig.userpet );
     mTvStatus = TV_CLOSE_ED;
     return 0;
@@ -1642,23 +1635,23 @@ int CTv::StartTvLock ()
     mSigDetectThread.startDetect();
     mTvMsgQueue.startMsgQueue();
     resetDmxAndAvSource();
-    SetDisplayMode ( mVpp.GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) ), CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mSigDetectThread.getCurSigInfo().fmt);
+    SetDisplayMode ( CVpp::getInstance()->GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) ), CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mSigDetectThread.getCurSigInfo().fmt);
     TvMisc_EnableWDT ( gTvinConfig.kernelpet_disable, gTvinConfig.userpet, gTvinConfig.kernelpet_timeout, gTvinConfig.userpet_timeout, gTvinConfig.userpet_reset );
     am_phase_t am_phase;
-    if (mVpp.getPqData()->PQ_GetPhaseArray ( &am_phase ) == 0 ) {
-        mTvin.TvinApi_SetCompPhase(am_phase);
+    if (CVpp::getInstance()->getPqData()->PQ_GetPhaseArray ( &am_phase ) == 0 ) {
+        CTvin::getInstance()->TvinApi_SetCompPhase(am_phase);
     }
-    mTvin.TvinApi_SetCompPhaseEnable ( 1 );
-    mTvin.VDIN_EnableRDMA ( 1 );
+    CTvin::getInstance()->TvinApi_SetCompPhaseEnable ( 1 );
+    CTvin::getInstance()->VDIN_EnableRDMA ( 1 );
 
     //win pos
     tvin_window_pos_t win_pos;
     Vpp_GetDisplayResolutionInfo(&win_pos);
     SetPreviewWindow ( win_pos );
 
-    mTvin.Tvin_RemovePath ( TV_PATH_TYPE_TVIN );
-    if ( mTvin.Tvin_RemovePath ( TV_PATH_TYPE_DEFAULT ) ) {
-        mTvin.Tvin_AddPath ( TV_PATH_DECODER_NEW3D_WITHOUTPPMGR_AMVIDEO );
+    CTvin::getInstance()->Tvin_RemovePath ( TV_PATH_TYPE_TVIN );
+    if ( CTvin::getInstance()->Tvin_RemovePath ( TV_PATH_TYPE_DEFAULT ) ) {
+        CTvin::getInstance()->Tvin_AddPath ( TV_PATH_DECODER_NEW3D_WITHOUTPPMGR_AMVIDEO );
     }
 
     mAv.SetVideoWindow (0, 0, 0, 0 );
@@ -1672,7 +1665,7 @@ int CTv::DoInstabootSuspend()
 {
     CTvDatabase::GetTvDb()->UnInitTvDb();
     CTvSettingdoSuspend();
-    mVpp.doSuspend();
+    CVpp::getInstance()->doSuspend();
     LOGD("%s,  \n", __FUNCTION__);
     return 0;
 }
@@ -1681,7 +1674,7 @@ int CTv::DoInstabootResume()
 {
     CTvDatabase::GetTvDb()->InitTvDb(TV_DB_PATH);
     CTvSettingdoResume();
-    mVpp.doResume();
+    CVpp::getInstance()->doResume();
     LOGD("%s, \n", __FUNCTION__);
     return 0;
 }
@@ -1708,12 +1701,12 @@ int CTv::StopTvLock ( void )
     const char *value;
     Mutex::Autolock _l ( mLock );
     mAv.DisableVideoWithBlackColor();
-    mVpp.LoadVppSettings ( SOURCE_TYPE_MPEG, TVIN_SIG_FMT_NULL, INDEX_2D, TVIN_TFMT_2D );
+    CVpp::getInstance()->LoadVppSettings ( SOURCE_TYPE_MPEG, TVIN_SIG_FMT_NULL, INDEX_2D, TVIN_TFMT_2D );
     //we should stop audio first for audio mute.
     mTvAction |= TV_ACTION_STOPING;
-    mTvin.Tvin_StopDecoder();
-    mTvin.Tvin_RemovePath ( TV_PATH_TYPE_TVIN );
-    mTvin.VDIN_ClosePort();
+    CTvin::getInstance()->Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_RemovePath ( TV_PATH_TYPE_TVIN );
+    CTvin::getInstance()->VDIN_ClosePort();
     mTvMsgQueue.clearMsg();
     mSigDetectThread.requestAndWaitPauseDetect();
     //stop scan  if scanning
@@ -1723,10 +1716,10 @@ int CTv::StopTvLock ( void )
     stopPlaying();
     //
     setAudioChannel(AM_AOUT_OUTPUT_STEREO);
-    mTvin.setMpeg2Vdin(0);
+    CTvin::getInstance()->setMpeg2Vdin(0);
     mAv.setLookupPtsForDtmb(0);
     SwitchAVOutBypass(0);
-    tv_audio_channel_e audio_channel = mTvin.Tvin_GetInputSourceAudioChannelIndex (SOURCE_MPEG);
+    tv_audio_channel_e audio_channel = CTvin::getInstance()->Tvin_GetInputSourceAudioChannelIndex (SOURCE_MPEG);
     AudioLineInSelectChannel( audio_channel );
     AudioCtlUninit();
     SetAudioVolDigitLUTTable(SOURCE_MPEG);
@@ -1734,11 +1727,11 @@ int CTv::StopTvLock ( void )
     tvin_window_pos_t win_pos;
     Vpp_GetDisplayResolutionInfo(&win_pos);
     SetPreviewWindow (win_pos );
-    //mVpp.LoadVppSettings ( SOURCE_TYPE_MPEG, TVIN_SIG_FMT_NULL, INDEX_2D, TVIN_TFMT_2D );
-    SetDisplayMode ( mVpp.GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(SOURCE_MPEG) ), CTvin::Tvin_SourceInputToSourceInputType(SOURCE_MPEG), mSigDetectThread.getCurSigInfo().fmt);
+    //CVpp::getInstance()->LoadVppSettings ( SOURCE_TYPE_MPEG, TVIN_SIG_FMT_NULL, INDEX_2D, TVIN_TFMT_2D );
+    SetDisplayMode ( CVpp::getInstance()->GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(SOURCE_MPEG) ), CTvin::Tvin_SourceInputToSourceInputType(SOURCE_MPEG), mSigDetectThread.getCurSigInfo().fmt);
     RefreshAudioMasterVolume ( SOURCE_MPEG );
-    mVpp.VPP_SetScalerPathSel(0);
-    mVpp.VPP_SetVideoCrop ( 0, 0, 0, 0 );
+    CVpp::getInstance()->VPP_SetScalerPathSel(0);
+    CVpp::getInstance()->VPP_SetVideoCrop ( 0, 0, 0, 0 );
     m_last_source_input = SOURCE_INVALID;
     m_source_input = SOURCE_INVALID;
     mFrontDev.Close();
@@ -1768,33 +1761,33 @@ int CTv::Tv_MiscSetBySource ( tv_source_input_t source_input )
 
     switch ( source_input ) {
     case SOURCE_TV:
-        mVpp.VPP_SetScalerPathSel(1);
+        CVpp::getInstance()->VPP_SetScalerPathSel(1);
         ret = SetFileAttrValue ( "/sys/module/am_vecm/parameters/dnlp_adj_level", "4" );
         break;
 
     case SOURCE_HDMI1:
     case SOURCE_HDMI2:
     case SOURCE_HDMI3:
-        mVpp.VPP_SetScalerPathSel(0);
-        //ret = mVpp.Tv_SavePanoramaMode ( VPP_PANORAMA_MODE_FULL, SOURCE_TYPE_HDMI );
+        CVpp::getInstance()->VPP_SetScalerPathSel(0);
+        //ret = CVpp::getInstance()->Tv_SavePanoramaMode ( VPP_PANORAMA_MODE_FULL, SOURCE_TYPE_HDMI );
         ret |= SetFileAttrValue ( "/sys/module/am_vecm/parameters/dnlp_adj_level", "5" );
         break;
 
     case SOURCE_DTV:
-        mVpp.VPP_SetScalerPathSel(0);
+        CVpp::getInstance()->VPP_SetScalerPathSel(0);
 
     case SOURCE_AV1:
     case SOURCE_AV2:
     case SOURCE_VGA:
-        mVpp.VPP_SetScalerPathSel(1);
+        CVpp::getInstance()->VPP_SetScalerPathSel(1);
         ret |= SetFileAttrValue ( "/sys/module/am_vecm/parameters/dnlp_adj_level", "5" );
         break;
 
     case SOURCE_SVIDEO:
     case SOURCE_IPTV:
-        mVpp.VPP_SetScalerPathSel(1);
+        CVpp::getInstance()->VPP_SetScalerPathSel(1);
     default:
-        mVpp.VPP_SetScalerPathSel(0);
+        CVpp::getInstance()->VPP_SetScalerPathSel(0);
         ret |= SetFileAttrValue ( "/sys/module/am_vecm/parameters/dnlp_adj_level", "5" );
         break;
     }
@@ -1877,30 +1870,30 @@ int CTv::SetSourceSwitchInput (tv_source_input_t source_input )
     if ( source_input == SOURCE_DTV ) {
         //we should stop audio first for audio mute.
         SwitchAVOutBypass(0);
-        tv_audio_channel_e audio_channel = mTvin.Tvin_GetInputSourceAudioChannelIndex (SOURCE_MPEG);
+        tv_audio_channel_e audio_channel = CTvin::getInstance()->Tvin_GetInputSourceAudioChannelIndex (SOURCE_MPEG);
         AudioLineInSelectChannel( audio_channel );
         AudioCtlUninit();
         SetAudioVolDigitLUTTable(SOURCE_MPEG);
         //
-        mTvin.Tvin_StopDecoder();
-        mTvin.Tvin_RemovePath ( TV_PATH_TYPE_TVIN );
-        mTvin.VDIN_ClosePort();
+        CTvin::getInstance()->Tvin_StopDecoder();
+        CTvin::getInstance()->Tvin_RemovePath ( TV_PATH_TYPE_TVIN );
+        CTvin::getInstance()->VDIN_ClosePort();
         //double confirm we set the main volume lut buffer to mpeg
         RefreshAudioMasterVolume ( SOURCE_MPEG );
         RefreshSrsEffectAndDacGain();
         SetCustomEQGain();
-        mTvin.setMpeg2Vdin(1);
+        CTvin::getInstance()->setMpeg2Vdin(1);
         mAv.setLookupPtsForDtmb(1);
-        //mVpp.LoadVppSettings ( SOURCE_TYPE_DTV, TVIN_SIG_FMT_NULL, INDEX_2D, TVIN_TFMT_2D );
+        //CVpp::getInstance()->LoadVppSettings ( SOURCE_TYPE_DTV, TVIN_SIG_FMT_NULL, INDEX_2D, TVIN_TFMT_2D );
         //mAutoPQparam.startAutoPQ(CTvin::Tvin_SourceInputToSourceInputType(SOURCE_DTV));
         Tv_SetAudioInSource ( source_input );
     } else {
         mAutoPQparam.stopAutoPQ();
-        mTvin.setMpeg2Vdin(0);
+        CTvin::getInstance()->setMpeg2Vdin(0);
         mAv.setLookupPtsForDtmb(0);
-        mTvin.Tvin_AddPath ( TV_PATH_VDIN_NEW3D_WITHOUTPPMGR_AMVIDEO );
+        CTvin::getInstance()->Tvin_AddPath ( TV_PATH_VDIN_NEW3D_WITHOUTPPMGR_AMVIDEO );
     }
-    cur_port = mTvin.Tvin_GetSourcePortBySourceInput ( cur_source_input );
+    cur_port = CTvin::getInstance()->Tvin_GetSourcePortBySourceInput ( cur_source_input );
     Tv_MiscSetBySource ( source_input );
 
     //only DTV->TVIN or TVIN->DTV need start resource detect thread
@@ -1910,8 +1903,8 @@ int CTv::SetSourceSwitchInput (tv_source_input_t source_input )
         int isNeedCheckD2D3 = ( gTvinConfig.memory512m) ? 1 : 0;
         static int sigchkcnt = 0;
         while ( true ) {
-            if ( ( mTvin.Tvin_CheckPathActive ( TV_PATH_TYPE_DEFAULT, isNeedCheckD2D3 ) == TV_PATH_STATUS_INACTIVE )
-                    && ( mTvin.Tvin_CheckPathActive ( TV_PATH_TYPE_TVIN, isNeedCheckD2D3 ) == TV_PATH_STATUS_INACTIVE ) ) {
+            if ( ( CTvin::getInstance()->Tvin_CheckPathActive ( TV_PATH_TYPE_DEFAULT, isNeedCheckD2D3 ) == TV_PATH_STATUS_INACTIVE )
+                    && ( CTvin::getInstance()->Tvin_CheckPathActive ( TV_PATH_TYPE_TVIN, isNeedCheckD2D3 ) == TV_PATH_STATUS_INACTIVE ) ) {
                 LOGD("%s, path check is ok, and break\n", __FUNCTION__);
                 break;
             } else {
@@ -1934,7 +1927,7 @@ int CTv::SetSourceSwitchInput (tv_source_input_t source_input )
             SwitchAVOutBypass(1);
         }
 
-        tv_audio_channel_e audio_channel = mTvin.Tvin_GetInputSourceAudioChannelIndex (source_input);
+        tv_audio_channel_e audio_channel = CTvin::getInstance()->Tvin_GetInputSourceAudioChannelIndex (source_input);
         AudioLineInSelectChannel( audio_channel );
 
         Tv_SetAudioInSource ( source_input );
@@ -1946,16 +1939,16 @@ int CTv::SetSourceSwitchInput (tv_source_input_t source_input )
             HanldeAudioInputSr(-1);
         }
         //===========================================
-        if ( mTvin.SwitchPort ( cur_port ) == 0 ) { //ok
+        if ( CTvin::getInstance()->SwitchPort ( cur_port ) == 0 ) { //ok
             //==========================================
             unsigned char std;
             SSMReadCVBSStd(&std);
             int fmt = CFrontEnd::stdEnumToCvbsFmt (std, CC_ATV_AUDIO_STD_AUTO);
-            mTvin.AFE_SetCVBSStd ( ( tvin_sig_fmt_t ) fmt );
+            CTvin::getInstance()->AFE_SetCVBSStd ( ( tvin_sig_fmt_t ) fmt );
 
             //for HDMI source connect detect
-            mTvin.VDIN_OpenHDMIPinMuxOn(true);
-            mVpp.Vpp_ResetLastVppSettingsSourceType();
+            CTvin::getInstance()->VDIN_OpenHDMIPinMuxOn(true);
+            CVpp::getInstance()->Vpp_ResetLastVppSettingsSourceType();
             //==========================================
             m_sig_stable_nums = 0;
             mSigDetectThread.setObserver ( this );
@@ -1997,18 +1990,18 @@ void CTv::onSigToStable()
             freq = 50;
         }
 
-        mTvin.VDIN_SetDisplayVFreq ( freq, mAv.getVideoDisplayResolution(), mHdmiOutFbc );
+        CTvin::getInstance()->VDIN_SetDisplayVFreq ( freq, mAv.getVideoDisplayResolution(), mHdmiOutFbc );
         LOGD ( "%s, SetDisplayVFreq %dHZ.", __FUNCTION__, freq);
     }
     //showbo mark  hdmi auto 3d, tran fmt  is 3d, so switch to 3d
 
-    mVpp.LoadVppSettings (CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mSigDetectThread.getCurSigInfo().fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), mSigDetectThread.getCurSigInfo().trans_fmt );
+    CVpp::getInstance()->LoadVppSettings (CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mSigDetectThread.getCurSigInfo().fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), mSigDetectThread.getCurSigInfo().trans_fmt );
 
     if ( m_win_mode == PREVIEW_WONDOW ) {
         mAv.setVideoAxis(m_win_pos.x1, m_win_pos.y1, m_win_pos.x2, m_win_pos.y2);
         mAv.setVideoScreenMode ( CAv::VIDEO_WIDEOPTION_FULL_STRETCH );
     } else {
-        SetDisplayMode ( mVpp.GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) ), CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mSigDetectThread.getCurSigInfo().fmt);
+        SetDisplayMode ( CVpp::getInstance()->GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) ), CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mSigDetectThread.getCurSigInfo().fmt);
     }
     m_sig_stable_nums = 0;
 }
@@ -2026,7 +2019,7 @@ void CTv::onSigStillStable()
     }
     if (m_sig_stable_nums == 2) {
         LOGD("still stable , to start decoder");
-        int startdec_status = mTvin.Tvin_StartDecoder ( mSigDetectThread.getCurSigInfo() );
+        int startdec_status = CTvin::getInstance()->Tvin_StartDecoder ( mSigDetectThread.getCurSigInfo() );
         if ( startdec_status == 0 ) { //showboz  codes from  start decode fun
             const char *value = config_get_str ( CFG_SECTION_TV, "tvin.db.reg.en", "null" );
             if ( strcmp ( value, "enable" ) == 0 ) {
@@ -2107,14 +2100,14 @@ void CTv::onSigStableToUnstable()
     LOGD ( "%s, stable to unstable\n", __FUNCTION__);
     SetAudioMuteForTv(CC_AUDIO_MUTE);
     mAv.DisableVideoWithBlackColor();
-    mTvin.Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_StopDecoder();
 }
 
 void CTv::onSigStableToUnSupport()
 {
     SetAudioMuteForTv(CC_AUDIO_MUTE);
     mAv.DisableVideoWithBlackColor();
-    mTvin.Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_StopDecoder();
 
     tvin_info_t info = mSigDetectThread.getCurSigInfo();
     TvEvent::SignalInfoEvent ev;
@@ -2136,7 +2129,7 @@ void CTv::onSigStableToNoSig()
         mAv.DisableVideoWithBlueColor();
     }
     //SetAudioMuteForTv(CC_AUDIO_MUTE);
-    mTvin.Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_StopDecoder();
 
     tvin_info_t info = mSigDetectThread.getCurSigInfo();
     TvEvent::SignalInfoEvent ev;
@@ -2151,7 +2144,7 @@ void CTv::onSigStableToNoSig()
 void CTv::onSigUnStableToUnSupport()
 {
     mAv.DisableVideoWithBlackColor();
-    mTvin.Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_StopDecoder();
     tvin_info_t info = mSigDetectThread.getCurSigInfo();
 
     TvEvent::SignalInfoEvent ev;
@@ -2173,7 +2166,7 @@ void CTv::onSigUnStableToNoSig()
         mAv.DisableVideoWithBlueColor();
         //SetAudioMuteForTv(CC_AUDIO_MUTE);
     }
-    mTvin.Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_StopDecoder();
 
     tvin_info_t info = mSigDetectThread.getCurSigInfo();
     TvEvent::SignalInfoEvent ev;
@@ -2195,7 +2188,7 @@ void CTv::onSigNullToNoSig()
         mAv.DisableVideoWithBlueColor();
         //SetAudioMuteForTv(CC_AUDIO_MUTE);
     }
-    mTvin.Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_StopDecoder();
 
     tvin_info_t info = mSigDetectThread.getCurSigInfo();
 
@@ -2258,20 +2251,20 @@ void CTv::onStableSigFmtChange()
             freq = 50;
         }
 
-        mTvin.VDIN_SetDisplayVFreq ( freq, mAv.getVideoDisplayResolution(), mHdmiOutFbc );
+        CTvin::getInstance()->VDIN_SetDisplayVFreq ( freq, mAv.getVideoDisplayResolution(), mHdmiOutFbc );
         LOGD ( "%s, SetDisplayVFreq %dHZ.", __FUNCTION__, freq);
     }
     //showbo mark  hdmi auto 3d, tran fmt  is 3d, so switch to 3d
     LOGD("hdmi trans_fmt = %d", mSigDetectThread.getCurSigInfo().trans_fmt);
 
     //load pq parameters
-    mVpp.LoadVppSettings (CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mSigDetectThread.getCurSigInfo().fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), mSigDetectThread.getCurSigInfo().trans_fmt );
+    CVpp::getInstance()->LoadVppSettings (CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mSigDetectThread.getCurSigInfo().fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), mSigDetectThread.getCurSigInfo().trans_fmt );
 
     if ( m_win_mode == PREVIEW_WONDOW ) {
         mAv.setVideoAxis(m_win_pos.x1, m_win_pos.y1, m_win_pos.x2, m_win_pos.y2);
         mAv.setVideoScreenMode ( CAv::VIDEO_WIDEOPTION_FULL_STRETCH );
     } else {
-        SetDisplayMode ( mVpp.GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) ), CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mSigDetectThread.getCurSigInfo().fmt);
+        SetDisplayMode ( CVpp::getInstance()->GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) ), CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mSigDetectThread.getCurSigInfo().fmt);
     }
 }
 
@@ -2287,7 +2280,7 @@ void CTv::onSigDetectEnter()
 void CTv::onSigDetectLoop()
 {
     if (( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) == SOURCE_TYPE_HDMI ) ) {
-        int sr = mTvin.get_hdmi_sampling_rate();
+        int sr = CTvin::getInstance()->get_hdmi_sampling_rate();
         if ( ( sr > 0 ) && ( sr != m_hdmi_sampling_rate ) ) {
             LOGD("HDMI  SR CHANGED");
             CMessage msg;
@@ -2300,7 +2293,7 @@ void CTv::onSigDetectLoop()
         }
 
         //m_hdmi_audio_data init is 0, not audio data , when switch to HDMI
-        int hdmi_audio_data = mTvin.TvinApi_GetHDMIAudioStatus();
+        int hdmi_audio_data = CTvin::getInstance()->TvinApi_GetHDMIAudioStatus();
         if (hdmi_audio_data != m_hdmi_audio_data) {
             LOGD("HDMI  auds_rcv_sts CHANGED = %d", hdmi_audio_data);
             m_hdmi_audio_data = hdmi_audio_data;
@@ -2326,7 +2319,7 @@ void CTv::CTvDetectObserverForScanner::onSigStableToUnstable()
     } else {
         mpTv->mAv.DisableVideoWithBlueColor();
     }
-    mpTv->mTvin.Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_StopDecoder();
 }
 
 void CTv::CTvDetectObserverForScanner::onSigUnStableToNoSig()
@@ -2338,7 +2331,7 @@ void CTv::CTvDetectObserverForScanner::onSigUnStableToNoSig()
     } else {
         mpTv->mAv.DisableVideoWithBlueColor();
     }
-    mpTv->mTvin.Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_StopDecoder();
 }
 
 void CTv::CTvDetectObserverForScanner::onSigStableToNoSig()
@@ -2350,7 +2343,7 @@ void CTv::CTvDetectObserverForScanner::onSigStableToNoSig()
     } else {
         mpTv->mAv.DisableVideoWithBlueColor();
     }
-    mpTv->mTvin.Tvin_StopDecoder();
+    CTvin::getInstance()->Tvin_StopDecoder();
     LOGD ( "%s, Enable bluescreen for signal change in StableToNoSig!", __FUNCTION__);
 }
 
@@ -2364,7 +2357,7 @@ void CTv::CTvDetectObserverForScanner::onSigStillStable()
 {
     if (m_sig_stable_nums == 1) {
         LOGD("%s still stable , to start decoder", __FUNCTION__);
-        int startdec_status = mpTv->mTvin.Tvin_StartDecoder (mpTv->mSigDetectThread.getCurSigInfo() );
+        int startdec_status = CTvin::getInstance()->Tvin_StartDecoder (mpTv->mSigDetectThread.getCurSigInfo() );
         if ( startdec_status == 0 ) {
             const char *value = config_get_str ( CFG_SECTION_TV, "tvin.db.reg.en", "null" );
             if ( strcmp ( value, "enable" ) == 0 ) {
@@ -2392,9 +2385,9 @@ void CTv::onSourceConnect(int source_type, int connect_status)
 void CTv::onVframeSizeChange()
 {
     if (m_source_input == SOURCE_DTV) {
-        mVpp.LoadVppSettings ( SOURCE_TYPE_DTV, mAv.getVideoResolutionToFmt(), INDEX_2D, TVIN_TFMT_2D );
+        CVpp::getInstance()->LoadVppSettings ( SOURCE_TYPE_DTV, mAv.getVideoResolutionToFmt(), INDEX_2D, TVIN_TFMT_2D );
     } else if (m_source_input == SOURCE_INVALID) {
-        mVpp.LoadVppSettings ( SOURCE_TYPE_MPEG, mAv.getVideoResolutionToFmt(), INDEX_2D, TVIN_TFMT_2D );
+        CVpp::getInstance()->LoadVppSettings ( SOURCE_TYPE_MPEG, mAv.getVideoResolutionToFmt(), INDEX_2D, TVIN_TFMT_2D );
     }
 }
 
@@ -2418,7 +2411,7 @@ tvin_info_t CTv::GetCurrentSignalInfo ( void )
 
     int feState = mFrontDev.getStatus();
     if ( (CTvin::Tvin_SourceInputToSourceInputType(m_source_input) == SOURCE_TYPE_DTV ) ) {
-        det_fmt = mTvin.TvinApi_Get3DDectMode();
+        det_fmt = CTvin::getInstance()->TvinApi_Get3DDectMode();
         if ((feState & FE_HAS_LOCK) == FE_HAS_LOCK) {
             signal_info.status = TVIN_SIG_STATUS_STABLE;
         } else if ((feState & FE_TIMEDOUT) == FE_TIMEDOUT) {
@@ -2437,15 +2430,15 @@ int CTv::Tv_GetHistgram(int *histgram_buf)
     if (histgram_buf == NULL) {
         return -1;
     }
-    return mTvin.VDIN_GetHistgram(histgram_buf);
+    return CTvin::getInstance()->VDIN_GetHistgram(histgram_buf);
 }
 
 int CTv::Tv_Set3DMode ( VIDEO_3D_MODE_T mode )
 {
     if (mode == VIDEO_3D_MODE_AUTO) {
-        mTvin.VDIN_SetDI3DDetc (1);
+        CTvin::getInstance()->VDIN_SetDI3DDetc (1);
     } else {
-        mTvin.VDIN_SetDI3DDetc (0);
+        CTvin::getInstance()->VDIN_SetDI3DDetc (0);
     }
 
     mAv.set3DMode(mode, 0, 0);
@@ -2491,7 +2484,7 @@ int CTv::Tv_Get3DTo2DMode ( void )
 
 int CTv::Tv_Set3DDepth ( int value )
 {
-    mTvin.Tvin_SetDepthOf2Dto3D( value );
+    CTvin::getInstance()->Tvin_SetDepthOf2Dto3D( value );
     SSMSave3DDepth ( value );
     return 0;
 }
@@ -2524,10 +2517,10 @@ int CTv::Tvin_SetPLLValues ()
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceInput(m_source_input);
     am_regs_t regs;
 
-    if ( mVpp.getPqData()->PQ_GetPLLParams ( source_port, sig_fmt, &regs ) == 0 ) {
+    if ( CVpp::getInstance()->getPqData()->PQ_GetPLLParams ( source_port, sig_fmt, &regs ) == 0 ) {
         LOGD ("%s,PQ_GetPLLParams(source_port[%d], sig_fmt[%d],&regs).\n", __FUNCTION__, source_port, sig_fmt );
 
-        if ( mTvin.TvinApi_LoadPLLValues ( regs ) < 0 ) {
+        if ( CTvin::getInstance()->TvinApi_LoadPLLValues ( regs ) < 0 ) {
             LOGE ( "%s, TvinApi_LoadPLLValues failed!\n", __FUNCTION__ );
             return -1;
         }
@@ -2545,11 +2538,11 @@ int CTv::SetCVD2Values ()
     tvin_port_t source_port = CTvin::Tvin_GetSourcePortBySourceInput(m_source_input);
     am_regs_t regs;
 
-    if (mVpp.getPqData()->PQ_GetCVD2Params ( source_port, sig_fmt, &regs ) == 0) {
+    if (CVpp::getInstance()->getPqData()->PQ_GetCVD2Params ( source_port, sig_fmt, &regs ) == 0) {
         LOGD ( "%s, PQ_GetCVD2Params(source_port[%d], sig_fmt[%d],&regs).\n", __FUNCTION__,
                source_port, sig_fmt );
 
-        if ( mTvin.TvinApi_LoadCVD2Values ( regs ) < 0 ) {
+        if ( CTvin::getInstance()->TvinApi_LoadCVD2Values ( regs ) < 0 ) {
             LOGE ( "%s, TvinApi_LoadCVD2Values failed!\n", __FUNCTION__);
             return -1;
         }
@@ -2635,7 +2628,7 @@ int CTv::Tv_SetAudioInSource (tv_source_input_t source_input)
 {
     int vol = 255;
     if (source_input == SOURCE_TV) {
-        if (mTvin.Tvin_GetAudioInSourceType(source_input) == TV_AUDIO_IN_SOURCE_TYPE_ATV) {
+        if (CTvin::getInstance()->Tvin_GetAudioInSourceType(source_input) == TV_AUDIO_IN_SOURCE_TYPE_ATV) {
             AudioSetAudioInSource(CC_AUDIO_IN_SOURCE_ATV);
             vol = GetAudioInternalDACDigitalPlayBackVolume_Cfg(CC_AUDIO_IN_SOURCE_ATV);
             LOGD("%s,  atv DAC_Digital_PlayBack_Volume = %d\n", __FUNCTION__, vol);
@@ -2792,7 +2785,7 @@ int CTv::getAutoBackLight_on_off()
 
 int CTv::getAverageLuma()
 {
-    return mTvin.VDIN_Get_avg_luma();
+    return CTvin::getInstance()->VDIN_Get_avg_luma();
 }
 
 int CTv::setAutobacklightData(const char *value)
@@ -2846,7 +2839,7 @@ int CTv::Tv_SSMRestoreDefaultSetting()
 {
     SSMRestoreDeviceMarkValues();
     AudioSSMRestoreDefaultSetting();
-    mVpp.VPPSSMRestoreDefault();
+    CVpp::getInstance()->VPPSSMRestoreDefault();
     MiscSSMRestoreDefault();
     ReservedSSMRestoreDefault();
     SSMSaveCVBSStd ( 0 );
@@ -2866,7 +2859,7 @@ int CTv::clearDbAllProgramInfoTable()
 
 int CTv::Tv_SSMFacRestoreDefaultSetting()
 {
-    mVpp.VPPSSMFacRestoreDefault();
+    CVpp::getInstance()->VPPSSMFacRestoreDefault();
     AudioSSMRestoreDefaultSetting();
     MiscSSMFacRestoreDefault();
     return 0;
@@ -3021,7 +3014,7 @@ int CTv::SendHDMIRxCECGiveOSDNameMessage(tv_source_input_t source_input, unsigne
 
 int CTv::GetHdmiHdcpKeyKsvInfo(int data_buf[])
 {
-    return mTvin.get_hdmi_ksv_info(m_source_input, data_buf);
+    return CTvin::getInstance()->get_hdmi_ksv_info(m_source_input, data_buf);
 }
 
 bool CTv::hdmiOutWithFbc()
@@ -3353,12 +3346,12 @@ int CTv::Tv_SetDDDRCMode(tv_source_input_t source_input)
 //PQ
 int CTv::Tv_SetBrightness ( int brightness, tv_source_input_type_t source_type, int is_save )
 {
-    return mVpp.SetBrightness(brightness, (tv_source_input_type_t)source_type, mSigDetectThread.getCurSigInfo().fmt, mSigDetectThread.getCurSigInfo().trans_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), is_save);
+    return CVpp::getInstance()->SetBrightness(brightness, (tv_source_input_type_t)source_type, mSigDetectThread.getCurSigInfo().fmt, mSigDetectThread.getCurSigInfo().trans_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), is_save);
 }
 
 int CTv::Tv_GetBrightness ( tv_source_input_type_t source_type )
 {
-    return mVpp.GetBrightness((tv_source_input_type_t)source_type);
+    return CVpp::getInstance()->GetBrightness((tv_source_input_type_t)source_type);
 }
 
 int CTv::Tv_SaveBrightness ( int brightness, tv_source_input_type_t source_type )
@@ -3368,12 +3361,12 @@ int CTv::Tv_SaveBrightness ( int brightness, tv_source_input_type_t source_type 
 
 int CTv::Tv_SetContrast ( int contrast, tv_source_input_type_t source_type,  int is_save )
 {
-    return mVpp.SetContrast(contrast, (tv_source_input_type_t)source_type, mSigDetectThread.getCurSigInfo().fmt, mSigDetectThread.getCurSigInfo().trans_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), is_save);
+    return CVpp::getInstance()->SetContrast(contrast, (tv_source_input_type_t)source_type, mSigDetectThread.getCurSigInfo().fmt, mSigDetectThread.getCurSigInfo().trans_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), is_save);
 }
 
 int CTv::Tv_GetContrast ( tv_source_input_type_t source_type )
 {
-    return mVpp.GetContrast((tv_source_input_type_t)source_type);
+    return CVpp::getInstance()->GetContrast((tv_source_input_type_t)source_type);
 }
 
 int CTv::Tv_SaveContrast ( int contrast, tv_source_input_type_t source_type )
@@ -3383,12 +3376,12 @@ int CTv::Tv_SaveContrast ( int contrast, tv_source_input_type_t source_type )
 
 int CTv::Tv_SetSaturation ( int satuation, tv_source_input_type_t source_type, tvin_sig_fmt_t fmt, int is_save )
 {
-    return mVpp.SetSaturation(satuation, (tv_source_input_type_t)source_type, (tvin_sig_fmt_t)fmt, mSigDetectThread.getCurSigInfo().trans_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), is_save);
+    return CVpp::getInstance()->SetSaturation(satuation, (tv_source_input_type_t)source_type, (tvin_sig_fmt_t)fmt, mSigDetectThread.getCurSigInfo().trans_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), is_save);
 }
 
 int CTv::Tv_GetSaturation ( tv_source_input_type_t source_type )
 {
-    return mVpp.GetSaturation((tv_source_input_type_t)source_type);
+    return CVpp::getInstance()->GetSaturation((tv_source_input_type_t)source_type);
 }
 
 int CTv::Tv_SaveSaturation ( int satuation, tv_source_input_type_t source_type )
@@ -3398,12 +3391,12 @@ int CTv::Tv_SaveSaturation ( int satuation, tv_source_input_type_t source_type )
 
 int CTv::Tv_SetHue ( int hue, tv_source_input_type_t source_type, tvin_sig_fmt_t fmt, int is_save )
 {
-    return mVpp.SetHue(hue, (tv_source_input_type_t)source_type, (tvin_sig_fmt_t)fmt, mSigDetectThread.getCurSigInfo().trans_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), is_save);
+    return CVpp::getInstance()->SetHue(hue, (tv_source_input_type_t)source_type, (tvin_sig_fmt_t)fmt, mSigDetectThread.getCurSigInfo().trans_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), is_save);
 }
 
 int CTv::Tv_GetHue ( tv_source_input_type_t source_type )
 {
-    return mVpp.GetHue((tv_source_input_type_t)source_type);
+    return CVpp::getInstance()->GetHue((tv_source_input_type_t)source_type);
 }
 
 int CTv::Tv_SaveHue ( int hue, tv_source_input_type_t source_type )
@@ -3413,27 +3406,27 @@ int CTv::Tv_SaveHue ( int hue, tv_source_input_type_t source_type )
 
 int CTv::Tv_SetPQMode ( vpp_picture_mode_t mode, tv_source_input_type_t source_type, int is_save )
 {
-    return mVpp.SetPQMode((vpp_picture_mode_t)mode, (tv_source_input_type_t)source_type, mSigDetectThread.getCurSigInfo().fmt, mSigDetectThread.getCurSigInfo().trans_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), is_save);
+    return CVpp::getInstance()->SetPQMode((vpp_picture_mode_t)mode, (tv_source_input_type_t)source_type, mSigDetectThread.getCurSigInfo().fmt, mSigDetectThread.getCurSigInfo().trans_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), is_save);
 }
 
 vpp_picture_mode_t CTv::Tv_GetPQMode ( tv_source_input_type_t source_type )
 {
-    return mVpp.GetPQMode((tv_source_input_type_t)source_type);
+    return CVpp::getInstance()->GetPQMode((tv_source_input_type_t)source_type);
 }
 
 int CTv::Tv_SavePQMode ( vpp_picture_mode_t mode, tv_source_input_type_t source_type )
 {
-    return mVpp.SavePQMode ( mode, source_type );
+    return CVpp::getInstance()->SavePQMode ( mode, source_type );
 }
 
 int CTv::Tv_SetSharpness ( int value, tv_source_input_type_t source_type, int en, int is_save )
 {
-    return mVpp.SetSharpness(value, (tv_source_input_type_t)source_type, en, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), mSigDetectThread.getCurSigInfo().fmt, mSigDetectThread.getCurSigInfo().trans_fmt, is_save);
+    return CVpp::getInstance()->SetSharpness(value, (tv_source_input_type_t)source_type, en, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), mSigDetectThread.getCurSigInfo().fmt, mSigDetectThread.getCurSigInfo().trans_fmt, is_save);
 }
 
 int CTv::Tv_GetSharpness ( tv_source_input_type_t source_type )
 {
-    return mVpp.GetSharpness((tv_source_input_type_t)source_type);
+    return CVpp::getInstance()->GetSharpness((tv_source_input_type_t)source_type);
 }
 
 int CTv::Tv_SaveSharpness ( int value, tv_source_input_type_t source_type )
@@ -3446,7 +3439,7 @@ int CTv::Tv_SetBacklight ( int value, tv_source_input_type_t source_type, int is
     if (mHdmiOutFbc) {
         return Tv_FactorySet_FBC_Backlight(value);
     } else {
-        return mVpp.SetBacklight(value, (tv_source_input_type_t)source_type, is_save);
+        return CVpp::getInstance()->SetBacklight(value, (tv_source_input_type_t)source_type, is_save);
     }
 }
 
@@ -3455,13 +3448,13 @@ int CTv::Tv_GetBacklight ( tv_source_input_type_t source_type )
     if (mHdmiOutFbc) {
         return Tv_FactoryGet_FBC_Backlight();
     } else {
-        return mVpp.GetBacklight((tv_source_input_type_t)source_type);
+        return CVpp::getInstance()->GetBacklight((tv_source_input_type_t)source_type);
     }
 }
 
 int CTv::Tv_SaveBacklight ( int value, tv_source_input_type_t source_type )
 {
-    return mVpp.SaveBacklight ( value, source_type );
+    return CVpp::getInstance()->SaveBacklight ( value, source_type );
 }
 
 int CTv::Tv_SetBacklight_Switch ( int value )
@@ -3469,7 +3462,7 @@ int CTv::Tv_SetBacklight_Switch ( int value )
     if (mHdmiOutFbc) {
         return Tv_FactorySet_FBC_backlight_onoff(value);
     } else {
-        return mVpp.VPP_SetBackLight_Switch(value);
+        return CVpp::getInstance()->VPP_SetBackLight_Switch(value);
     }
 }
 
@@ -3478,7 +3471,7 @@ int CTv::Tv_GetBacklight_Switch ( void )
     if (mHdmiOutFbc) {
         return Tv_FactoryGet_FBC_backlight_onoff();
     } else {
-        return mVpp.VPP_GetBackLight_Switch();
+        return CVpp::getInstance()->VPP_GetBackLight_Switch();
     }
 }
 
@@ -3487,7 +3480,7 @@ int CTv::Tv_SetColorTemperature ( vpp_color_temperature_mode_t mode, tv_source_i
     if (mHdmiOutFbc) {
         return Tv_FactorySet_FBC_ColorTemp_Mode(mode);
     } else {
-        return mVpp.SetColorTemperature((vpp_color_temperature_mode_t)mode, (tv_source_input_type_t)source_type, is_save);
+        return CVpp::getInstance()->SetColorTemperature((vpp_color_temperature_mode_t)mode, (tv_source_input_type_t)source_type, is_save);
     }
 }
 
@@ -3496,13 +3489,13 @@ vpp_color_temperature_mode_t CTv::Tv_GetColorTemperature ( tv_source_input_type_
     if (mHdmiOutFbc) {
         return (vpp_color_temperature_mode_t)Tv_FactoryGet_FBC_ColorTemp_Mode();
     } else {
-        return mVpp.GetColorTemperature((tv_source_input_type_t)source_type);
+        return CVpp::getInstance()->GetColorTemperature((tv_source_input_type_t)source_type);
     }
 }
 
 int CTv::Tv_SaveColorTemperature ( vpp_color_temperature_mode_t mode, tv_source_input_type_t source_type )
 {
-    return mVpp.SaveColorTemp ( mode, source_type );
+    return CVpp::getInstance()->SaveColorTemp ( mode, source_type );
 }
 
 int CTv::Tv_SetDisplayMode ( vpp_display_mode_t mode, tv_source_input_type_t source_type, tvin_sig_fmt_t fmt, int is_save )
@@ -3525,7 +3518,7 @@ int CTv::SetDisplayMode ( vpp_display_mode_t display_mode, tv_source_input_type_
 {
     LOGD("SetDisplayMode, display_mode = %d, source_type = %d fmt = %d  tranfmt = %d\n",  display_mode, source_type, sig_fmt, mSigDetectThread.getCurSigInfo().trans_fmt);
 
-    tvin_cutwin_t cutwin = mVpp.GetOverscan ( source_type, sig_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), mSigDetectThread.getCurSigInfo().trans_fmt);
+    tvin_cutwin_t cutwin = CVpp::getInstance()->GetOverscan ( source_type, sig_fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), mSigDetectThread.getCurSigInfo().trans_fmt);
     LOGD("SetDisplayMode , get crop %d %d %d %d \n", cutwin.vs, cutwin.hs, cutwin.ve, cutwin.he);
     int video_screen_mode = CAv::VIDEO_WIDEOPTION_16_9;
     tvin_window_pos_t win_pos;
@@ -3543,8 +3536,8 @@ int CTv::SetDisplayMode ( vpp_display_mode_t display_mode, tv_source_input_type_
         break;
     case VPP_DISPLAY_MODE_FULL:
         video_screen_mode = CAv::VIDEO_WIDEOPTION_NONLINEAR;
-        mVpp.VPP_SetNonLinearFactor ( 20 );
-        //mVpp.VPP_SetNonLinearFactor ( 20 );
+        CVpp::getInstance()->VPP_SetNonLinearFactor ( 20 );
+        //CVpp::getInstance()->VPP_SetNonLinearFactor ( 20 );
         break;
     case VPP_DISPLAY_MODE_CROP_FULL:
         cutwin.vs = 0;
@@ -3588,7 +3581,7 @@ int CTv::SetDisplayMode ( vpp_display_mode_t display_mode, tv_source_input_type_
         cutwin.he = cutwin.he + 12;
     }
     if (source_type == SOURCE_TYPE_HDMI) {
-        if ((IsDVISignal()) || (mTvin.GetITContent() == 1) ||
+        if ((IsDVISignal()) || (CTvin::getInstance()->GetITContent() == 1) ||
             (display_mode == VPP_DISPLAY_MODE_FULL_REAL)) {
             cutwin.vs = 0;
             cutwin.hs = 0;
@@ -3599,13 +3592,13 @@ int CTv::SetDisplayMode ( vpp_display_mode_t display_mode, tv_source_input_type_
 
     //mAv.setVideoAxis ( win_pos.x1, win_pos.y1, win_pos.x2, win_pos.y2 );
     mAv.setVideoScreenMode(video_screen_mode);
-    mVpp.VPP_SetVideoCrop(cutwin.vs, cutwin.hs, cutwin.ve, cutwin.he);
+    CVpp::getInstance()->VPP_SetVideoCrop(cutwin.vs, cutwin.hs, cutwin.ve, cutwin.he);
     return 0;
 }
 
 vpp_display_mode_t CTv::Tv_GetDisplayMode ( tv_source_input_type_t source_type )
 {
-    return mVpp.GetDisplayMode((tv_source_input_type_t)source_type);
+    return CVpp::getInstance()->GetDisplayMode((tv_source_input_type_t)source_type);
 }
 
 int CTv::Tv_SaveDisplayMode ( vpp_display_mode_t mode, tv_source_input_type_t source_type )
@@ -3615,12 +3608,12 @@ int CTv::Tv_SaveDisplayMode ( vpp_display_mode_t mode, tv_source_input_type_t so
 
 int CTv::Tv_SetNoiseReductionMode ( vpp_noise_reduction_mode_t mode, tv_source_input_type_t source_type, int is_save )
 {
-    return mVpp.SetNoiseReductionMode((vpp_noise_reduction_mode_t)mode, (tv_source_input_type_t)source_type, mSigDetectThread.getCurSigInfo().fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), mSigDetectThread.getCurSigInfo().trans_fmt, is_save);
+    return CVpp::getInstance()->SetNoiseReductionMode((vpp_noise_reduction_mode_t)mode, (tv_source_input_type_t)source_type, mSigDetectThread.getCurSigInfo().fmt, Check2Dor3D(m_mode_3d, mSigDetectThread.getCurSigInfo().trans_fmt ), mSigDetectThread.getCurSigInfo().trans_fmt, is_save);
 }
 
 int CTv::Tv_SaveNoiseReductionMode ( vpp_noise_reduction_mode_t mode, tv_source_input_type_t source_type )
 {
-    return mVpp.SaveNoiseReductionMode ( mode, source_type );
+    return CVpp::getInstance()->SaveNoiseReductionMode ( mode, source_type );
 }
 
 int CTv::Tv_Set2k4k_ScalerUp_Mode ( int value )
@@ -3765,15 +3758,15 @@ int CTv::Tv_GetSplitScreenDemoStatus(tv_source_input_type_t source_type)
 
 vpp_noise_reduction_mode_t CTv::Tv_GetNoiseReductionMode ( tv_source_input_type_t source_type )
 {
-    return mVpp.GetNoiseReductionMode((tv_source_input_type_t)source_type);
+    return CVpp::getInstance()->GetNoiseReductionMode((tv_source_input_type_t)source_type);
 }
 
 /**
  * @parameter mode : 0:sharpness; 1:NR
  *
     1.sharpness分屏（可以控制宽度）
-    分屏大小 寄存器范围是0x50000 冿x50780,左效果的范围越来越大?0x70780 冿x70000也是一�?
-    左右调换控制 bit 17. 开僿控�?bit 16. 0-11bit 是控制宽度的。范围是0-0x780?920像素?
+    分屏大小 寄存器范围是0x50000 冿x50780,左效果的范围越来越大?0x70780 冿x70000也是一枿
+    左右调换控制 bit 17. 开僿控冿bit 16. 0-11bit 是控制宽度的。范围是0-0x780?920像素?
     左做效果处理  echo w 0x503c0 v 0x31d6 > /sys/class/amlogic/debug
     右做效果处理  echo w 0x703c0 v 0x31d6 > /sys/class/amlogic/debug
     echo w 0x403c0 v 0x31d6 > /sys/class/amlogic/debug
@@ -3781,7 +3774,7 @@ vpp_noise_reduction_mode_t CTv::Tv_GetNoiseReductionMode ( tv_source_input_type_
     2. NR分屏(不能控制宽度)
     左做效果处理 echo w 0x07 v 0x174d > /sys /class/amlogic/debug
     右做效果处理 echo w 0x70 v 0x174d > /sys /class/amlogic/debug
-    �?                     echo w 0x77 v 0x174d > /sys/class/amlogic/debug
+    偿                     echo w 0x77 v 0x174d > /sys/class/amlogic/debug
  */
 int CTv::Tv_SplitScreenEffect(int mode, int width, int reverse)
 {
@@ -3789,7 +3782,7 @@ int CTv::Tv_SplitScreenEffect(int mode, int width, int reverse)
 
     if (mode == 0) {
         if (width == 0) {//close
-            ret = mVpp.VPP_SplitScreenEffect(0x403c0, 0x31d6);
+            ret = CVpp::getInstance()->VPP_SplitScreenEffect(0x403c0, 0x31d6);
         } else {
             int val = 0;
             if (reverse == 0) {//left effect
@@ -3797,16 +3790,16 @@ int CTv::Tv_SplitScreenEffect(int mode, int width, int reverse)
             } else {//right effect
                 val = 0x70780 - width;
             }
-            ret = mVpp.VPP_SplitScreenEffect(val, 0x31d6);
+            ret = CVpp::getInstance()->VPP_SplitScreenEffect(val, 0x31d6);
         }
     } else if (mode == 1) {
         if (width == 0) {//close
-            ret = mVpp.VPP_SplitScreenEffect(0x77, 0x174d);
+            ret = CVpp::getInstance()->VPP_SplitScreenEffect(0x77, 0x174d);
         } else {
             if (reverse == 0)
-                ret = mVpp.VPP_SplitScreenEffect(0x07, 0x174d);
+                ret = CVpp::getInstance()->VPP_SplitScreenEffect(0x07, 0x174d);
             else
-                ret = mVpp.VPP_SplitScreenEffect(0x70, 0x174d);
+                ret = CVpp::getInstance()->VPP_SplitScreenEffect(0x70, 0x174d);
         }
     } else if (mode == 2) {
     }
@@ -3816,52 +3809,52 @@ int CTv::Tv_SplitScreenEffect(int mode, int width, int reverse)
 
 int CTv::Tv_FactorySetPQMode_Brightness ( int source_type, int pq_mode, int brightness )
 {
-    return mVpp.FactorySetPQMode_Brightness(source_type, pq_mode, brightness);
+    return CVpp::getInstance()->FactorySetPQMode_Brightness(source_type, pq_mode, brightness);
 }
 
 int CTv::Tv_FactoryGetPQMode_Brightness ( int source_type, int pq_mode )
 {
-    return mVpp.FactoryGetPQMode_Brightness(source_type, pq_mode);
+    return CVpp::getInstance()->FactoryGetPQMode_Brightness(source_type, pq_mode);
 }
 
 int CTv::Tv_FactorySetPQMode_Contrast ( int source_type, int pq_mode, int contrast )
 {
-    return mVpp.FactorySetPQMode_Contrast(source_type, pq_mode, contrast);
+    return CVpp::getInstance()->FactorySetPQMode_Contrast(source_type, pq_mode, contrast);
 }
 
 int CTv::Tv_FactoryGetPQMode_Contrast ( int source_type, int pq_mode )
 {
-    return mVpp.FactoryGetPQMode_Contrast(source_type, pq_mode);
+    return CVpp::getInstance()->FactoryGetPQMode_Contrast(source_type, pq_mode);
 }
 
 int CTv::Tv_FactorySetPQMode_Saturation ( int source_type, int pq_mode, int saturation )
 {
-    return mVpp.FactorySetPQMode_Saturation(source_type, pq_mode, saturation);
+    return CVpp::getInstance()->FactorySetPQMode_Saturation(source_type, pq_mode, saturation);
 }
 
 int CTv::Tv_FactoryGetPQMode_Saturation ( int source_type, int pq_mode )
 {
-    return mVpp.FactoryGetPQMode_Saturation(source_type, pq_mode);
+    return CVpp::getInstance()->FactoryGetPQMode_Saturation(source_type, pq_mode);
 }
 
 int CTv::Tv_FactorySetPQMode_Hue ( int source_type, int pq_mode, int hue )
 {
-    return mVpp.FactorySetPQMode_Hue(source_type, pq_mode, hue);
+    return CVpp::getInstance()->FactorySetPQMode_Hue(source_type, pq_mode, hue);
 }
 
 int CTv::Tv_FactoryGetPQMode_Hue ( int source_type, int pq_mode )
 {
-    return mVpp.FactoryGetPQMode_Hue(source_type, pq_mode);
+    return CVpp::getInstance()->FactoryGetPQMode_Hue(source_type, pq_mode);
 }
 
 int CTv::Tv_FactorySetPQMode_Sharpness ( int source_type, int pq_mode, int sharpness )
 {
-    return mVpp.FactorySetPQMode_Sharpness(source_type, pq_mode, sharpness);
+    return CVpp::getInstance()->FactorySetPQMode_Sharpness(source_type, pq_mode, sharpness);
 }
 
 int CTv::Tv_FactoryGetPQMode_Sharpness ( int source_type, int pq_mode )
 {
-    return mVpp.FactoryGetPQMode_Sharpness(source_type, pq_mode);
+    return CVpp::getInstance()->FactoryGetPQMode_Sharpness(source_type, pq_mode);
 }
 
 int CTv::GetColorTemperatureParams ( vpp_color_temperature_mode_t Tempmode, tcon_rgb_ogo_t *params )
@@ -3876,7 +3869,7 @@ int CTv::GetColorTemperatureParams ( vpp_color_temperature_mode_t Tempmode, tcon
         params->b_post_offset = Tv_FactoryWhiteBalanceFormatOutputFbcOffsetParams(params->b_post_offset);
         return ret;
     } else {
-        return mVpp.GetColorTemperatureParams(Tempmode, params);
+        return CVpp::getInstance()->GetColorTemperatureParams(Tempmode, params);
     }
 }
 
@@ -3915,7 +3908,7 @@ int CTv::Tv_FactorySetTestPattern ( int pattern )
 
 int CTv::Tv_FactoryGetTestPattern ( void )
 {
-    return mVpp.FactoryGetTestPattern();
+    return CVpp::getInstance()->FactoryGetTestPattern();
 }
 
 int CTv::Tv_FactorySetScreenColor ( int vdin_blending_mask, int y, int u, int v )
@@ -3925,60 +3918,60 @@ int CTv::Tv_FactorySetScreenColor ( int vdin_blending_mask, int y, int u, int v 
 
 int CTv::Tv_FactoryResetPQMode ( void )
 {
-    return mVpp.FactoryResetPQMode();
+    return CVpp::getInstance()->FactoryResetPQMode();
 }
 
 int CTv::Tv_FactoryResetColorTemp ( void )
 {
-    return mVpp.FactoryResetColorTemp();
+    return CVpp::getInstance()->FactoryResetColorTemp();
 }
 
 int CTv::Tv_FactorySetParamsDefault ( void )
 {
-    return mVpp.FactorySetParamsDefault();
+    return CVpp::getInstance()->FactorySetParamsDefault();
 }
 
 int CTv::Tv_FactorySetDDRSSC ( int step )
 {
-    return mVpp.FactorySetDDRSSC(step);
+    return CVpp::getInstance()->FactorySetDDRSSC(step);
 }
 
 int CTv::Tv_FactoryGetDDRSSC ( void )
 {
-    return mVpp.FactoryGetDDRSSC();
+    return CVpp::getInstance()->FactoryGetDDRSSC();
 }
 
 int CTv::Tv_FactorySetLVDSSSC ( int step )
 {
-    return mVpp.FactorySetLVDSSSC(step);
+    return CVpp::getInstance()->FactorySetLVDSSSC(step);
 }
 
 int CTv::Tv_FactoryGetLVDSSSC ( void )
 {
-    return mVpp.FactoryGetLVDSSSC();
+    return CVpp::getInstance()->FactoryGetLVDSSSC();
 }
 
 void CTv::Tv_Spread_Spectrum()
 {
     int value = 0;
-    value = mVpp.FactoryGetLVDSSSC();
-    mVpp.FactorySetLVDSSSC(value);
+    value = CVpp::getInstance()->FactoryGetLVDSSSC();
+    CVpp::getInstance()->FactorySetLVDSSSC(value);
 }
 
 int CTv::Tv_FactorySetNolineParams ( int noline_params_type, int source_type, noline_params_t noline_params )
 {
-    return mVpp.FactorySetNolineParams(noline_params_type, source_type, noline_params);
+    return CVpp::getInstance()->FactorySetNolineParams(noline_params_type, source_type, noline_params);
 }
 
 noline_params_t CTv::Tv_FactoryGetNolineParams ( int noline_params_type, int source_type )
 {
-    return mVpp.FactoryGetNolineParams(noline_params_type, source_type);
+    return CVpp::getInstance()->FactoryGetNolineParams(noline_params_type, source_type);
 }
 
 int CTv::Tv_FactorySetOverscan ( int source_type, int fmt, int status_3d, int trans_fmt, tvin_cutwin_t cutwin_t )
 {
-    //tvin_cutwin_t cutwin_t = mVpp.Tv_FactoryGetOverscan(source_type, fmt, status_3d, trans_fmt);
-    mVpp.FactorySetOverscan(source_type, fmt, status_3d, trans_fmt, cutwin_t);
+    //tvin_cutwin_t cutwin_t = CVpp::getInstance()->Tv_FactoryGetOverscan(source_type, fmt, status_3d, trans_fmt);
+    CVpp::getInstance()->FactorySetOverscan(source_type, fmt, status_3d, trans_fmt, cutwin_t);
     //} else {
 #if 0
     char val_buf[256];
@@ -3988,13 +3981,13 @@ int CTv::Tv_FactorySetOverscan ( int source_type, int fmt, int status_3d, int tr
     config_set_str(CFG_SECTION_TV, "vpp.overscan.dtv", val_buf);
     //}
 #endif
-    return mVpp.VPP_SetVideoCrop ( ( int ) cutwin_t.vs, ( int ) cutwin_t.hs, ( int ) cutwin_t.ve, ( int ) cutwin_t.he );
+    return CVpp::getInstance()->VPP_SetVideoCrop ( ( int ) cutwin_t.vs, ( int ) cutwin_t.hs, ( int ) cutwin_t.ve, ( int ) cutwin_t.he );
 }
 
 tvin_cutwin_t CTv::Tv_FactoryGetOverscan ( int source_type, int fmt, int status_3d, int trans_fmt )
 {
     status_3d = status_3d;
-    return mVpp.FactoryGetOverscan(source_type, fmt, Check2Dor3D(m_mode_3d, (tvin_trans_fmt_t)trans_fmt), trans_fmt);
+    return CVpp::getInstance()->FactoryGetOverscan(source_type, fmt, Check2Dor3D(m_mode_3d, (tvin_trans_fmt_t)trans_fmt), trans_fmt);
 #if 0
     else {
         tvin_cutwin_t  cutwin;
@@ -4022,7 +4015,7 @@ tvin_cutwin_t CTv::Tv_FactoryGetOverscan ( int source_type, int fmt, int status_
 
 int CTv::Tv_ReplacePqDb(const char *newFilePath)
 {
-    return mVpp.getPqData()->replacePqDb(newFilePath);
+    return CVpp::getInstance()->getPqData()->replacePqDb(newFilePath);
 }
 
 int CTv::Tv_FactorySet_FBC_Brightness ( int value )
@@ -4467,7 +4460,7 @@ int CTv::Tv_FactoryGetWhiteBalanceRedGain(int source_type, int colortemp_mode)
     int ret = -1;
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
         LOGD("--------- call none fbc method ---------");
-        ret = mVpp.FactoryGetColorTemp_Rgain(source_type, colortemp_mode);
+        ret = CVpp::getInstance()->FactoryGetColorTemp_Rgain(source_type, colortemp_mode);
     } else { //use fbc store the white balance params
         LOGD("--------- call fbc method ---------");
         ret = Tv_FactoryGetItemFromBatch((vpp_color_temperature_mode_t)colortemp_mode, 0);
@@ -4479,7 +4472,7 @@ int CTv::Tv_FactoryGetWhiteBalanceGreenGain(int source_type, int colortemp_mode)
 {
     int ret = -1;
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.FactoryGetColorTemp_Ggain(source_type, colortemp_mode);
+        ret = CVpp::getInstance()->FactoryGetColorTemp_Ggain(source_type, colortemp_mode);
     } else { //use fbc store the white balance params
         ret = Tv_FactoryGetItemFromBatch((vpp_color_temperature_mode_t)colortemp_mode, 1);
     }
@@ -4490,7 +4483,7 @@ int CTv::Tv_FactoryGetWhiteBalanceBlueGain(int source_type, int colortemp_mode)
 {
     int ret = -1;
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.FactoryGetColorTemp_Bgain(source_type, colortemp_mode);
+        ret = CVpp::getInstance()->FactoryGetColorTemp_Bgain(source_type, colortemp_mode);
     } else { //use fbc store the white balance params
         ret = Tv_FactoryGetItemFromBatch((vpp_color_temperature_mode_t)colortemp_mode, 2);
     }
@@ -4501,7 +4494,7 @@ int CTv::Tv_FactoryGetWhiteBalanceRedOffset(int source_type, int colortemp_mode)
 {
     int ret = -1;
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.FactoryGetColorTemp_Roffset(source_type, colortemp_mode);
+        ret = CVpp::getInstance()->FactoryGetColorTemp_Roffset(source_type, colortemp_mode);
     } else { //use fbc store the white balance params
         ret = Tv_FactoryGetItemFromBatch((vpp_color_temperature_mode_t)colortemp_mode, 3);
     }
@@ -4512,7 +4505,7 @@ int CTv::Tv_FactoryGetWhiteBalanceGreenOffset(int source_type, int colortemp_mod
 {
     int ret = -1;
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.FactoryGetColorTemp_Goffset(source_type, colortemp_mode);
+        ret = CVpp::getInstance()->FactoryGetColorTemp_Goffset(source_type, colortemp_mode);
     } else { //use fbc store the white balance params
         ret = Tv_FactoryGetItemFromBatch((vpp_color_temperature_mode_t)colortemp_mode, 4);
     }
@@ -4523,7 +4516,7 @@ int CTv::Tv_FactoryGetWhiteBalanceBlueOffset(int source_type, int colortemp_mode
 {
     int ret = -1;
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.FactoryGetColorTemp_Boffset(source_type, colortemp_mode);
+        ret = CVpp::getInstance()->FactoryGetColorTemp_Boffset(source_type, colortemp_mode);
     } else { //use fbc store the white balance params
         ret = Tv_FactoryGetItemFromBatch((vpp_color_temperature_mode_t)colortemp_mode, 5);
     }
@@ -4539,10 +4532,10 @@ int CTv::Tv_FactorySetWhiteBalanceRedGain(int source_type, int colortemp_mode, i
         value = 2047;
     }
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.FactorySetColorTemp_Rgain(source_type, colortemp_mode, value);
+        ret = CVpp::getInstance()->FactorySetColorTemp_Rgain(source_type, colortemp_mode, value);
         if (ret != -1) {
             LOGD("save the red gain to flash")
-            ret = mVpp.FactorySaveColorTemp_Rgain(source_type, colortemp_mode, value);
+            ret = CVpp::getInstance()->FactorySaveColorTemp_Rgain(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
         value = Tv_FactoryWhiteBalanceFormatInputFbcGainParams(value);
@@ -4560,10 +4553,10 @@ int CTv::Tv_FactorySetWhiteBalanceGreenGain(int source_type, int colortemp_mode,
         value = 2047;
     }
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.FactorySetColorTemp_Ggain(source_type, colortemp_mode, value);
+        ret = CVpp::getInstance()->FactorySetColorTemp_Ggain(source_type, colortemp_mode, value);
         if (ret != -1) {
             LOGD("save the green gain to flash")
-            ret = mVpp.FactorySaveColorTemp_Ggain(source_type, colortemp_mode, value);
+            ret = CVpp::getInstance()->FactorySaveColorTemp_Ggain(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
         value = Tv_FactoryWhiteBalanceFormatInputFbcGainParams(value);
@@ -4581,10 +4574,10 @@ int CTv::Tv_FactorySetWhiteBalanceBlueGain(int source_type, int colortemp_mode, 
         value = 2047;
     }
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.FactorySetColorTemp_Bgain(source_type, colortemp_mode, value);
+        ret = CVpp::getInstance()->FactorySetColorTemp_Bgain(source_type, colortemp_mode, value);
         if (ret != -1) {
             LOGD("save the blue gain to flash")
-            ret = mVpp.FactorySaveColorTemp_Bgain(source_type, colortemp_mode, value);
+            ret = CVpp::getInstance()->FactorySaveColorTemp_Bgain(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
         value = Tv_FactoryWhiteBalanceFormatInputFbcGainParams(value);
@@ -4602,10 +4595,10 @@ int CTv::Tv_FactorySetWhiteBalanceRedOffset(int source_type, int colortemp_mode,
         value = 1023;
     }
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.FactorySetColorTemp_Roffset(source_type, colortemp_mode, value);
+        ret = CVpp::getInstance()->FactorySetColorTemp_Roffset(source_type, colortemp_mode, value);
         if (ret != -1) {
             LOGD("save the red offset to flash")
-            ret = mVpp.FactorySaveColorTemp_Roffset(source_type, colortemp_mode, value);
+            ret = CVpp::getInstance()->FactorySaveColorTemp_Roffset(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
         value = Tv_FactoryWhiteBalanceFormatInputFbcOffsetParams(value);
@@ -4623,10 +4616,10 @@ int CTv::Tv_FactorySetWhiteBalanceGreenOffset(int source_type, int colortemp_mod
         value = 1023;
     }
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.FactorySetColorTemp_Goffset(source_type, colortemp_mode, value);
+        ret = CVpp::getInstance()->FactorySetColorTemp_Goffset(source_type, colortemp_mode, value);
         if (ret != -1) {
             LOGD("save the green offset to flash")
-            ret = mVpp.FactorySaveColorTemp_Goffset(source_type, colortemp_mode, value);
+            ret = CVpp::getInstance()->FactorySaveColorTemp_Goffset(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
         value = Tv_FactoryWhiteBalanceFormatInputFbcOffsetParams(value);
@@ -4644,10 +4637,10 @@ int CTv::Tv_FactorySetWhiteBalanceBlueOffset(int source_type, int colortemp_mode
         value = 1023;
     }
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.FactorySetColorTemp_Boffset(source_type, colortemp_mode, value);
+        ret = CVpp::getInstance()->FactorySetColorTemp_Boffset(source_type, colortemp_mode, value);
         if (ret != -1) {
             LOGD("save the blue offset to flash")
-            ret = mVpp.FactorySaveColorTemp_Boffset(source_type, colortemp_mode, value);
+            ret = CVpp::getInstance()->FactorySaveColorTemp_Boffset(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
         value = Tv_FactoryWhiteBalanceFormatInputFbcOffsetParams(value);
@@ -4660,7 +4653,7 @@ int CTv::Tv_FactorySetWhiteBalanceColorTempMode(int source_type, int colortemp_m
 {
     int ret = -1;
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.SetColorTemperature((vpp_color_temperature_mode_t)colortemp_mode, (tv_source_input_type_t)source_type, is_save);
+        ret = CVpp::getInstance()->SetColorTemperature((vpp_color_temperature_mode_t)colortemp_mode, (tv_source_input_type_t)source_type, is_save);
     } else { //use fbc store the white balance params
         ret = Tv_FactorySet_FBC_ColorTemp_Mode(colortemp_mode);
     }
@@ -4671,7 +4664,7 @@ int CTv::Tv_FactoryGetWhiteBalanceColorTempMode(int source_type )
 {
     int ret = -1;
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.GetColorTemperature((tv_source_input_type_t)source_type);
+        ret = CVpp::getInstance()->GetColorTemperature((tv_source_input_type_t)source_type);
     } else { //use fbc store the white balance params
         ret = Tv_FactoryGet_FBC_ColorTemp_Mode();
     }
@@ -4733,13 +4726,13 @@ int CTv::Tv_FactorySaveWhiteBalancePramas(int source_type, int tempmode, int r_g
 {
     int ret = 0;
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        mVpp.SaveColorTemp((vpp_color_temperature_mode_t) tempmode, (tv_source_input_type_t) source_type);
-        mVpp.FactorySaveColorTemp_Rgain(source_type, tempmode, r_gain);
-        mVpp.FactorySaveColorTemp_Ggain(source_type, tempmode, g_gain);
-        mVpp.FactorySaveColorTemp_Bgain(source_type, tempmode, b_gain);
-        mVpp.FactorySaveColorTemp_Roffset(source_type, tempmode, r_offset);
-        mVpp.FactorySaveColorTemp_Goffset(source_type, tempmode, g_offset);
-        mVpp.FactorySaveColorTemp_Boffset(source_type, tempmode, b_offset);
+        CVpp::getInstance()->SaveColorTemp((vpp_color_temperature_mode_t) tempmode, (tv_source_input_type_t) source_type);
+        CVpp::getInstance()->FactorySaveColorTemp_Rgain(source_type, tempmode, r_gain);
+        CVpp::getInstance()->FactorySaveColorTemp_Ggain(source_type, tempmode, g_gain);
+        CVpp::getInstance()->FactorySaveColorTemp_Bgain(source_type, tempmode, b_gain);
+        CVpp::getInstance()->FactorySaveColorTemp_Roffset(source_type, tempmode, r_offset);
+        CVpp::getInstance()->FactorySaveColorTemp_Goffset(source_type, tempmode, g_offset);
+        CVpp::getInstance()->FactorySaveColorTemp_Boffset(source_type, tempmode, b_offset);
     } else { //use fbc store the white balance params
         tcon_rgb_ogo_t params;
 
@@ -4814,7 +4807,7 @@ int CTv::Tv_FactoryCloseWhiteBalanceGrayPattern()
     int useFbc = 0;
     int ret = -1;
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
-        ret = mVpp.VPP_SetGrayPattern(0);
+        ret = CVpp::getInstance()->VPP_SetGrayPattern(0);
     } else { //use fbc store the white balance params
         ret = Tv_FactoryClose_FBC_GrayPattern();
     }
@@ -4834,7 +4827,7 @@ int CTv::Tv_FactorySetWhiteBalanceGrayPattern(int value)
 {
     int ret = -1;
     if (!mHdmiOutFbc) {
-        ret = mVpp.VPP_SetGrayPattern(value);
+        ret = CVpp::getInstance()->VPP_SetGrayPattern(value);
     } else {
         ret = Tv_FactorySet_FBC_GrayPattern(value);
     }
@@ -4845,7 +4838,7 @@ int CTv:: Tv_FactoryGetWhiteBalanceGrayPattern()
 {
     int ret = -1;
     if (!mHdmiOutFbc) {
-        ret = mVpp.VPP_GetGrayPattern();
+        ret = CVpp::getInstance()->VPP_GetGrayPattern();
     }
     return ret;
 }

@@ -382,6 +382,8 @@ public:
     int VPP_SetBackLight_Switch ( int value );
     int VPP_GetBackLight_Switch ( void );
     int VPP_SetScalerPathSel (const unsigned int value);
+
+    static CVpp *getInstance();
 private:
     //
     int VPP_OpenModule ( void );
@@ -426,7 +428,7 @@ private:
 
     int isPreviewWindow();
 
-
+    static CVpp *mInstance;
     tv_source_input_type_t vpp_setting_last_source_type;
     tvin_sig_fmt_t vpp_setting_last_sig_fmt;
     tvin_trans_fmt_t vpp_setting_last_trans_fmt;

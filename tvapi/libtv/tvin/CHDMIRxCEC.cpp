@@ -1,5 +1,5 @@
-#include "CTvin.h"
 
+#include "CHDMIRxCEC.h"
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <errno.h>
@@ -11,7 +11,7 @@
 
 #define CS_HDMIRX_CEC_PATH    "/dev/hdmirx0"
 
-CTvin::CHDMIRxCEC::CHDMIRxCEC(CTvin *pTvin)
+CHDMIRxCEC::CHDMIRxCEC()
 {
     int i = 0;
 
@@ -25,7 +25,6 @@ CTvin::CHDMIRxCEC::CHDMIRxCEC(CTvin *pTvin)
     mState = STATE_STOPED;
 
     mpObserver = NULL;
-    mpTvin = pTvin;
 
     for (i = 0; i < CC_SOURCE_DEV_REFRESH_CNT; i++) {
         mSourceDevLogicAddrBuf[i] = -1;
@@ -41,11 +40,11 @@ CTvin::CHDMIRxCEC::CHDMIRxCEC(CTvin *pTvin)
     mSourceDevRefreshBuf[2] = E_LA_PLYBACK3;
 }
 
-CTvin::CHDMIRxCEC::~CHDMIRxCEC()
+CHDMIRxCEC::~CHDMIRxCEC()
 {
 }
 
-int CTvin::CHDMIRxCEC::start()
+int CHDMIRxCEC::start()
 {
     CMutex::Autolock _l (mLock);
 
@@ -60,7 +59,7 @@ int CTvin::CHDMIRxCEC::start()
     return mState;
 }
 
-int CTvin::CHDMIRxCEC::stop()
+int CHDMIRxCEC::stop()
 {
     CMutex::Autolock _l (mLock);
 
@@ -77,7 +76,7 @@ int CTvin::CHDMIRxCEC::stop()
     return mState;
 }
 
-int CTvin::CHDMIRxCEC::pause()
+int CHDMIRxCEC::pause()
 {
     CMutex::Autolock _l (mLock);
 
@@ -89,7 +88,7 @@ int CTvin::CHDMIRxCEC::pause()
     return 0;
 }
 
-int CTvin::CHDMIRxCEC::resume()
+int CHDMIRxCEC::resume()
 {
     CMutex::Autolock _l (mLock);
 
@@ -106,21 +105,21 @@ int CTvin::CHDMIRxCEC::resume()
     return 0;
 }
 
-int CTvin::CHDMIRxCEC::isAllowOperate(int source_input)
+int CHDMIRxCEC::isAllowOperate(int source_input)
 {
     if (GetModuleEnableFlag() == 0) {
         return -1;
     }
 
     int source_port = CTvin::Tvin_GetSourcePortBySourceInput((tv_source_input_t)source_input);
-    if (mpTvin->VDIN_GetPortConnect(source_port) == false) {
+    if (CTvin::getInstance()->VDIN_GetPortConnect(source_port) == false) {
         return -1;
     }
 
     return 0;
 }
 
-int CTvin::CHDMIRxCEC::GetModuleEnableFlag()
+int CHDMIRxCEC::GetModuleEnableFlag()
 {
     const char *config_value = NULL;
 
@@ -138,7 +137,7 @@ int CTvin::CHDMIRxCEC::GetModuleEnableFlag()
     return mModuleEnableFlag;
 }
 
-int CTvin::CHDMIRxCEC::PrintMessage(const char *func_name, int data_type, struct _cec_msg *msg)
+int CHDMIRxCEC::PrintMessage(const char *func_name, int data_type, struct _cec_msg *msg)
 {
 #ifdef CC_ENABLE_PRINT_MESSAGE
     if (msg == NULL) {
@@ -160,7 +159,7 @@ int CTvin::CHDMIRxCEC::PrintMessage(const char *func_name, int data_type, struct
     return 0;
 }
 
-int CTvin::CHDMIRxCEC::ClrReplyListItem(HDMIRxRequestReplyItem *reply_item)
+int CHDMIRxCEC::ClrReplyListItem(HDMIRxRequestReplyItem *reply_item)
 {
     if (reply_item == NULL) {
         return -1;
@@ -176,7 +175,7 @@ int CTvin::CHDMIRxCEC::ClrReplyListItem(HDMIRxRequestReplyItem *reply_item)
     return 0;
 }
 
-int CTvin::CHDMIRxCEC::CopyMessageData(unsigned char data_buf[], unsigned char msg_data[], int msg_len)
+int CHDMIRxCEC::CopyMessageData(unsigned char data_buf[], unsigned char msg_data[], int msg_len)
 {
     if (data_buf == NULL) {
         return 0;
@@ -199,12 +198,12 @@ int CTvin::CHDMIRxCEC::CopyMessageData(unsigned char data_buf[], unsigned char m
     return msg_len;
 }
 
-int CTvin::CHDMIRxCEC::GetDeviceLogicAddr(int source_input)
+int CHDMIRxCEC::GetDeviceLogicAddr(int source_input)
 {
     return mSourceDevLogicAddrBuf[source_input - SOURCE_HDMI1];
 }
 
-int CTvin::CHDMIRxCEC::processRefreshSrcDevice(int source_input)
+int CHDMIRxCEC::processRefreshSrcDevice(int source_input)
 {
     int i = 0, physical_addr = 0;
     int source_port_1 = 0, source_port_2 = 0;
@@ -240,7 +239,7 @@ int CTvin::CHDMIRxCEC::processRefreshSrcDevice(int source_input)
     return 0;
 }
 
-int CTvin::CHDMIRxCEC::ClearRxMessageBuffer()
+int CHDMIRxCEC::ClearRxMessageBuffer()
 {
     int m_cec_dev_fd = -1;
 
@@ -258,7 +257,7 @@ int CTvin::CHDMIRxCEC::ClearRxMessageBuffer()
     return 0;
 }
 
-int CTvin::CHDMIRxCEC::GetMessage(struct _cec_msg msg_buf[])
+int CHDMIRxCEC::GetMessage(struct _cec_msg msg_buf[])
 {
     int i = 0;
     int m_cec_dev_fd = -1;
@@ -291,7 +290,7 @@ int CTvin::CHDMIRxCEC::GetMessage(struct _cec_msg msg_buf[])
 }
 
 
-int CTvin::CHDMIRxCEC::SendMessage(struct _cec_msg *msg)
+int CHDMIRxCEC::SendMessage(struct _cec_msg *msg)
 {
     int m_cec_dev_fd = -1;
 
@@ -315,9 +314,7 @@ int CTvin::CHDMIRxCEC::SendMessage(struct _cec_msg *msg)
     return 0;
 }
 
-
-
-int CTvin::CHDMIRxCEC::sendMessageAndWaitReply(struct _cec_msg *msg, struct _cec_msg *reply_msg, int WaitCmd, int timeout)
+int CHDMIRxCEC::sendMessageAndWaitReply(struct _cec_msg *msg, struct _cec_msg *reply_msg, int WaitCmd, int timeout)
 {
     int tmp_ret = 0, tmp_ind = 0;
 
@@ -354,7 +351,7 @@ int CTvin::CHDMIRxCEC::sendMessageAndWaitReply(struct _cec_msg *msg, struct _cec
     return 0;
 }
 
-int CTvin::CHDMIRxCEC::SendCustomMessage(int source_input, unsigned char data_buf[])
+int CHDMIRxCEC::SendCustomMessage(int source_input, unsigned char data_buf[])
 {
     CECMsgStream msg_stream;
 
@@ -370,7 +367,7 @@ int CTvin::CHDMIRxCEC::SendCustomMessage(int source_input, unsigned char data_bu
     return SendMessage(&msg_stream.msg);
 }
 
-int CTvin::CHDMIRxCEC::SendCustomMessageAndWaitReply(int source_input, unsigned char data_buf[], unsigned char reply_buf[], int WaitCmd, int timeout)
+int CHDMIRxCEC::SendCustomMessageAndWaitReply(int source_input, unsigned char data_buf[], unsigned char reply_buf[], int WaitCmd, int timeout)
 {
     CECMsgStream msg_stream;
     struct _cec_msg reply_msg;
@@ -391,7 +388,7 @@ int CTvin::CHDMIRxCEC::SendCustomMessageAndWaitReply(int source_input, unsigned 
     return CopyMessageData(reply_buf, reply_msg.msg_data, reply_msg.msg_len);
 }
 
-int CTvin::CHDMIRxCEC::SendBoradcastStandbyMessage(int source_input)
+int CHDMIRxCEC::SendBoradcastStandbyMessage(int source_input)
 {
     struct _cec_msg msg;
 
@@ -407,7 +404,7 @@ int CTvin::CHDMIRxCEC::SendBoradcastStandbyMessage(int source_input)
     return SendMessage(&msg);
 }
 
-int CTvin::CHDMIRxCEC::SendGiveCECVersionMessage(int source_input, unsigned char data_buf[])
+int CHDMIRxCEC::SendGiveCECVersionMessage(int source_input, unsigned char data_buf[])
 {
     struct _cec_msg msg, reply_msg;
 
@@ -431,7 +428,7 @@ int CTvin::CHDMIRxCEC::SendGiveCECVersionMessage(int source_input, unsigned char
     return CopyMessageData(data_buf, reply_msg.msg_data, reply_msg.msg_len);
 }
 
-int CTvin::CHDMIRxCEC::SendGiveDeviceVendorIDMessage(int source_input, unsigned char data_buf[])
+int CHDMIRxCEC::SendGiveDeviceVendorIDMessage(int source_input, unsigned char data_buf[])
 {
     struct _cec_msg msg, reply_msg;
 
@@ -455,7 +452,7 @@ int CTvin::CHDMIRxCEC::SendGiveDeviceVendorIDMessage(int source_input, unsigned 
     return CopyMessageData(data_buf, reply_msg.msg_data, reply_msg.msg_len);
 }
 
-int CTvin::CHDMIRxCEC::SendGiveOSDNameMessage(int source_input, unsigned char data_buf[])
+int CHDMIRxCEC::SendGiveOSDNameMessage(int source_input, unsigned char data_buf[])
 {
     struct _cec_msg msg, reply_msg;
 
@@ -479,7 +476,7 @@ int CTvin::CHDMIRxCEC::SendGiveOSDNameMessage(int source_input, unsigned char da
     return CopyMessageData(data_buf, reply_msg.msg_data, reply_msg.msg_len);
 }
 
-int CTvin::CHDMIRxCEC::SendGivePhysicalAddressMessage(int source_input, int logic_addr, int *physical_addr)
+int CHDMIRxCEC::SendGivePhysicalAddressMessage(int source_input, int logic_addr, int *physical_addr)
 {
     struct _cec_msg msg, reply_msg;
 
@@ -510,7 +507,7 @@ int CTvin::CHDMIRxCEC::SendGivePhysicalAddressMessage(int source_input, int logi
     return -1;
 }
 
-int CTvin::CHDMIRxCEC::SendSetMenuLanguageMessage(int source_input, unsigned char data_buf[])
+int CHDMIRxCEC::SendSetMenuLanguageMessage(int source_input, unsigned char data_buf[])
 {
     struct _cec_msg msg;
 
@@ -532,7 +529,7 @@ int CTvin::CHDMIRxCEC::SendSetMenuLanguageMessage(int source_input, unsigned cha
     return SendMessage(&msg);
 }
 
-int CTvin::CHDMIRxCEC::SendVendorRemoteKeyDownMessage(int source_input, unsigned char key_val)
+int CHDMIRxCEC::SendVendorRemoteKeyDownMessage(int source_input, unsigned char key_val)
 {
     struct _cec_msg msg;
 
@@ -548,7 +545,7 @@ int CTvin::CHDMIRxCEC::SendVendorRemoteKeyDownMessage(int source_input, unsigned
     return SendMessage(&msg);
 }
 
-int CTvin::CHDMIRxCEC::SendVendorRemoteKeyUpMessage(int source_input)
+int CHDMIRxCEC::SendVendorRemoteKeyUpMessage(int source_input)
 {
     struct _cec_msg msg;
 
@@ -564,7 +561,7 @@ int CTvin::CHDMIRxCEC::SendVendorRemoteKeyUpMessage(int source_input)
     return SendMessage(&msg);
 }
 
-int CTvin::CHDMIRxCEC::rmFromRequestList(int index)
+int CHDMIRxCEC::rmFromRequestList(int index)
 {
     mListLock.lock();
 
@@ -575,7 +572,7 @@ int CTvin::CHDMIRxCEC::rmFromRequestList(int index)
     return 0;
 }
 
-int CTvin::CHDMIRxCEC::addToRequestList(HDMIRxRequestReplyItem *reply_item)
+int CHDMIRxCEC::addToRequestList(HDMIRxRequestReplyItem *reply_item)
 {
     int i = 0;
 
@@ -594,7 +591,7 @@ int CTvin::CHDMIRxCEC::addToRequestList(HDMIRxRequestReplyItem *reply_item)
     return 0;
 }
 
-int CTvin::CHDMIRxCEC::processData(int msg_cnt)
+int CHDMIRxCEC::processData(int msg_cnt)
 {
     int i = 0, j = 0;
     CECMsgStream msg_stream;
@@ -622,7 +619,7 @@ int CTvin::CHDMIRxCEC::processData(int msg_cnt)
     return 0;
 }
 
-bool CTvin::CHDMIRxCEC::threadLoop()
+bool CHDMIRxCEC::threadLoop()
 {
     int msg_cnt = 0;
     int sleeptime = 200; //ms

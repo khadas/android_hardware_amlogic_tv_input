@@ -15,18 +15,13 @@
 #include <stdlib.h>
 #include <cutils/properties.h>
 
-#include <xxxconfig.h>
-
 #ifdef LOG_TAG
 #undef LOG_TAG
 #define LOG_TAG "CAutoPQ"
 #endif
 
-CAutoPQparam::CAutoPQparam( CVpp *mVpp, CTvin *pTvin, CAv *mAv)
+CAutoPQparam::CAutoPQparam()
 {
-    myVpp = mVpp;
-    myTvin = pTvin;
-    myAv = mAv;
     preFmtType = 0;
     curFmtType = 0;
     autofreq_checkcount = 0;
@@ -124,7 +119,7 @@ int CAutoPQparam::adjustPQparameters()
 
         if (curFmtType != preFmtType) {
             LOGD("adjustPQparameters: nodeVal = %d, sig_fmt = %d.", nodeVal, sig_fmt);
-            ret = myVpp->LoadVppSettings (mAutoPQSource, sig_fmt, _3d_type, trans_fmt);
+            ret = CVpp::getInstance()->LoadVppSettings (mAutoPQSource, sig_fmt, _3d_type, trans_fmt);
         }
 
         preFmtType = curFmtType;

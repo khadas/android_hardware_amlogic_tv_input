@@ -23,6 +23,14 @@
 #undef LOG_TAG
 #define LOG_TAG "CVpp"
 #endif
+
+CVpp *CVpp::mInstance;
+CVpp *CVpp::getInstance()
+{
+    if (NULL == mInstance) mInstance = new CVpp();
+    return mInstance;
+}
+
 CVpp::CVpp()
 {
     vpp_amvideo_fd = -1;

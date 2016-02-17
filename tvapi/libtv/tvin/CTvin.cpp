@@ -28,8 +28,8 @@
 #define LOG_TAG "CTvin"
 #endif
 
-#define AFE_DEV_PATH    "/dev/tvafe0"
-#define HDMIRX_KSV_PATH    "/dev/hdmirx0"
+#define AFE_DEV_PATH        "/dev/tvafe0"
+#define HDMIRX_KSV_PATH     "/dev/hdmirx0"
 
 
 #define CC_SEL_VDIN_DEV   (0)
@@ -57,16 +57,14 @@
 #define CVBS_H_ACTIVE   (720)
 #define CVBS_V_ACTIVE   (480)
 
-#define  FBIOPUT_OSD_FREE_SCALE_ENABLE     0x4504
-#define  FBIOPUT_OSD_FREE_SCALE_WIDTH      0x4505
-#define  FBIOPUT_OSD_FREE_SCALE_HEIGHT  0x4506
-
-typedef enum {
-    VIEWMODE_NULL = 0,
-    VIEWMODE_4_3,
-    VIEWMODE_16_9
-} view_mode_t;
 int CTvin::mSourceInputToPortMap[SOURCE_MAX];
+CTvin *CTvin::mInstance;
+
+CTvin *CTvin::getInstance()
+{
+    if (NULL == mInstance) mInstance = new CTvin();
+    return mInstance;
+}
 
 CTvin::CTvin()
 {
@@ -3029,12 +3027,10 @@ int CTvin::get_hdmi_sampling_rate()
 }
 
 //**************************************************************************
-CTvin::CTvinSigDetect::CTvinSigDetect (CTvin *pTvin)
+CTvin::CTvinSigDetect::CTvinSigDetect ()
 {
     mDetectState = STATE_STOPED;
     mpObserver = NULL;
-
-    mpTvin = pTvin;
     initSigState();
 }
 
@@ -3117,7 +3113,7 @@ void CTvin::CTvinSigDetect::setVdinNoSigCheckKeepTimes(int times, bool isOnce)
 
 int CTvin::CTvinSigDetect::Tv_TvinSigDetect ( int &sleeptime )
 {
-    mpTvin->VDIN_GetSignalInfo ( &m_cur_sig_info ); //get info
+    CTvin::getInstance()->VDIN_GetSignalInfo ( &m_cur_sig_info ); //get info
     //set no sig check times
     static long long sNosigKeepTime = 0;
     //LOGD("stime=%d status=%d, fmt = %d sNosigKeepTime = %d, mKeepNosigTime = %d", sleeptime, m_cur_sig_info.status,m_cur_sig_info.fmt, sNosigKeepTime, mKeepNosigTime);

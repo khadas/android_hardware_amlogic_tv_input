@@ -38,7 +38,7 @@ static const char *VPP_POLL_PATCH = "/dev/amvideo_poll";
 
 class CSourceConnectDetect: public CThread {
 public:
-    CSourceConnectDetect(CTvin *pTvin);
+    CSourceConnectDetect();
     ~CSourceConnectDetect();
     int startDetect();
     int GetSourceConnectStatus(tv_source_input_t source_input);
@@ -60,7 +60,6 @@ private:
     bool threadLoop();
 
     ISourceConnectObserver *mpObserver;
-    CTvin *mpTvin;
     Epoll       mEpoll;
     mutable CMutex           mLock;
     epoll_event m_event;

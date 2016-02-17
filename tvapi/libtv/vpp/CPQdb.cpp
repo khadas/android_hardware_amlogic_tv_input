@@ -13,7 +13,6 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <xxxconfig.h>
 #include "CPQdb.h"
 #include "../tvutils/tvutils.h"
 #include "../tvconfig/tvconfig.h"

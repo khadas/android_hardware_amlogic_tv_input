@@ -22,7 +22,7 @@ CTvScanner *CTvScanner::m_s_Scanner = NULL;
 //{
 //
 //}
-CTvScanner::CTvScanner(CTvin *pTvin)
+CTvScanner::CTvScanner()
 {
     mbScanStart = false;
     mpObserver = NULL;
@@ -31,7 +31,6 @@ CTvScanner::CTvScanner(CTvin *pTvin)
     mMaxFreq = 100;
     mCurScanStartFreq = 1;
     mCurScanEndFreq = 100;
-    mpTvin = pTvin;
 }
 
 CTvScanner::~CTvScanner()
@@ -48,7 +47,7 @@ AM_Bool_t CTvScanner::atv_cvbs_lock_check(v4l2_std_id  *colorStd)
 
     *colorStd = 0;
     while (i < 20) {
-        ret = mpTvin->AFE_GetCVBSLockStatus(&cvbs_lock_status);
+        ret = CTvin::getInstance()->AFE_GetCVBSLockStatus(&cvbs_lock_status);
 
         if (cvbs_lock_status == TVAFE_CVBS_VIDEO_HV_LOCKED)
             //||cvbs_lock_status == TVAFE_CVBS_VIDEO_V_LOCKED
@@ -56,7 +55,7 @@ AM_Bool_t CTvScanner::atv_cvbs_lock_check(v4l2_std_id  *colorStd)
         {
             usleep(2000 * 1000);
             tvin_info_t info;
-            mpTvin->VDIN_GetSignalInfo(&info);
+            CTvin::getInstance()->VDIN_GetSignalInfo(&info);
             *colorStd = CTvin::CvbsFtmToV4l2ColorStd(info.fmt);
             LOGD("atv_cvbs_lock_check     locked   and cvbs fmt = 0x%x std = 0x%x", info.fmt, *colorStd);
             return true;
