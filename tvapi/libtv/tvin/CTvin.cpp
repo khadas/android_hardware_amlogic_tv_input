@@ -3029,11 +3029,12 @@ int CTvin::get_hdmi_sampling_rate()
 }
 
 //**************************************************************************
-CTvin::CTvinSigDetect::CTvinSigDetect ()
+CTvin::CTvinSigDetect::CTvinSigDetect (CTvin *pTvin)
 {
     mDetectState = STATE_STOPED;
     mpObserver = NULL;
 
+    mpTvin = pTvin;
     initSigState();
 }
 
@@ -3049,14 +3050,8 @@ int CTvin::CTvinSigDetect::startDetect(bool bPause)
         return mDetectState;
     }
 
-    m_cur_sig_info.trans_fmt = TVIN_TFMT_2D;
-    m_cur_sig_info.fmt = TVIN_SIG_FMT_NULL;
-    m_cur_sig_info.status = TVIN_SIG_STATUS_NULL;
-    m_cur_sig_info.reserved = 0;
-
-    m_pre_sig_info = m_cur_sig_info;
-
     m_request_pause_detect = bPause;
+    initSigState();
     this->run();
     return mDetectState;
 }
@@ -3122,8 +3117,7 @@ void CTvin::CTvinSigDetect::setVdinNoSigCheckKeepTimes(int times, bool isOnce)
 
 int CTvin::CTvinSigDetect::Tv_TvinSigDetect ( int &sleeptime )
 {
-    CTvin tvin;
-    tvin.VDIN_GetSignalInfo ( &m_cur_sig_info ); //get info
+    mpTvin->VDIN_GetSignalInfo ( &m_cur_sig_info ); //get info
     //set no sig check times
     static long long sNosigKeepTime = 0;
     //LOGD("stime=%d status=%d, fmt = %d sNosigKeepTime = %d, mKeepNosigTime = %d", sleeptime, m_cur_sig_info.status,m_cur_sig_info.fmt, sNosigKeepTime, mKeepNosigTime);

@@ -72,6 +72,7 @@ static void sqliteLogCallback(void *data, int iErrCode, const char *zMsg)
 }
 
 CTv::CTv() :
+    mSigDetectThread(&mTvin),
     mSourceConnectDetectThread(&mTvin),
     mHDMIRxCEC ( &mTvin ),
     mTvScanner ( &mTvin ),
@@ -1639,7 +1640,6 @@ int CTv::StartTvLock ()
     mFrontDev.Open(FE_ANALOG);
     mFrontDev.autoLoadFE();
     mSigDetectThread.startDetect();
-    mSigDetectThread.initSigState();
     mTvMsgQueue.startMsgQueue();
     resetDmxAndAvSource();
     SetDisplayMode ( mVpp.GetDisplayMode ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) ), CTvin::Tvin_SourceInputToSourceInputType(m_source_input), mSigDetectThread.getCurSigInfo().fmt);

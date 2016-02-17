@@ -1156,7 +1156,7 @@ public:
     class CTvinSigDetect: public CThread {
     public:
         static const int VDIN_NOSIG_DEFAULT_CHECK_TIMES = 1;
-        CTvinSigDetect ();
+        CTvinSigDetect (CTvin *pTvin);
         ~CTvinSigDetect();
         int startDetect(bool bPause = true);
         int stopDetect();
@@ -1206,6 +1206,7 @@ public:
         int Tv_TvinSigDetect ( int &args );
 
         //member
+        CTvin *mpTvin;
         tvin_info_t m_cur_sig_info;
         tvin_info_t m_pre_sig_info;
         int mKeepNosigTime;
