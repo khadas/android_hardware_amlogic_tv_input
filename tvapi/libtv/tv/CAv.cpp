@@ -1,5 +1,6 @@
-#include "CAv.h"
 #define LOG_TAG "CAv"
+
+#include "CAv.h"
 #include "../tvutils/tvutils.h"
 #include "../tvconfig/tvconfig.h"
 #include <stdio.h>
@@ -9,6 +10,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <amstream.h>
+
 CAv::CAv()
 {
     mpObserver = NULL;
@@ -211,13 +213,13 @@ int CAv::EnableVideoWhenVideoPlaying(int minFrameCount, int waitTime)
 
 bool CAv::videoIsPlaying(int minFrameCount)
 {
-    int value[3];
+    int value[3] = {0};
     value[0] = getVideoFrameCount();
     usleep(20 * 1000);
     value[1] = getVideoFrameCount();
     //usleep(20*1000);
     //value[2] = getVideoFrameCount();
-    LOGD("---videoIsPlaying  framecount =%d = %d = %d", value[0], value[1], value[2]);
+    LOGD("---videoIsPlaying framecount =%d = %d = %d", value[0], value[1], value[2]);
     if (value[1] >=  minFrameCount && (value[1] > value[0])) return true;
     else return false;
 }
@@ -241,7 +243,7 @@ int CAv::getVideoFrameCount()
 tvin_sig_fmt_t CAv::getVideoResolutionToFmt()
 {
     tvin_sig_fmt_e sig_fmt = TVIN_SIG_FMT_HDMI_1920X1080P_60HZ;
-    int height = CFile::getFileAttrValue(PATH_VIDEO_HEIGHT);
+    int height = CFile::getFileAttrValue(SYS_VIDEO_FRAME_HEIGHT);
     LOGD("---------getVideoResolutionToFmt -------- height = %d", height);
     if (height <= 576) {
         sig_fmt = TVIN_SIG_FMT_HDMI_720X480P_60HZ;
@@ -410,7 +412,8 @@ void CAv::av_evt_callback ( long dev_no, int event_type, void *param, void *user
     default:
         break;
     }
-    LOGD ( "%s, av_evt_callback : dev_no %d type %d param = %d\n", __FUNCTION__,  dev_no, pAv->mCurAvEvent.type , (int)param);
+    LOGD ( "%s, av_evt_callback : dev_no %ld type %d param = %d\n",
+        __FUNCTION__, dev_no, pAv->mCurAvEvent.type , (int)param);
 }
 
 int CAv::set3DMode(VIDEO_3D_MODE_T mode, int LR_switch, int mode_3D_TO_2D)

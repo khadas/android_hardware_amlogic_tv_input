@@ -1,3 +1,5 @@
+#define LOG_TAG "TVutils"
+
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
@@ -21,8 +23,6 @@
 using namespace android;
 
 #include "tvutils.h"
-
-#define LOG_TAG "LibTvMISC"
 #include "CTvLog.h"
 
 #define CS_I2C_1_DEV_PATH "/dev/i2c-1"
@@ -397,7 +397,7 @@ static int memerase(int fd, struct erase_info_user *erase)
 
 #define CS_ATV_SOCKET_FILE_NAME "/dev/socket/datv_sock"
 
-static int setServer(const char *fileName)
+static int setServer(const char *fileName __unused)
 {
     int ret = -1, sock = -1;
     struct sockaddr_un srv_addr;
@@ -709,13 +709,13 @@ int I2C_WriteNbyte(int i2c_no, int dev_addr, int slave_addr, int len, unsigned c
     if (i2c_no == 1) {
         device_fd = open(CS_I2C_1_DEV_PATH, O_RDWR);
         if (device_fd < 0) {
-            LOGE("%s, Open device file %S error: %s.\n", CFG_SECTION_TV, CS_I2C_1_DEV_PATH, strerror(errno));
+            LOGE("%s, Open device file %s error: %s.\n", CFG_SECTION_TV, CS_I2C_1_DEV_PATH, strerror(errno));
             return -1;
         }
     } else if (i2c_no == 2) {
         device_fd = open(CS_I2C_2_DEV_PATH, O_RDWR);
         if (device_fd < 0) {
-            LOGE("%s, Open device file %S error: %s.\n", CFG_SECTION_TV, CS_I2C_2_DEV_PATH, strerror(errno));
+            LOGE("%s, Open device file %s error: %s.\n", CFG_SECTION_TV, CS_I2C_2_DEV_PATH, strerror(errno));
             return -1;
         }
     } else {
@@ -766,13 +766,13 @@ int I2C_ReadNbyte(int i2c_no, int dev_addr, int slave_addr, int len, unsigned ch
     if (i2c_no == 1) {
         device_fd = open(CS_I2C_1_DEV_PATH, O_RDWR);
         if (device_fd < 0) {
-            LOGE("%s, Open device file %S error: %s.\n", CFG_SECTION_TV, CS_I2C_1_DEV_PATH, strerror(errno));
+            LOGE("%s, Open device file %s error: %s.\n", CFG_SECTION_TV, CS_I2C_1_DEV_PATH, strerror(errno));
             return -1;
         }
     } else if (i2c_no == 2) {
         device_fd = open(CS_I2C_2_DEV_PATH, O_RDWR);
         if (device_fd < 0) {
-            LOGE("%s, Open device file %S error: %s.\n", CFG_SECTION_TV, CS_I2C_2_DEV_PATH, strerror(errno));
+            LOGE("%s, Open device file %s error: %s.\n", CFG_SECTION_TV, CS_I2C_2_DEV_PATH, strerror(errno));
             return -1;
         }
     } else {
@@ -916,7 +916,7 @@ int Set_Fixed_NonStandard(int value)
     return ret;
 }
 
-static void *UserPet_TreadRun(void *data)
+static void *UserPet_TreadRun(void *data __unused)
 {
     while (is_turnon_user_pet_thread == true) {
         if (is_user_pet_thread_start == true) {
@@ -1429,7 +1429,7 @@ int reboot_sys_by_fbc_edid_info()
     LOGD("get edid info from fbc!");
     memset(outputmode_prop_value, '\0', 256);
     memset(lcd_reverse_prop_value, '\0', 256);
-    property_get("ubootenv.var.outputmode", outputmode_prop_value, "null" );
+    property_get(UBOOTENV_OUTPUTMODE, outputmode_prop_value, "null" );
     property_get("ubootenv.var.lcd_reverse", lcd_reverse_prop_value, "null" );
 
     fd = open("/sys/class/amhdmitx/amhdmitx0/edid_info", O_RDWR);
@@ -1455,7 +1455,7 @@ int reboot_sys_by_fbc_edid_info()
                 if (0 == env_different_as_cur) {
                     env_different_as_cur = 1;
                 }
-                property_set("ubootenv.var.outputmode", "1080p");
+                property_set(UBOOTENV_OUTPUTMODE, "1080p");
             }
             break;
         case 0x1:
@@ -1465,7 +1465,7 @@ int reboot_sys_by_fbc_edid_info()
                 if (0 == env_different_as_cur) {
                     env_different_as_cur = 1;
                 }
-                property_set("ubootenv.var.outputmode", "4k2k60hz420");
+                property_set(UBOOTENV_OUTPUTMODE, "4k2k60hz420");
             }
             break;
         case 0x2:
@@ -1473,7 +1473,7 @@ int reboot_sys_by_fbc_edid_info()
                 if (0 == env_different_as_cur) {
                     env_different_as_cur = 1;
                 }
-                property_set("ubootenv.var.outputmode", "1366*768");
+                property_set(UBOOTENV_OUTPUTMODE, "1366*768");
             }
             break;
         default:
@@ -1540,7 +1540,7 @@ int reboot_sys_by_fbc_uart_panel_info(CFbcCommunication *fbc)
     LOGD("device is fbc, get panel info from fbc!\n");
     memset(outputmode_prop_value, '\0', 256);
     memset(lcd_reverse_prop_value, '\0', 256);
-    property_get("ubootenv.var.outputmode", outputmode_prop_value, "null" );
+    property_get(UBOOTENV_OUTPUTMODE, outputmode_prop_value, "null" );
     property_get("ubootenv.var.lcd_reverse", lcd_reverse_prop_value, "null" );
 
     fbc->cfbc_Get_FBC_PANEL_REVERSE(COMM_DEV_SERIAL, &panel_reverse);
@@ -1556,7 +1556,7 @@ int reboot_sys_by_fbc_uart_panel_info(CFbcCommunication *fbc)
             if (0 == env_different_as_cur) {
                 env_different_as_cur = 1;
             }
-            property_set("ubootenv.var.outputmode", "1080p");
+            property_set(UBOOTENV_OUTPUTMODE, "1080p");
         }
         break;
     case 0x1:
@@ -1566,7 +1566,7 @@ int reboot_sys_by_fbc_uart_panel_info(CFbcCommunication *fbc)
             if (0 == env_different_as_cur) {
                 env_different_as_cur = 1;
             }
-            property_set("ubootenv.var.outputmode", "4k2k60hz420");
+            property_set(UBOOTENV_OUTPUTMODE, "4k2k60hz420");
         }
         break;
     case 0x2:
@@ -1574,7 +1574,7 @@ int reboot_sys_by_fbc_uart_panel_info(CFbcCommunication *fbc)
             if (0 == env_different_as_cur) {
                 env_different_as_cur = 1;
             }
-            property_set("ubootenv.var.outputmode", "1366*768");
+            property_set(UBOOTENV_OUTPUTMODE, "1366*768");
         }
         break;
     default:
@@ -1623,7 +1623,7 @@ static pid_t pidof(const char *name)
     char tmp_buf[512];
 
     if (!(dir = opendir("/proc"))) {
-        LOGE("%s, can't open /proc", __FUNCTION__, strerror(errno));
+        LOGE("%s, can't open /proc, %s", __FUNCTION__, strerror(errno));
         return -1;
     }
 
@@ -1711,8 +1711,8 @@ unsigned int CalCRC32(unsigned int crc, const unsigned char *ptr, unsigned int b
                                               0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c, 0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c
                                             };
     unsigned int crcu32 = crc;
-    if (buf_len < 0)
-        return 0;
+    //if (buf_len < 0)
+    //    return 0;
     if (!ptr) return 0;
     crcu32 = ~crcu32;
     while (buf_len--) {
@@ -1773,12 +1773,11 @@ static char gFBCPrjInfoBuf[1024] = {0};
 
 static int GetProjectInfoOriData(char data_str[], CFbcCommunication *fbcIns)
 {
-    int tmp_val = 0;
     int src_type = GetPlatformProjectInfoSrc();
 
     if (src_type == 0) {
-        memset(data_str, '\0', sizeof(data_str));
-        getBootEnv("ubootenv.var.project_info", data_str, "null");
+        //memset(data_str, '\0', sizeof(data_str));//sizeof pointer has issue
+        getBootEnv("ubootenv.var.project_info", data_str, (char *)"null");
         if (strcmp(data_str, "null") == 0) {
             LOGE("%s, get project info data error!!!\n", __FUNCTION__);
             return -1;
@@ -1966,7 +1965,7 @@ public:
     {
     }
 
-    void binderDied(const wp<IBinder> &who)
+    void binderDied(const wp<IBinder> &who __unused)
     {
         ALOGW("system_control died!");
     }

@@ -6,6 +6,8 @@
 //  @ File Name : CTv.cpp
 //  @ Date : 2013-11
 //  @ Author :
+#define LOG_TAG "CTv"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -57,9 +59,6 @@ extern "C" {
 #include <sys/ioctl.h>
 
 #include "CTv.h"
-
-#define LOG_TAG "CTv"
-
 
 using namespace android;
 
@@ -449,29 +448,6 @@ void CTv::CTvMsgQueue::handleMessage ( CMessage &msg )
     }
 }
 
-void CTv::onHdmiSrChanged(int   sr, bool bInit)
-{
-    if (bInit) {
-        LOGD ( "%s, Init HDMI audio, sampling rate:%d", __FUNCTION__,  sr );
-        sr = HanldeAudioInputSr(sr);
-        InitTvAudio (sr, CC_IN_USE_SPDIF_DEVICE);
-    } else {
-        LOGD ( "%s, Reset HDMI sampling rate to %d", __FUNCTION__,  sr );
-        AudioChangeSampleRate ( sr );
-    }
-}
-
-void CTv::onHMDIAudioStatusChanged(int status)
-{
-    if (status == 0) {//change to no audio data
-        SetAudioMuteForTv ( CC_AUDIO_MUTE );
-    } else if (status == 1) {//change to audio data come
-        Tv_SetAudioInSource(m_source_input);
-        usleep(200 * 1000);
-        SetAudioMuteForTv ( CC_AUDIO_UNMUTE );
-    }
-}
-
 void CTv::CTvMsgQueue::onEvent ( const CTvScanner::ScannerEvent &ev )
 {
     CMessage msg;
@@ -506,6 +482,29 @@ void CTv::CTvMsgQueue::onEvent(const CAv::AVEvent &ev)
     msg.mType = CTvMsgQueue::TV_MSG_AV_EVENT;
     memcpy(msg.mpPara, &ev, sizeof(ev));
     this->sendMsg ( msg );
+}
+
+void CTv::onHdmiSrChanged(int   sr, bool bInit)
+{
+    if (bInit) {
+        LOGD ( "%s, Init HDMI audio, sampling rate:%d", __FUNCTION__,  sr );
+        sr = HanldeAudioInputSr(sr);
+        InitTvAudio (sr, CC_IN_USE_SPDIF_DEVICE);
+    } else {
+        LOGD ( "%s, Reset HDMI sampling rate to %d", __FUNCTION__,  sr );
+        AudioChangeSampleRate ( sr );
+    }
+}
+
+void CTv::onHMDIAudioStatusChanged(int status)
+{
+    if (status == 0) {//change to no audio data
+        SetAudioMuteForTv ( CC_AUDIO_MUTE );
+    } else if (status == 1) {//change to audio data come
+        Tv_SetAudioInSource(m_source_input);
+        usleep(200 * 1000);
+        SetAudioMuteForTv ( CC_AUDIO_UNMUTE );
+    }
 }
 
 int CTv::setTvObserver ( TvIObserver *ob )
@@ -615,7 +614,7 @@ int CTv::dtvAutoScanAtscLock(int attenna, int videoStd, int audioStd)
 }
 
 //searchType 0:not 256 1:is 256 Program
-int CTv::atvAutoScan(int videoStd, int audioStd, int searchType)
+int CTv::atvAutoScan(int videoStd __unused, int audioStd __unused, int searchType)
 {
     int minScanFreq, maxScanFreq, vStd, aStd;
     AutoMutex lock ( mLock );
@@ -662,7 +661,7 @@ int CTv::atvAutoScan(int videoStd, int audioStd, int searchType)
     return 0;
 }
 
-int CTv::clearAllProgram(int arg0)
+int CTv::clearAllProgram(int arg0 __unused)
 {
     CTvProgram::CleanAllProgramBySrvType ( CTvProgram::TYPE_ATV );
     CTvProgram::CleanAllProgramBySrvType ( CTvProgram::TYPE_TV );
@@ -805,6 +804,8 @@ int CTv::playProgramLock ( int progId )
         channel = AM_AOUT_OUTPUT_DUAL_RIGHT;
     }
     setAudioChannel((int)channel);*/
+
+    progId = progId;
     return 0;
 }
 
@@ -902,10 +903,9 @@ int CTv::getAudioInfoByIndex ( int progId, int idx, int *pAFmt, String8 &lang )
     return iOutRet;
 }
 
-int CTv::switchAudioTrack ( int aPid, int aFmt, int aParam )
+int CTv::switchAudioTrack (int aPid, int aFmt, int aParam __unused)
 {
     int iOutRet = 0;
-
     do {
         if ( aPid < 0 || aFmt < 0 ) {
             break;
@@ -971,7 +971,7 @@ int CTv::ResetAudioDecoderForPCMOutput()
 }
 
 int CTv::playDtvProgram ( int mode, int freq, int para1, int para2,
-                          int vpid, int vfmt, int apid, int afmt, int pcr, int audioCompetation)
+                          int vpid, int vfmt, int apid, int afmt, int pcr __unused, int audioCompetation)
 {
     AutoMutex lock ( mLock );
     mTvAction |= TV_ACTION_PLAYING;
@@ -984,7 +984,7 @@ int CTv::playDtvProgram ( int mode, int freq, int para1, int para2,
     mFrontDev.setPara ( mode, freq, para1, para2);
     mTvAction |= TV_ACTION_PLAYING;
     startPlayTv ( SOURCE_DTV, vpid, apid, vfmt, afmt );
-    //
+
     CMessage msg;
     msg.mDelayMs = 2000;
     msg.mType = CTvMsgQueue::TV_MSG_CHECK_FE_DELAY;
@@ -1043,7 +1043,7 @@ int CTv::playDtmbProgram ( int progId )
     return 0;
 }
 
-int CTv::playAtvProgram (int  freq, int videoStd, int audioStd, int fineTune, int audioCompetation)
+int CTv::playAtvProgram (int  freq, int videoStd, int audioStd, int fineTune __unused, int audioCompetation)
 {
     mTvAction |= TV_ACTION_PLAYING;
     if ( m_blackout_enable == 1 ) {
@@ -1144,7 +1144,7 @@ int CTv::SetCurProgramAudioVolumeCompensationVal ( int tmpVal )
     return 0;
 }
 
-int CTv::GetAudioVolumeCompensationVal(int progxxId)
+int CTv::GetAudioVolumeCompensationVal(int progxxId __unused)
 {
     int tmpVolValue = 0;
     CTvProgram prog;
@@ -1296,7 +1296,7 @@ int CTv::getChannelInfoBydbID ( int dbID, channel_info_t &chan_info )
     if ( CTvProgram::TYPE_ATV == prog.getProgType() ) {
         chan_info.freq = channel.getFrequency();
         chan_info.uInfo.atvChanInfo.finefreq  =  channel.getAfcData();
-        LOGD("%s, get channel std = %lld", __FUNCTION__, channel.getStd());
+        LOGD("%s, get channel std = %d", __FUNCTION__, channel.getStd());
         chan_info.uInfo.atvChanInfo.videoStd =
             ( atv_video_std_t ) CFrontEnd::stdAndColorToVideoEnum ( channel.getStd() );
         chan_info.uInfo.atvChanInfo.audioStd =
@@ -1365,22 +1365,20 @@ int CTv::getDTVProgramID ( void )
 
 int CTv::getATVMinMaxFreq ( int *scanMinFreq, int *scanMaxFreq )
 {
-    int tmpVal, i = 0;
-    const char *config_value;
     const char *strDelimit = ",";
     char *token = NULL;
 
     *scanMinFreq = 44250000;
     *scanMaxFreq = 868250000;
 
-    config_value = config_get_str ( CFG_SECTION_ATV, "atv.get.min.max.freq", "null" );
-    if ( strcmp ( config_value, "null" ) == 0 ) {
-        LOGD ( "%s, atv.get.min.max.freq not set config\n", __FUNCTION__ );
+    const char *freqList = config_get_str ( CFG_SECTION_ATV, CFG_ATV_FREQ_LIST, "null" );
+    if ( strcmp ( freqList, "null" ) == 0 ) {
+        LOGE( "%s, atv freq list is null \n", __FUNCTION__ );
         return -1;
     }
 
     char data_str[512] = {0};
-    strncpy ( data_str, config_value, sizeof ( data_str ) - 1 );
+    strncpy ( data_str, freqList, sizeof ( data_str ) - 1 );
 
     char *pSave;
     token = strtok_r ( data_str, strDelimit, &pSave);
@@ -1416,22 +1414,18 @@ tv_source_input_t CTv::GetLastSourceInput ( void )
 
 int CTv::isVgaFmtInHdmi ( void )
 {
-    tvin_sig_fmt_t fmt = mSigDetectThread.getCurSigInfo().fmt;
-
     if ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) != SOURCE_TYPE_HDMI ) {
         return -1;
     }
-    return CTvin::isVgaFmtInHdmi ( fmt );
+    return CTvin::isVgaFmtInHdmi (mSigDetectThread.getCurSigInfo().fmt);
 }
 
 int CTv::isSDFmtInHdmi ( void )
 {
-    tvin_sig_fmt_t fmt = mSigDetectThread.getCurSigInfo().fmt;
-
     if ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) != SOURCE_TYPE_HDMI ) {
         return -1;
     }
-    return CTvin::isSDFmtInHdmi ( fmt );
+    return CTvin::isSDFmtInHdmi (mSigDetectThread.getCurSigInfo().fmt);
 }
 
 void CTv::print_version_info ( void )
@@ -1456,35 +1450,35 @@ int CTv::Tvin_GetTvinConfig ( void )
 {
     const char *config_value;
 
-    config_value = config_get_str ( CFG_SECTION_TV, "tvin.kernelpet_disable", "null" );
+    config_value = config_get_str ( CFG_SECTION_TV, CFG_TVIN_KERNELPET_DISABLE, "null" );
     if ( strcmp ( config_value, "disable" ) == 0 ) {
         gTvinConfig.kernelpet_disable = true;
     } else {
         gTvinConfig.kernelpet_disable = false;
     }
 
-    config_value = config_get_str ( CFG_SECTION_TV, "tvin.kernelpet.timeout", "null" );
+    config_value = config_get_str ( CFG_SECTION_TV, CFG_TVIN_KERNELPET_TIMEROUT, "null" );
     gTvinConfig.userpet_timeout = ( unsigned int ) strtol ( config_value, NULL, 10 );
 
     if ( gTvinConfig.kernelpet_timeout <= 0 || gTvinConfig.kernelpet_timeout > 40 ) {
         gTvinConfig.kernelpet_timeout = 10;
     }
 
-    config_value = config_get_str ( CFG_SECTION_TV, "tvin.userpet", "null" );
+    config_value = config_get_str ( CFG_SECTION_TV, CFG_TVIN_USERPET, "null" );
     if ( strcmp ( config_value, "enable" ) == 0 ) {
         gTvinConfig.userpet = true;
     } else {
         gTvinConfig.userpet = false;
     }
 
-    config_value = config_get_str ( CFG_SECTION_TV, "tvin.userpet.timeout", "null" );
+    config_value = config_get_str ( CFG_SECTION_TV, CFG_TVIN_USERPET_TIMEROUT, "null" );
     gTvinConfig.userpet_timeout = ( unsigned int ) strtol ( config_value, NULL, 10 );
 
     if ( gTvinConfig.userpet_timeout <= 0 || gTvinConfig.userpet_timeout > 100 ) {
         gTvinConfig.userpet_timeout = 10;
     }
 
-    config_value = config_get_str ( CFG_SECTION_TV, "tvin.userpet.reset", "null" );
+    config_value = config_get_str ( CFG_SECTION_TV, CFG_TVIN_USERPET_RESET, "null" );
     if ( strcmp ( config_value, "disable" ) == 0 ) {
         gTvinConfig.userpet_reset = 0;
     } else {
@@ -1504,7 +1498,7 @@ int CTv::OpenTv ( void )
     const char *value;
     Tv_Spread_Spectrum();
     //reboot system by fbc setting.
-    value = config_get_str ( CFG_SECTION_TV, "fbc.get.panelinfo", "null" );
+    value = config_get_str ( CFG_SECTION_TV, CFG_FBC_PANEL_INFO, "null" );
     LOGD("open tv, get fbc panel info:%s\n", value);
     if ( strcmp ( value, "edid" ) == 0 ) {
         reboot_sys_by_fbc_edid_info();
@@ -1531,7 +1525,7 @@ int CTv::OpenTv ( void )
 
     //set color filter
     //    SetFileAttrValue ( "/sys/module/amvideo/parameters/filt_mode", "0x2100" );
-    value = config_get_str ( CFG_SECTION_TV, "tvin.autoset.displayfreq", "null" );
+    value = config_get_str ( CFG_SECTION_TV, CFG_TVIN_DISPLAY_FREQ_AUTO, "null" );
     if ( strcmp ( value, "enable" ) == 0 ) {
         mAutoSetDisplayFreq = true;
     } else {
@@ -1540,19 +1534,19 @@ int CTv::OpenTv ( void )
 
     Tv_HandeHDMIEDIDFilePathConfig();
 
-    value = config_get_str ( CFG_SECTION_TV, "ssm.handle.hdmi.edid.en", "null" );
+    value = config_get_str ( CFG_SECTION_TV, CFG_SSM_HDMI_EDID_EN, "null" );
     if ( strtoul(value, NULL, 10) == 1 ) {
-        LOGD( "%s, get config \"%s\" is \"%s\".\n", __FUNCTION__, "ssm.handle.hdmi.edid.en", value );
+        LOGD( "%s, get config \"%s\" is \"%s\".\n", __FUNCTION__, CFG_SSM_HDMI_EDID_EN, value );
         //get hdmi edid use mode
         char prop_value[256] = {0};
         char *pEdid = NULL;
-        property_get( "ubootenv.var.outputmode", prop_value, "null" );
-        LOGD( "%s, get property \"%s\" is \"%s\".\n", __FUNCTION__, "ubootenv.var.outputmode", prop_value );
+        property_get( UBOOTENV_OUTPUTMODE, prop_value, "null" );
+        LOGD( "%s, get property [%s]:[%s]\n", __FUNCTION__, UBOOTENV_OUTPUTMODE, prop_value );
 
         if ( strcmp ( prop_value, "null" ) != 0 )
             pEdid = prop_value;
         else
-            pEdid = "hdmi_edid";//set default hdmi edid
+            pEdid = (char *)"hdmi_edid";//set default hdmi edid
 
         config_set_str ( CFG_SECTION_TV, CS_HDMI_EDID_USE_CFG, pEdid );
         //set file's path for hdmi edid of each port
@@ -1752,7 +1746,7 @@ int CTv::StopTvLock ( void )
 
 const char *CTv::getPqDbPath()
 {
-    return config_get_str(CFG_SECTION_TV, "pq_db_path", "/param/pq.db");
+    return config_get_str(CFG_SECTION_TV, CFG_PQ_DB_PATH, DEF_VALUE_PQ_DB_PATH);
 }
 
 int CTv::Tv_MiscSetBySource ( tv_source_input_t source_input )
@@ -1762,7 +1756,7 @@ int CTv::Tv_MiscSetBySource ( tv_source_input_t source_input )
     switch ( source_input ) {
     case SOURCE_TV:
         CVpp::getInstance()->VPP_SetScalerPathSel(1);
-        ret = SetFileAttrValue ( "/sys/module/am_vecm/parameters/dnlp_adj_level", "4" );
+        ret = SetFileAttrValue ( SYS_VECM_DNLP_ADJ_LEVEL, "4" );
         break;
 
     case SOURCE_HDMI1:
@@ -1770,7 +1764,7 @@ int CTv::Tv_MiscSetBySource ( tv_source_input_t source_input )
     case SOURCE_HDMI3:
         CVpp::getInstance()->VPP_SetScalerPathSel(0);
         //ret = CVpp::getInstance()->Tv_SavePanoramaMode ( VPP_PANORAMA_MODE_FULL, SOURCE_TYPE_HDMI );
-        ret |= SetFileAttrValue ( "/sys/module/am_vecm/parameters/dnlp_adj_level", "5" );
+        ret |= SetFileAttrValue ( SYS_VECM_DNLP_ADJ_LEVEL, "5" );
         break;
 
     case SOURCE_DTV:
@@ -1780,7 +1774,7 @@ int CTv::Tv_MiscSetBySource ( tv_source_input_t source_input )
     case SOURCE_AV2:
     case SOURCE_VGA:
         CVpp::getInstance()->VPP_SetScalerPathSel(1);
-        ret |= SetFileAttrValue ( "/sys/module/am_vecm/parameters/dnlp_adj_level", "5" );
+        ret |= SetFileAttrValue ( SYS_VECM_DNLP_ADJ_LEVEL, "5" );
         break;
 
     case SOURCE_SVIDEO:
@@ -1788,7 +1782,7 @@ int CTv::Tv_MiscSetBySource ( tv_source_input_t source_input )
         CVpp::getInstance()->VPP_SetScalerPathSel(1);
     default:
         CVpp::getInstance()->VPP_SetScalerPathSel(0);
-        ret |= SetFileAttrValue ( "/sys/module/am_vecm/parameters/dnlp_adj_level", "5" );
+        ret |= SetFileAttrValue ( SYS_VECM_DNLP_ADJ_LEVEL, "5" );
         break;
     }
     return ret;
@@ -1899,7 +1893,7 @@ int CTv::SetSourceSwitchInput (tv_source_input_t source_input )
     //only DTV->TVIN or TVIN->DTV need start resource detect thread
     if ( ( pre_source_input == SOURCE_DTV || cur_source_input == SOURCE_DTV ) &&
             ( cur_source_input != pre_source_input ) ) {
-        LOGD ( "%s, dtv  need  resource  detect\n", __FUNCTION__ );
+        LOGD ( "%s, dtv need resource detect\n", __FUNCTION__ );
         int isNeedCheckD2D3 = ( gTvinConfig.memory512m) ? 1 : 0;
         static int sigchkcnt = 0;
         while ( true ) {
@@ -1949,7 +1943,7 @@ int CTv::SetSourceSwitchInput (tv_source_input_t source_input )
             //for HDMI source connect detect
             CTvin::getInstance()->VDIN_OpenHDMIPinMuxOn(true);
             CVpp::getInstance()->Vpp_ResetLastVppSettingsSourceType();
-            //==========================================
+
             m_sig_stable_nums = 0;
             mSigDetectThread.setObserver ( this );
             mSigDetectThread.initSigState();
@@ -2021,7 +2015,7 @@ void CTv::onSigStillStable()
         LOGD("still stable , to start decoder");
         int startdec_status = CTvin::getInstance()->Tvin_StartDecoder ( mSigDetectThread.getCurSigInfo() );
         if ( startdec_status == 0 ) { //showboz  codes from  start decode fun
-            const char *value = config_get_str ( CFG_SECTION_TV, "tvin.db.reg.en", "null" );
+            const char *value = config_get_str ( CFG_SECTION_TV, CFG_TVIN_DB_REG, "null" );
             if ( strcmp ( value, "enable" ) == 0 ) {
                 usleep ( 20 * 1000 );
                 Tvin_SetPLLValues ();
@@ -2046,11 +2040,9 @@ void CTv::onEnableVideoLater(int framecount)
 {
     LOGD("onEnableVideoLater framecount = %d", framecount);
     mAv.EnableVideoWhenVideoPlaying(2);
-    //if(CTvin::Tvin_SourceInputToSourceInputType(m_source_input) != SOURCE_TYPE_HDMI ){
     if (CTvin::Tvin_SourceInputToSourceInputType(m_source_input) != SOURCE_TYPE_HDMI ) {
         SetAudioMuteForTv ( CC_AUDIO_UNMUTE );
         Tv_SetAudioInSource(m_source_input);
-        //}
     }
 }
 
@@ -2222,7 +2214,7 @@ void CTv::onSigStillNosig()
 
 void CTv::onSigStillNoSupport()
 {
-    return;//change for gxtvbb, don't send event when sitll not support
+    LOGD ( "%s, gxtvbb, don't send event when sitll not support", __FUNCTION__);
     /*
     tvin_info_t info = mSigDetectThread.getCurSigInfo();
     TvEvent::SignalInfoEvent SigEv;
@@ -2282,7 +2274,7 @@ void CTv::onSigDetectLoop()
     if (( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) == SOURCE_TYPE_HDMI ) ) {
         int sr = CTvin::getInstance()->get_hdmi_sampling_rate();
         if ( ( sr > 0 ) && ( sr != m_hdmi_sampling_rate ) ) {
-            LOGD("HDMI  SR CHANGED");
+            LOGD("HDMI SR CHANGED");
             CMessage msg;
             msg.mDelayMs = 0;
             msg.mType = CTvMsgQueue::TV_MSG_HDMI_SR_CHANGED;
@@ -2359,7 +2351,7 @@ void CTv::CTvDetectObserverForScanner::onSigStillStable()
         LOGD("%s still stable , to start decoder", __FUNCTION__);
         int startdec_status = CTvin::getInstance()->Tvin_StartDecoder (mpTv->mSigDetectThread.getCurSigInfo() );
         if ( startdec_status == 0 ) {
-            const char *value = config_get_str ( CFG_SECTION_TV, "tvin.db.reg.en", "null" );
+            const char *value = config_get_str ( CFG_SECTION_TV, CFG_TVIN_DB_REG, "null" );
             if ( strcmp ( value, "enable" ) == 0 ) {
                 usleep ( 20 * 1000 );
                 mpTv->Tvin_SetPLLValues ();
@@ -2454,7 +2446,7 @@ VIDEO_3D_MODE_T CTv::Tv_Get3DMode ( void )
 
 int CTv::Tv_Set3DLRSwith ( int on_off)
 {
-    LOGW ( "%s,Set3D LRSwith on_off %d ,status %d !!! ",  __FUNCTION__, on_off);
+    LOGW ( "%s,Set3D LRSwith on_off %d",  __FUNCTION__, on_off);
     mAv.set3DMode(m_mode_3d, on_off, 0);
     SSMSave3DLRSwitch(on_off);
     return 0;
@@ -2469,7 +2461,7 @@ int CTv::Tv_Get3DLRSwith ( void )
 
 int CTv::Tv_Set3DTo2DMode ( int mode)
 {
-    LOGW ( "%s,Set3D to 2D mode %d ,status %d !!! ",  __FUNCTION__  , mode);
+    LOGW ( "%s,Set3D to 2D mode %d",  __FUNCTION__  , mode);
     mAv.set3DMode(m_mode_3d, 0, mode);
     SSMSave3DTO2D ( mode );
     return 0;
@@ -2644,7 +2636,7 @@ int CTv::Tv_SetAudioInSource (tv_source_input_t source_input)
         AudioSetAudioInSource(CC_AUDIO_IN_SOURCE_HDMI);
         vol = GetAudioInternalDACDigitalPlayBackVolume_Cfg(CC_AUDIO_IN_SOURCE_HDMI);
     } else if (source_input == SOURCE_YPBPR1 || source_input == SOURCE_YPBPR2 ||
-               source_input == SOURCE_TYPE_VGA) {
+               source_input == SOURCE_VGA) {
         AudioSetAudioInSource(CC_AUDIO_IN_SOURCE_LINEIN);
         vol = GetAudioInternalDACDigitalPlayBackVolume_Cfg(CC_AUDIO_IN_SOURCE_LINEIN);
     } else if (source_input == SOURCE_MPEG) {
@@ -2672,7 +2664,7 @@ int CTv::Tv_SetAudioSourceType (tv_source_input_t source_input)
                source_input == SOURCE_HDMI3) {
         audio_source = AUDIO_HDMI_SOURCE;
     } else if (source_input == SOURCE_YPBPR1 || source_input == SOURCE_YPBPR2 ||
-               source_input == SOURCE_TYPE_VGA) {
+               source_input == SOURCE_VGA) {
         audio_source = AUDIO_AV_SOURCE;
     } else if (source_input == SOURCE_DTV) {
         audio_source = AUDIO_MPEG_SOURCE;
@@ -3019,7 +3011,7 @@ int CTv::GetHdmiHdcpKeyKsvInfo(int data_buf[])
 
 bool CTv::hdmiOutWithFbc()
 {
-    const char *value = config_get_str(CFG_SECTION_TV, "platform.havefbc", "true");
+    const char *value = config_get_str(CFG_SECTION_TV, CFG_FBC_USED, "true");
     if (strcmp(value, "true") == 0) {
         return true;
     }
@@ -3086,51 +3078,47 @@ void CTv::onHeadSetDetect(int state, int para)
 void CTv::onThermalDetect(int state)
 {
     const char *value;
-    const char *value_normal;
-    const char *value_cold;
-    int threshold = 0, val = 0;
-    static int pre_val = -1;
+    int val = 0;
+    static int preValue = -1;
 
-    value = config_get_str ( CFG_SECTION_TV, "tvin.thermal.threshold.enable", "null" );
+    value = config_get_str ( CFG_SECTION_TV, CFG_TVIN_THERMAL_THRESHOLD_ENABLE, "null" );
     if ( strcmp ( value, "enable" ) == 0 ) {
-        value = config_get_str ( CFG_SECTION_TV, "tvin.thermal.threshold.value", "null" );
-        threshold = atoi(value);
+        value = config_get_str ( CFG_SECTION_TV, CFG_TVIN_THERMAL_THRESHOLD_VALUE, "null" );
+        int threshold = atoi(value);
         LOGD ( "%s, threshold value: %d\n", __FUNCTION__, threshold);
 
         if (state > threshold) {
-            value_normal = config_get_str ( CFG_SECTION_TV, "tvin.thermal.fbc.normal.value", "null" );
-            val = atoi(value_normal);
+            const char *valueNormal = config_get_str ( CFG_SECTION_TV, CFG_TVIN_THERMAL_FBC_NORMAL_VALUE, "null" );
+            val = atoi(valueNormal);
             if (val == 0) {
                 val = 0x4210000;    //normal default
             }
             LOGD ( "%s, current temp: %d set 1\n", __FUNCTION__, state);
         } else {
-            value_cold = config_get_str ( CFG_SECTION_TV, "tvin.thermal.fbc.cold.value", "null" );
-            val = atoi(value_cold);
+            const char *valueCold = config_get_str ( CFG_SECTION_TV, CFG_TVIN_THERMAL_FBC_COLD_VALUE, "null" );
+            val = atoi(valueCold);
             if (val == 0) {
                 val = 0x8210000;    //cold default
             }
             LOGD ( "%s, current temp: 0x%x set 0\n", __FUNCTION__, state);
         }
 
-        if (pre_val == val) {
-            LOGD ( "%s, pre_val == val : 0x%x,bypass\n", __FUNCTION__, val);
-        } else {
-            pre_val = val;
+        if (preValue != val) {
+            LOGD ( "%s, pre value :0x%x, new value :0x%x, bypass\n", __FUNCTION__, preValue, val);
+            preValue = val;
             Tv_FactorySet_FBC_Thermal_State(val);
-            LOGD ( "%s, pre_val :0x%x,bypass\n", __FUNCTION__, pre_val);
         }
     } else {
-        LOGD ( "%s, tvin.thermal.threshold.enable == disable\n", __FUNCTION__);
+        LOGD ( "%s, tvin thermal threshold disable\n", __FUNCTION__);
     }
 }
 
 int CTv::SetDebugSerialOnOff(int on_off)
 {
     if (on_off) {
-        property_set("ubootenv.var.console", "ttyS0,115200n8");
+        property_set(UBOOTENV_CONSOLE, "ttyS0,115200n8");
     } else {
-        property_set("ubootenv.var.console", "off");
+        property_set(UBOOTENV_CONSOLE, "off");
     }
     return 0;
 }
@@ -3138,7 +3126,7 @@ int CTv::SetDebugSerialOnOff(int on_off)
 int CTv::GetDebugSerialOnOff()
 {
     char prop[256] = {0};
-    property_get("ubootenv.var.console", prop, "null" );
+    property_get(UBOOTENV_CONSOLE, prop, "null" );
     if (!strcmp(prop, "ttyS0,115200n8")) {
         return 1;
     } else {
@@ -3202,16 +3190,15 @@ int CTv::SendSerialData(int dev_id, int data_len, unsigned char data_buf[])
 int CTv::ChannelExport(const char *destPath)
 {
     char tmp[256];
-    FILE *fp = NULL;
     if (destPath == NULL) {
         destPath = "/storage/external_storage/sda1/";
     }
 
-    sprintf(tmp, "cp /param/dtv.db %s", destPath);
+    sprintf(tmp, "cp %s %s", DEF_VALUE_CAHNNEL_DB, destPath);
     if (system(tmp) >= 0) {
         LOGD("%s, copy dtv.db from /param to udisk success !", __FUNCTION__);
         system("sync");
-        fp = fopen(destPath, "r");
+        FILE *fp = fopen(destPath, "r");
         if (fp != NULL) {
             fclose(fp);
             fp = NULL;
@@ -3230,9 +3217,9 @@ int CTv::ChannelImport(const char *srcPath)
 
     if (Tv_Utils_IsFileExist(srcPath)) {
         char tmp[256];
-        const char *destPath = config_get_str(CFG_SECTION_TV, "tv.channel.db", (char *) "/param/dtv.db");
+        const char *destPath = config_get_str(CFG_SECTION_TV, CFG_CAHNNEL_DB, (char *) DEF_VALUE_CAHNNEL_DB);
 
-        LOGD("%s,   file exist !" , srcPath);
+        LOGD("%s, file exist !" , srcPath);
         CTvDatabase::GetTvDb()->UnInitTvDb();
         sprintf(tmp, "rm %s", destPath);
         if (system(tmp) >= 0) {
@@ -3282,13 +3269,13 @@ int CTv::Tv_HandeHDMIEDIDFilePathConfig()
     char edid_path_cfg[256];
     bool fileExist = false;
 
-    const char *value = config_get_str(CFG_SECTION_TV, "ssm.handle.hdmi.edid.en", "null");
+    const char *value = config_get_str(CFG_SECTION_TV, CFG_SSM_HDMI_EDID_EN, "null");
     if (strtoul(value, NULL, 10) == 1) {
-        LOGD( "%s, get config [ssm.handle.hdmi.edid.en]:[%s]\n", __FUNCTION__, value);
+        LOGD( "%s, get config [%s]:[%s]\n", __FUNCTION__, CFG_SSM_HDMI_EDID_EN, value);
         //get hdmi edid use mode
         char propValue[256] = {0};
-        property_get("ubootenv.var.outputmode", propValue, "null");
-        LOGD( "%s, get property [ubootenv.var.outputmode]:[%s]\n", __FUNCTION__, propValue);
+        property_get(UBOOTENV_OUTPUTMODE, propValue, "null");
+        LOGD( "%s, get property [%s]:[%s]\n", __FUNCTION__, UBOOTENV_OUTPUTMODE, propValue);
         if (strcmp(propValue, "null") != 0) {
             fileExist = true;
 
@@ -3333,11 +3320,11 @@ int CTv::Tv_SetDDDRCMode(tv_source_input_t source_input)
 {
     if (source_input == SOURCE_DTV) {
         if (GetPlatformHaveDDFlag() == 1) {
-            Tv_Utils_SetFileAttrStr("/sys/class/audiodsp/ac3_drc_control", (char *)"drcmode 3");
+            Tv_Utils_SetFileAttrStr(SYS_AUIDO_DSP_AC3_DRC, (char *)"drcmode 3");
         }
     } else {
         if (GetPlatformHaveDDFlag() == 1) {
-            Tv_Utils_SetFileAttrStr("/sys/class/audiodsp/ac3_drc_control", (char *)"drcmode 2");
+            Tv_Utils_SetFileAttrStr(SYS_AUIDO_DSP_AC3_DRC, (char *)"drcmode 2");
         }
     }
     return 0;
@@ -3627,9 +3614,9 @@ int CTv::Tv_Set2k4k_ScalerUp_Mode ( int value )
     if ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) != SOURCE_TYPE_HDMI &&
             CTvin::Tvin_SourceInputToSourceInputType(m_source_input) != SOURCE_TYPE_AV &&
             CTvin::Tvin_SourceInputToSourceInputType(m_source_input) != SOURCE_TYPE_TV) {
-        int fd = open("/sys/class/video/frame_height", O_RDONLY);
+        int fd = open(SYS_VIDEO_FRAME_HEIGHT, O_RDONLY);
         if (fd <= 0) {
-            LOGE("open /sys/class/video/frame_height ERROR!!error = -%s- \n", strerror ( errno ));
+            LOGE("open %s ERROR!!error = -%s- \n",SYS_VIDEO_FRAME_HEIGHT, strerror ( errno ));
             return -1;
         }
         read(fd, s, sizeof(s));
@@ -3654,21 +3641,18 @@ int CTv::Tv_Set2k4k_ScalerUp_Mode ( int value )
     switch (value) {
     case 1: //  on
         if (fmt_hd_sd) {
-            ret = Tv_Utils_SetFileAttrStr("/sys/class/video/video_scaler_path_sel", (char *)"0");
-            //LOGD("%s, enable, set 0.\n", __FUNCTION__);
+            ret = Tv_Utils_SetFileAttrStr(SYS_VIDEO_SCALER_PATH_SEL, (char *)"0");
         } else {
-            ret = Tv_Utils_SetFileAttrStr("/sys/class/video/video_scaler_path_sel", (char *)"1");
+            ret = Tv_Utils_SetFileAttrStr(SYS_VIDEO_SCALER_PATH_SEL, (char *)"1");
         }
         break;
 
     case 0: //  off
     default:
         if (fmt_hd_sd) {
-            ret = Tv_Utils_SetFileAttrStr("/sys/class/video/video_scaler_path_sel", (char *)"1");
-            //LOGD("%s, disable, set 1.\n", __FUNCTION__);
+            ret = Tv_Utils_SetFileAttrStr(SYS_VIDEO_SCALER_PATH_SEL, (char *)"1");
         } else {
-            ret = Tv_Utils_SetFileAttrStr("/sys/class/video/video_scaler_path_sel", (char *)"0");
-            //LOGD("%s, disable, set 0.\n", __FUNCTION__);
+            ret = Tv_Utils_SetFileAttrStr(SYS_VIDEO_SCALER_PATH_SEL, (char *)"0");
         }
         break;
     }
@@ -3687,9 +3671,9 @@ int CTv::Tv_Get2k4k_ScalerUp_Mode ( void )
     if ( CTvin::Tvin_SourceInputToSourceInputType(m_source_input) != SOURCE_TYPE_HDMI &&
             CTvin::Tvin_SourceInputToSourceInputType(m_source_input) != SOURCE_TYPE_AV &&
             CTvin::Tvin_SourceInputToSourceInputType(m_source_input) != SOURCE_TYPE_TV) {
-        int fd = open("/sys/class/video/frame_height", O_RDONLY);
+        int fd = open(SYS_VIDEO_FRAME_HEIGHT, O_RDONLY);
         if (fd <= 0) {
-            LOGE("open /sys/class/video/frame_height  ERROR!!error = -%s- \n", strerror ( errno ));
+            LOGE("open %s ERROR!!error = -%s- \n",SYS_VIDEO_FRAME_HEIGHT, strerror ( errno ));
             return -1;
         }
         read(fd, s, sizeof(s));
@@ -3710,8 +3694,7 @@ int CTv::Tv_Get2k4k_ScalerUp_Mode ( void )
         fmt_hd_sd = 0;
     }
 
-    Tv_Utils_GetFileAttrStr("/sys/class/video/video_scaler_path_sel", 64, attrV);
-    //LOGD("%s, 11111111scaler_path_sel[%s].\n", __FUNCTION__ , attrV);
+    Tv_Utils_GetFileAttrStr(SYS_VIDEO_SCALER_PATH_SEL, 64, attrV);
     if (strncasecmp(attrV, "1", strlen ("1")) == 0) {
         if (fmt_hd_sd) {
             ret = 0;
@@ -3736,11 +3719,11 @@ int CTv::Tv_SetSplitScreenDemoStatus(tv_source_input_type_t source_type, int ono
     int ret = 0;
     LOGD("%s, split screen demo status source[%d],onoff_stauts[%d]\n", __FUNCTION__ , source_type, onoff_status);
     if (1 == onoff_status) {
-        ret = Tv_Utils_SetFileAttrStr("/sys/class/amlogic/debug", (char *)"w 0x503c0 v 0x31d6");//sharpness screen left
-        ret |= Tv_Utils_SetFileAttrStr("/sys/class/amlogic/debug", (char *)"w 0x07 v 0x174d");//nr screen left
+        ret = Tv_Utils_SetFileAttrStr(SYS_DROILOGIC_DEBUG, (char *)"w 0x503c0 v 0x31d6");//sharpness screen left
+        ret |= Tv_Utils_SetFileAttrStr(SYS_DROILOGIC_DEBUG, (char *)"w 0x07 v 0x174d");//nr screen left
     } else if (0 == onoff_status) {
-        ret = Tv_Utils_SetFileAttrStr("/sys/class/amlogic/debug", (char *)"w 0x503c0 v 0x31d6");//sharpness screen left
-        ret |= Tv_Utils_SetFileAttrStr("/sys/class/amlogic/debug", (char *)"w 0x07 v 0x174d");//nr screen left
+        ret = Tv_Utils_SetFileAttrStr(SYS_DROILOGIC_DEBUG, (char *)"w 0x503c0 v 0x31d6");//sharpness screen left
+        ret |= Tv_Utils_SetFileAttrStr(SYS_DROILOGIC_DEBUG, (char *)"w 0x07 v 0x174d");//nr screen left
     }
 
     if (fbcIns != NULL && 0 == ret) {
@@ -4534,7 +4517,7 @@ int CTv::Tv_FactorySetWhiteBalanceRedGain(int source_type, int colortemp_mode, i
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
         ret = CVpp::getInstance()->FactorySetColorTemp_Rgain(source_type, colortemp_mode, value);
         if (ret != -1) {
-            LOGD("save the red gain to flash")
+            LOGD("save the red gain to flash");
             ret = CVpp::getInstance()->FactorySaveColorTemp_Rgain(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
@@ -4555,7 +4538,7 @@ int CTv::Tv_FactorySetWhiteBalanceGreenGain(int source_type, int colortemp_mode,
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
         ret = CVpp::getInstance()->FactorySetColorTemp_Ggain(source_type, colortemp_mode, value);
         if (ret != -1) {
-            LOGD("save the green gain to flash")
+            LOGD("save the green gain to flash");
             ret = CVpp::getInstance()->FactorySaveColorTemp_Ggain(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
@@ -4576,7 +4559,7 @@ int CTv::Tv_FactorySetWhiteBalanceBlueGain(int source_type, int colortemp_mode, 
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
         ret = CVpp::getInstance()->FactorySetColorTemp_Bgain(source_type, colortemp_mode, value);
         if (ret != -1) {
-            LOGD("save the blue gain to flash")
+            LOGD("save the blue gain to flash");
             ret = CVpp::getInstance()->FactorySaveColorTemp_Bgain(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
@@ -4597,7 +4580,7 @@ int CTv::Tv_FactorySetWhiteBalanceRedOffset(int source_type, int colortemp_mode,
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
         ret = CVpp::getInstance()->FactorySetColorTemp_Roffset(source_type, colortemp_mode, value);
         if (ret != -1) {
-            LOGD("save the red offset to flash")
+            LOGD("save the red offset to flash");
             ret = CVpp::getInstance()->FactorySaveColorTemp_Roffset(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
@@ -4618,7 +4601,7 @@ int CTv::Tv_FactorySetWhiteBalanceGreenOffset(int source_type, int colortemp_mod
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
         ret = CVpp::getInstance()->FactorySetColorTemp_Goffset(source_type, colortemp_mode, value);
         if (ret != -1) {
-            LOGD("save the green offset to flash")
+            LOGD("save the green offset to flash");
             ret = CVpp::getInstance()->FactorySaveColorTemp_Goffset(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
@@ -4639,7 +4622,7 @@ int CTv::Tv_FactorySetWhiteBalanceBlueOffset(int source_type, int colortemp_mode
     if (!mHdmiOutFbc) { // not use fbc store the white balance params
         ret = CVpp::getInstance()->FactorySetColorTemp_Boffset(source_type, colortemp_mode, value);
         if (ret != -1) {
-            LOGD("save the blue offset to flash")
+            LOGD("save the blue offset to flash");
             ret = CVpp::getInstance()->FactorySaveColorTemp_Boffset(source_type, colortemp_mode, value);
         }
     } else { //use fbc store the white balance params
@@ -5366,12 +5349,12 @@ int CTv::Tv_FactorySet_VbyOne_Spread_Spectrum_N311 ( int value )
 
         switch (value) {
         case 0:
-            //SetFileAttrValue ( "/sys/class/amlogic/debug" ,"w 0x135c5091 c 0x10ca");
-            //SetFileAttrValue ( "/sys/class/amlogic/debug" ,"w 0x801da72c c 0x10cb");
+            //SetFileAttrValue ( SYS_DROILOGIC_DEBUG ,"w 0x135c5091 c 0x10ca");
+            //SetFileAttrValue ( SYS_DROILOGIC_DEBUG ,"w 0x801da72c c 0x10cb");
             break;
         case 1:
-            SetFileAttrValue ( "/sys/class/amlogic/debug" , "w 0x1ba05091 c 0x10ca");
-            SetFileAttrValue ( "/sys/class/amlogic/debug" , "w 0x80bda72c c 0x10cb");
+            SetFileAttrValue ( SYS_DROILOGIC_DEBUG, "w 0x1ba05091 c 0x10ca");
+            SetFileAttrValue ( SYS_DROILOGIC_DEBUG, "w 0x80bda72c c 0x10cb");
             break;
         default:
             LOGD("%s, Set spectrum for T868 V-by-one....%d....\n", __FUNCTION__ , value);
@@ -5591,8 +5574,8 @@ int CTv::SetAudioI2sMute(int muteStatus)
     } else {
         vol = 256;
     }
-    CFile::setFileAttrValue("/sys/class/amaudio2/aml_direct_right_gain", vol);
-    CFile::setFileAttrValue("/sys/class/amaudio2/aml_direct_left_gain", vol);
+    CFile::setFileAttrValue(SYS_AUIDO_DIRECT_RIGHT_GAIN, vol);
+    CFile::setFileAttrValue(SYS_AUIDO_DIRECT_LEFT_GAIN, vol);
     return 0;
 }
 
@@ -5604,7 +5587,7 @@ int CTv::SetDacMute(int muteStatus, int mute_type)
     }
 
     if (mute_type & CC_DAC_MUTE_TYPE_EXTERNAL) {
-        int tmp_ret = 0, set_val = 0;
+        int set_val = 0;
         int aud_arch_type = GetAudioArchitectureTypeCFG();
 
         if (aud_arch_type == CC_DAC_G9TV_EXTERNAL_DAC_ON_BOARD) {
@@ -5691,8 +5674,7 @@ int CTv::SetAudioSPDIFMode(int tmp_val)
 {
     LOGD("%s : tmp_val = %d\n", __FUNCTION__, tmp_val);
     mCurAudioSPDIFMode = tmp_val;
-
-    SetSPDIFMode(mCurAudioSPDIFMode);
+    SetSPDIFMode(tmp_val);
     return 0;
 }
 
@@ -6119,20 +6101,20 @@ void CTv::RefreshSrsEffectAndDacGain()
 
     if (surround_switch == CC_SWITCH_ON) {
         mAudioEffect.SetSrsSurroundSwitch(CC_SWITCH_ON);
-        tmp_gain_val = GetAudioSRSGainCfg("audio.srs.sourround.gain", 50);
+        tmp_gain_val = GetAudioSRSGainCfg(CFG_AUDIO_SRS_SOURROUND_GAIN, 50);
         mAudioEffect.SetSrsSurroundGain(tmp_gain_val);
 
-        int input_gain_val = GetAudioSRSGainCfg("audio.srs.input.gain", 50);
-        int out_gain_val = GetAudioSRSGainCfg("audio.srs.output.gain", 50);
+        int input_gain_val = GetAudioSRSGainCfg(CFG_AUDIO_SRS_INPUT_GAIN, 50);
+        int out_gain_val = GetAudioSRSGainCfg(CFG_AUDIO_SRS_OUTPUT_GAIN, 50);
         mAudioEffect.SetSrsInputOutputGain(input_gain_val, out_gain_val);
 
         if (trubass_switch == CC_SWITCH_ON
                 && dialogclarity_switch == CC_SWITCH_OFF) {
 
             mAudioEffect.SetSrsTruBassSwitch (CC_SWITCH_ON);
-            tmp_gain_val = GetAudioSRSGainCfg("audio.srs.trubass.gain", 50);
+            tmp_gain_val = GetAudioSRSGainCfg(CFG_AUDIO_SRS_TRUBASS_GAIN, 50);
             mAudioEffect.SetSrsTruBassGain(tmp_gain_val);
-            tmp_gain_val = GetAudioSRSGainCfg("audio.srs.trubass.speakersize", 2);
+            tmp_gain_val = GetAudioSRSGainCfg(CFG_AUDIO_SRS_TRUBASS_SPEAKERSIZE, 2);
             mAudioEffect.SetSrsTrubassSpeakerSize(tmp_gain_val);
 
             mAudioEffect.SetSrsDialogClaritySwitch (CC_SWITCH_OFF);
@@ -6141,9 +6123,9 @@ void CTv::RefreshSrsEffectAndDacGain()
                    && dialogclarity_switch == CC_SWITCH_ON) {
 
             mAudioEffect.SetSrsDialogClaritySwitch (CC_SWITCH_ON);
-            tmp_gain_val = GetAudioSRSGainCfg("audio.srs.dialogclarity.gain", 30);
+            tmp_gain_val = GetAudioSRSGainCfg(CFG_AUDIO_SRS_CLARITY_GAIN, 30);
             mAudioEffect.SetSrsDialogClarityGain(tmp_gain_val);
-            tmp_gain_val = GetAudioSRSGainCfg("audio.srs.definition.gain", 20);
+            tmp_gain_val = GetAudioSRSGainCfg(CFG_AUDIO_SRS_DEFINITION_GAIN, 20);
             mAudioEffect.SetSrsDefinitionGain(tmp_gain_val);
 
             mAudioEffect.SetSrsTruBassSwitch (CC_SWITCH_OFF);
@@ -6152,15 +6134,15 @@ void CTv::RefreshSrsEffectAndDacGain()
                    && dialogclarity_switch == CC_SWITCH_ON) {
 
             mAudioEffect.SetSrsTruBassSwitch (CC_SWITCH_ON);
-            tmp_gain_val = GetAudioSRSGainCfg("audio.srs.trubass.gain", 50);
+            tmp_gain_val = GetAudioSRSGainCfg(CFG_AUDIO_SRS_TRUBASS_GAIN, 50);
             mAudioEffect.SetSrsTruBassGain(tmp_gain_val);
-            tmp_gain_val = GetAudioSRSGainCfg("audio.srs.trubass.speakersize", 2);
+            tmp_gain_val = GetAudioSRSGainCfg(CFG_AUDIO_SRS_TRUBASS_SPEAKERSIZE, 2);
             mAudioEffect.SetSrsTrubassSpeakerSize(tmp_gain_val);
 
             mAudioEffect.SetSrsDialogClaritySwitch(CC_SWITCH_ON);
-            tmp_gain_val = GetAudioSRSGainCfg("audio.srs.dialogclarity.gain", 30);
+            tmp_gain_val = GetAudioSRSGainCfg(CFG_AUDIO_SRS_CLARITY_GAIN, 30);
             mAudioEffect.SetSrsDialogClarityGain(tmp_gain_val);
-            tmp_gain_val = GetAudioSRSGainCfg("audio.srs.definition.gain", 20);
+            tmp_gain_val = GetAudioSRSGainCfg(CFG_AUDIO_SRS_DEFINITION_GAIN, 20);
             mAudioEffect.SetSrsDefinitionGain(tmp_gain_val);
 
         } else if (trubass_switch == CC_SWITCH_OFF
@@ -6177,16 +6159,16 @@ void CTv::RefreshSrsEffectAndDacGain()
     //Refesh DAC gain
     int main_gain_val = 0;
     if (surround_switch == CC_SWITCH_ON) {
-        main_gain_val = GetAudioEffectAmplifierGainCfg("audio.srs.sourround.ampmaster.gain", 6, 24);
+        main_gain_val = GetAudioEffectAmplifierGainCfg(CFG_AUDIO_SRS_SOURROUND_MASTER_GAIN, 6, 24);
         if (dialogclarity_switch == CC_SWITCH_ON
                 && trubass_switch == CC_SWITCH_OFF) {
-            main_gain_val = GetAudioEffectAmplifierGainCfg("audio.srs.dialogclarity.ampmaster.gain", 6, 24);
+            main_gain_val = GetAudioEffectAmplifierGainCfg(CFG_AUDIO_SRS_CLARITY_MASTER_GAIN, 6, 24);
         } else if (dialogclarity_switch == CC_SWITCH_OFF
                    && trubass_switch == CC_SWITCH_ON) {
-            main_gain_val = GetAudioEffectAmplifierGainCfg("audio.srs.trubass.ampmaster.gain", 6, 24);
+            main_gain_val = GetAudioEffectAmplifierGainCfg(CFG_AUDIO_SRS_TRUBASS_MASTER_GAIN, 6, 24);
         } else if (dialogclarity_switch == CC_SWITCH_ON
                    && trubass_switch == CC_SWITCH_ON) {
-            main_gain_val = GetAudioEffectAmplifierGainCfg("audio.srs.trubass.dialogclarity.ampmaster.gain", 6, 24);
+            main_gain_val = GetAudioEffectAmplifierGainCfg(CFG_AUDIO_SRS_TRUBASS_CLARITY_MASTER_GAIN, 6, 24);
         }
     }
     mAudioAlsa.SetMainVolumeGain(main_gain_val);
@@ -6757,7 +6739,7 @@ int CTv::SetAtvInGain(int gain_val)
     char set_str[32] = {0};
 
     sprintf ( set_str, "audio_gain_set %x", gain_val );
-    return SetFileAttrValue ( "/sys/class/amlatvdemod/atvdemod_debug", set_str );
+    return SetFileAttrValue ( SYS_ATV_DEMOD_DEBUG, set_str );
 }
 
 int CTv::SetSpecialModeEQGain(int tmp_val)
@@ -6810,7 +6792,7 @@ int CTv::SaveSpecialIndexEQGain(int buf_index, int w_val)
 // amAudio
 int CTv::OpenAmAudio(unsigned int sr, int input_device, int output_device)
 {
-    LOGD("OpenAmAudio   input_device = %d", input_device);
+    LOGD("OpenAmAudio input_device = %d", input_device);
     return amAudioOpen(sr, input_device, output_device);
 }
 
@@ -6821,7 +6803,7 @@ int CTv::CloseAmAudio(void)
 
 int CTv::SetAmAudioInputSr(unsigned int sr, int output_device)
 {
-    LOGD("SetAmAudioInputSr   ");
+    LOGD("SetAmAudioInputSr");
     return amAudioSetInputSr(sr, CC_IN_USE_SPDIF_DEVICE, output_device);
 }
 
@@ -6856,29 +6838,9 @@ int CTv::SetAudioDumpDataFlag(int tmp_flag)
     return amAudioSetDumpDataFlag(tmp_flag);
 }
 
-int GetAudioDumpDataFlag()
+int CTv::GetAudioDumpDataFlag()
 {
     return amAudioGetDumpDataFlag();
-}
-
-static int RealCalVolDigitLUTBuf(int start_ind, int end_ind, int start_val,
-                                 int end_val, int lut_buf[])
-{
-    int i = 0;
-    float tmp_step = 0;
-
-    if (end_ind < start_ind) {
-        return 0;
-    }
-
-    tmp_step = (float) (end_val - start_val) / (float) (end_ind - start_ind);
-
-    for (i = start_ind; i < end_ind; i++) {
-        lut_buf[i] = start_val + (int) (tmp_step * (i - start_ind));
-    }
-
-    lut_buf[end_ind] = end_val;
-    return 1;
 }
 
 void CTv::AudioSetVolumeDigitLUTBuf(int lut_table_index, int *MainVolLutBuf)
@@ -7157,91 +7119,75 @@ int CTv::AudioSSMRestoreDefaultSetting()
     return 0;
 }
 
-static const char *gDefCapturePropName = "snd.card.default.card.capture";
-
 int CTv::InitSetTvAudioCard()
 {
-    int i = 0, totle_num = 0, capture_ind = 0;
-    char tmp_buf[32] = { 0 };
-    char tv_card_name[64] = { 0 };
-    char prop_value[PROPERTY_VALUE_MAX];
+    int captureIdx = -1;
+    char buf[32] = { 0 };
+    char propValue[PROPERTY_VALUE_MAX];
 
 #ifndef BOARD_ALSA_AUDIO_TINY
     snd_card_refresh_info();
 #endif
 
     if (GetTvAudioCardNeedSet()) {
-        memset(prop_value, '\0', PROPERTY_VALUE_MAX);
-        property_get("snd.card.totle.num", prop_value, "0");
+        int totleNum = 0;
+        char cardName[64] = { 0 };
 
-        totle_num = strtoul(prop_value, NULL, 10);
-        LOGD("%s, totle number = %d\n", __FUNCTION__, totle_num);
-        totle_num = 8;
+        GetTvAudioCardName(cardName);
+        /*
+        memset(propValue, '\0', PROPERTY_VALUE_MAX);
+        property_get(PROP_AUDIO_CARD_NUM, propValue, "0");
 
-        GetTvAudioCardName(tv_card_name);
+        totleNum = strtoul(propValue, NULL, 10);
+        LOGD("%s, totle number = %d\n", __FUNCTION__, totleNum);
+        */
+        totleNum = 8;
 
-        for (i = 0; i < totle_num; i++) {
-            sprintf(tmp_buf, "snd.card.%d.name", i);
-            memset(prop_value, '\0', PROPERTY_VALUE_MAX);
-            property_get(tmp_buf, prop_value, "null");
+        for (int i = 0; i < totleNum; i++) {
+            sprintf(buf, "snd.card.%d.name", i);
+            memset(propValue, '\0', PROPERTY_VALUE_MAX);
+            property_get(buf, propValue, "null");
 
-            LOGD("%s, key string \"%s\", value string \"%s\".\n", __FUNCTION__, tmp_buf, prop_value);
-
-            if (strcmp(prop_value, tv_card_name) == 0) {
+            LOGD("%s, key string \"%s\", value string \"%s\".\n", __FUNCTION__, buf, propValue);
+            if (strcmp(propValue, cardName) == 0) {
+                captureIdx = i;
                 break;
             }
         }
-
-        capture_ind = i;
-
-        if (capture_ind == totle_num) {
-            capture_ind = -1;
-            LOGE("%s, can't find tv card \"%s\".\n", __FUNCTION__, tv_card_name);
-        }
-    } else {
-        capture_ind = -1;
     }
 
-    sprintf(tmp_buf, "%d", capture_ind);
-    property_set(gDefCapturePropName, tmp_buf);
-    LOGD("%s, set \"%s\" as \"%s\".\n", __FUNCTION__, gDefCapturePropName, tmp_buf);
+    sprintf(buf, "%d", captureIdx);
+    property_set(PROP_DEF_CAPTURE_NAME, buf);
+    LOGD("%s, set \"%s\" as \"%s\".\n", __FUNCTION__, PROP_DEF_CAPTURE_NAME, buf);
     return 0;
 }
 
 int CTv::UnInitSetTvAudioCard()
 {
-    char tmp_buf[32] = { 0 };
-
 #ifndef BOARD_ALSA_AUDIO_TINY
     snd_card_refresh_info();
 #endif
-    sprintf(tmp_buf, "%d", -1);
-    property_set(gDefCapturePropName, tmp_buf);
-    LOGD("%s, set \"%s\" as \"%s\".\n", __FUNCTION__, gDefCapturePropName, tmp_buf);
+    property_set(PROP_DEF_CAPTURE_NAME, "-1");
+    LOGD("%s, set [%s]:[-1]\n", __FUNCTION__, PROP_DEF_CAPTURE_NAME);
     return 0;
 }
 
-#define CS_SPDIF_MODE_DEV_PATH "/sys/class/audiodsp/digital_raw"
-
 int CTv::SetSPDIFMode(int mode_val)
 {
-    FILE *spdif_mode_fp = NULL;
-
-    spdif_mode_fp = fopen(CS_SPDIF_MODE_DEV_PATH, "w");
-    if (spdif_mode_fp == NULL) {
-        LOGE("%s, Open file %s error(%s)!\n", __FUNCTION__, CS_SPDIF_MODE_DEV_PATH, strerror(errno));
+    FILE *fp = fopen(SYS_SPDIF_MODE_DEV_PATH, "w");
+    if (fp == NULL) {
+        LOGE("%s, Open file %s error(%s)!\n", __FUNCTION__, SYS_SPDIF_MODE_DEV_PATH, strerror(errno));
         return -1;
     }
 
     if (mode_val == CC_SPDIF_MODE_PCM) {
-        fprintf(spdif_mode_fp, "%d", 0);
+        fprintf(fp, "%d", 0);
     } else if (mode_val == CC_SPDIF_MODE_RAW ) {
-        fprintf(spdif_mode_fp, "%d", 1);
+        fprintf(fp, "%d", 1);
     }
 
-    fclose(spdif_mode_fp);
-    spdif_mode_fp = NULL;
-
+    fclose(fp);
+    fp = NULL;
     return 0;
 }
 
@@ -7298,7 +7244,7 @@ int CTv::SendCmdToOffBoardFBCExternalDac(int cmd, int para)
 
 int CTv::GetHdmiAvHotplugDetectOnoff()
 {
-    const char *value = config_get_str ( CFG_SECTION_TV, "ssm.hdmi_av.hotplug.detect.en", "null" );
+    const char *value = config_get_str ( CFG_SECTION_TV, CFG_SSM_HDMI_AV_DETECT, "null" );
     if ( strtoul(value, NULL, 10) == 1 ) {
         return 1;
     }

@@ -1,3 +1,5 @@
+#define LOG_TAG "audio_cfg"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,7 +10,6 @@
 #include "../tvconfig/tvconfig.h"
 #include "audio_cfg.h"
 
-#define LOG_TAG "audio_cfg"
 #include "CTvLog.h"
 
 static const char AudioAmpMainVolLutBaseNameTable[CC_GET_TYPE_CNT][128] = {"audio.amp.mainvol.tv.lutbuf",//0
@@ -468,7 +469,7 @@ int GetAudioSRSSupperBassTrubassSpeakerSizeCfg()
 {
     char cfg_name[128] = { 0 };
 
-    strcpy(cfg_name, "audio.srs.turbass.speakersize");
+    strcpy(cfg_name, CFG_AUDIO_SRS_TRUBASS_SPEAKERSIZE);
 
     const char *config_value = config_get_str(CFG_SECTION_TV, cfg_name, "null");
 

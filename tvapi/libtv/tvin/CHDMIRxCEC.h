@@ -21,10 +21,11 @@ public:
     public:
         IHDMIRxCECObserver() {};
         virtual ~IHDMIRxCECObserver() {};
-        virtual void onHDMIRxCECMessage(int msg_len, unsigned char msg_buf[]) {};
+        virtual void onHDMIRxCECMessage(int msg_len __unused, unsigned char msg_buf[] __unused) {
+        };
     };
-    void setObserver ( IHDMIRxCECObserver *pOb )
-    {
+
+    void setObserver ( IHDMIRxCECObserver *pOb ) {
         mpObserver = pOb;
     };
 

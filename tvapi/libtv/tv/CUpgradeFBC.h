@@ -97,7 +97,10 @@ public:
     public:
         IUpgradeFBCObserver() {};
         virtual ~IUpgradeFBCObserver() {};
-        virtual void onUpgradeStatus(int state, int param) {};
+        virtual void onUpgradeStatus(int state, int param) {
+            state = state;
+            param = param;
+        };
     };
     void setObserver(IUpgradeFBCObserver *pOb)
     {

@@ -1,3 +1,5 @@
+#define LOG_TAG "AutoBackLight"
+
 #include "AutoBackLight.h"
 #include "../tvsetting/CTvSetting.h"
 #include "../tvconfig/tvconfig.h"
@@ -14,11 +16,6 @@
 #include <linux/fb.h>
 #include <stdlib.h>
 #include <cutils/properties.h>
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "AutoBackLight"
-#endif
 
 AutoBackLight::AutoBackLight()
 {

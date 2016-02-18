@@ -1,3 +1,5 @@
+#define LOG_TAG "CFrontEnd"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -20,7 +22,6 @@ extern "C" {
 #include "linux/videodev2.h"
 #include "am_fend_ctrl.h"
 }
-#define LOG_TAG "CFrontEnd"
 
 CFrontEnd::CFrontEnd()
 {
@@ -193,7 +194,7 @@ int CFrontEnd::GetTSSource(AM_DMX_Source_t *src)
     return 0;
 }
 
-void CFrontEnd::dmd_fend_callback(long dev_no, int event_type, void *param, void *user_data)
+void CFrontEnd::dmd_fend_callback(long dev_no __unused, int event_type __unused, void *param, void *user_data)
 {
     CFrontEnd *pFront = (CFrontEnd *)user_data;
     if (NULL == pFront) {
@@ -468,7 +469,7 @@ int CFrontEnd::setThreadDelay(int delay)
     }
 }
 
-int CFrontEnd::lock(int frequency, int symbol_rate, int modulation, int bandwidth)
+int CFrontEnd::lock(int frequency, int symbol_rate, int modulation, int bandwidth __unused)
 {
     int rt = -1;
     struct dvb_frontend_parameters fparam;

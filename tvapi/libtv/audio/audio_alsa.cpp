@@ -1,3 +1,5 @@
+#define LOG_TAG "CAudioAlsa"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +17,6 @@
 #include "tvsetting/audio_cfg.h"
 #include "audio_alsa.h"
 #include <cutils/properties.h>
-#define LOG_TAG "CAudioAlsa"
 #include "CTvLog.h"
 #include "audio_amaudio.h"
 
@@ -206,7 +207,7 @@ int CAudioAlsa::HandleUSBAudioControlValue(int val_count, int data_buf[], int ma
         goto err_exit;
     }
 
-    for (match_index = 0; match_index < match_count; match_index++) {
+    for (match_index = 0; match_index < (unsigned int)match_count; match_index++) {
         pctl = mixer_get_ctl_by_name(mpUsbMixer, match_names[match_index]);
         if (NULL == pctl) {
             LOGE("[%s:%d] Failed to get mixer control for:%s\n", __FUNCTION__, __LINE__, match_names[match_index]);
@@ -230,11 +231,9 @@ err_exit:
     return -1;
 }
 
-int CAudioAlsa::CheckVolume(int digit_vol, int digit_min, int digit_max, int hd_min,
-                            int hd_max)
+int CAudioAlsa::CheckVolume(int digit_vol, int digit_min __unused, int digit_max __unused,
+                            int hd_min, int hd_max)
 {
-    int tmp_val = digit_vol;
-
     if (digit_vol < hd_min) {
         return hd_min;
     } else if (digit_vol > hd_max) {
@@ -244,9 +243,11 @@ int CAudioAlsa::CheckVolume(int digit_vol, int digit_min, int digit_max, int hd_
     return digit_vol;
 }
 
-int CAudioAlsa::GetTwoChannelVolume(int vol_buf[], int l_min_vol, int l_max_vol,
-                                    int r_min_vol, int r_max_vol, char *match_names, int hd_min,
-                                    int hd_max)
+int CAudioAlsa::GetTwoChannelVolume(int vol_buf[],
+                                    int l_min_vol __unused, int l_max_vol __unused,
+                                    int r_min_vol __unused, int r_max_vol __unused,
+                                    char *match_names,
+                                    int hd_min __unused, int hd_max __unused)
 {
     vol_buf[0] = 0;
     vol_buf[1] = 0;
@@ -255,13 +256,11 @@ int CAudioAlsa::GetTwoChannelVolume(int vol_buf[], int l_min_vol, int l_max_vol,
 
 int CAudioAlsa::GetLineInMaxVol()
 {
-
     return 127;
 }
 
 int CAudioAlsa::GetLineOutMaxVol()
 {
-
     return 255;
 }
 
@@ -676,27 +675,22 @@ int CAudioAlsa::SetMixerDacSwitch(int switch_val)
 
 int CAudioAlsa::GetMixerDacSwitch(void)
 {
-    char *match_names = "Output Mixer DAC Switch" ;
     int ctl_buf[2];
-
-    AudioControlGetValue(2, ctl_buf, match_names);
-
+    AudioControlGetValue(2, ctl_buf, (char *)"Output Mixer DAC Switch");
     return ctl_buf[0];
 }
 
 int CAudioAlsa::TransVolumeBarVolToDigitalVol(int digit_lut_buf[], int digit_vol)
 {
-
     return digit_lut_buf[digit_vol];
 }
 
-int CAudioAlsa::TransDigitalVolToVolumeBarVol(int digit_lut_buf[], int hd_vol, int hd_min,
-        int hd_max, int digit_min, int digit_max)
+int CAudioAlsa::TransDigitalVolToVolumeBarVol(int digit_lut_buf[], int hd_vol,
+        int hd_min __unused, int hd_max __unused,
+        int digit_min __unused, int digit_max)
 {
-    int i;
-
-
-    for (i = 0; i < CC_VOL_TRANS_LUT_BUF_SIZE - 1; i++) {
+    int i = 0;
+    for (; i < CC_VOL_TRANS_LUT_BUF_SIZE - 1; i++) {
         if (digit_lut_buf[i] >= hd_vol && digit_lut_buf[i + 1] < hd_vol)
             break;
     }
@@ -755,7 +749,6 @@ int CAudioAlsa::CalculateBalanceVol(int max_vol, int balance_val, int vol_buf[])
 {
     int bal_mid_vol = 0, bal_cal_len = 0;
     int tmp_val = 0;
-
 
     vol_buf[0] = max_vol;
     vol_buf[1] = max_vol;

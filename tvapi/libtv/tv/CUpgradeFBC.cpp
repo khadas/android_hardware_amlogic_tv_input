@@ -1,3 +1,5 @@
+#define LOG_TAG "CUpgradeFBC"
+
 #include <CTvLog.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,11 +11,6 @@
 #include <cutils/log.h>
 
 #include "CUpgradeFBC.h"
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CUpgradeFBC"
-#endif
 
 CUpgradeFBC::CUpgradeFBC()
 {

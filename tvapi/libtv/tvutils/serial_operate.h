@@ -12,21 +12,20 @@ public:
 
     class IHeadSetObserver {
     public:
-        IHeadSetObserver()
-        {};
-        virtual ~IHeadSetObserver()
-        {};
-        virtual void onHeadSetDetect(int state, int para) {};
-        virtual void onThermalDetect(int state) {};
-
+        IHeadSetObserver() {};
+        virtual ~IHeadSetObserver() {};
+        virtual void onHeadSetDetect(int state __unused, int para __unused) {
+        };
+        virtual void onThermalDetect(int state __unused) {
+        };
     };
-    void setObserver ( IHeadSetObserver *pOb )
-    {
+
+    void setObserver ( IHeadSetObserver *pOb ) {
         mpObserver = pOb;
     };
 
 private:
-    bool  threadLoop();
+    bool threadLoop();
     IHeadSetObserver *mpObserver;
 
 };

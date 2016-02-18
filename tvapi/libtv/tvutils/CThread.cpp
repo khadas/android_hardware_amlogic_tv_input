@@ -35,7 +35,7 @@ int CThread::readyToRun()
 }
 
 
-int CThread::run(const char *name, int priority, int stack)
+int CThread::run(const char *name __unused, int priority __unused, int stack)
 {
     CMutex::Autolock _l(mLock);
 

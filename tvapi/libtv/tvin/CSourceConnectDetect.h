@@ -49,11 +49,12 @@ public:
     public:
         ISourceConnectObserver() {};
         virtual ~ISourceConnectObserver() {};
-        virtual void onSourceConnect(int source, int connect_status) {};
+        virtual void onSourceConnect(int source __unused, int connect_status __unused) {
+        };
         virtual void onVframeSizeChange() {};
     };
-    void setObserver ( ISourceConnectObserver *pOb )
-    {
+
+    void setObserver ( ISourceConnectObserver *pOb ) {
         mpObserver = pOb;
     };
 private:

@@ -1,3 +1,5 @@
+#define LOG_TAG "TvService"
+
 #include <utils/Log.h>
 #include <binder/IServiceManager.h>
 #include <binder/IPCThreadState.h>
@@ -29,7 +31,6 @@ extern "C" {
 #include "make_ext4fs.h"
 #include "am_ver.h"
 }
-#define LOG_TAG "TvService"
 
 #define PICTURE_TIMEOUT seconds(5)
 
@@ -608,8 +609,8 @@ void TvService::Client::disconnect()
 
 status_t TvService::Client::createVideoFrame(const sp<IMemory> &share_mem, int iSourceMode, int iCapVideoLayerOnly)
 {
-    LOGD(" mem=%p size=%d", share_mem->pointer() == NULL, share_mem->size());
-    LOGD("iSourceMode :%d  iCapVideoLayerOnly = %d \n", iSourceMode, iCapVideoLayerOnly);
+    LOGD(" mem=%d size=%d", share_mem->pointer() == NULL, share_mem->size());
+    LOGD("iSourceMode :%d iCapVideoLayerOnly = %d \n", iSourceMode, iCapVideoLayerOnly);
     int Len = 0;
     Mutex::Autolock lock(mLock);
     mTvService->mCapVidFrame.InitVCap(share_mem);
@@ -2947,20 +2948,20 @@ status_t TvService::Client::processCmd(const Parcel &p, Parcel *r)
         break;
     }
     case MISC_SERIAL_SEND_DATA: {
-        int i = 0, tmp_buf_size = 0, ret = 0;
+        int i = 0, bufSize = 0, ret = 0;
 
         int dev_id = p.readInt32();
 
-        tmp_buf_size = p.readInt32();
-        if (tmp_buf_size > sizeof(tmp_uc_buf)) {
-            tmp_buf_size = sizeof(tmp_uc_buf);
+        bufSize = p.readInt32();
+        if (bufSize > (int)sizeof(tmp_uc_buf)) {
+            bufSize = sizeof(tmp_uc_buf);
         }
 
-        for (i = 0; i < tmp_buf_size; i++) {
+        for (i = 0; i < bufSize; i++) {
             tmp_uc_buf[i] = p.readInt32() & 0xFF;
         }
 
-        ret = mpTv->SendSerialData(dev_id, tmp_buf_size, tmp_uc_buf);
+        ret = mpTv->SendSerialData(dev_id, bufSize, tmp_uc_buf);
         r->writeInt32(ret);
         break;
     }
@@ -3114,7 +3115,7 @@ status_t TvService::Client::processCmd(const Parcel &p, Parcel *r)
     }
     case DTV_GET_SCAN_FREQUENCY_LIST: {
         Vector<sp<CTvChannel> > out;
-        int tmpRet = CTvRegion::getChannelListByName("CHINA,Default DTMB ALL", out);
+        int tmpRet = CTvRegion::getChannelListByName((char *)"CHINA,Default DTMB ALL", out);
         r->writeInt32(out.size());
         for (int i = 0; i < (int)out.size(); i++) {
             r->writeInt32(out[i]->getID());
@@ -4394,6 +4395,8 @@ sp<TvService::Client> TvService::Client::getClientFromCookie(void *user)
                LOGE("getClientFromCookie: got callback but client was NULL");
            }
        }*/
+
+    user = user;//for warning
     return client;
 }
 
@@ -4418,6 +4421,10 @@ void TvService::Client::notifyCallback(int32_t msgType, int32_t ext1, int32_t ex
         }
         break;
     }
+
+    //for warning
+    ext1 = ext1;
+    ext2 = ext2;
 
 #if DEBUG_CLIENT_REFERENCES
     if (client->getStrongCount() == 1) {

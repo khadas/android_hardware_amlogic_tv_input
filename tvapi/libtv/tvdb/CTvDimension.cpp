@@ -1,15 +1,10 @@
+#define LOG_TAG "CTvDimension"
 
 #include "CTvDimension.h"
 #include "CTvProgram.h"
 #include "CTvTime.h"
 #include "CTvEvent.h"
 #include "../tvconfig/tvconfig.h"
-
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#endif
-#define LOG_TAG "CTvDimension"
 
 /**
  *TV ATSC rating dimension

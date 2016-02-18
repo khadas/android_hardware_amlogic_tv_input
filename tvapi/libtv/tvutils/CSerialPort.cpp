@@ -17,6 +17,7 @@ CSerialPort::CSerialPort()
 {
     mDevId = -1;
 }
+
 //close it
 CSerialPort::~CSerialPort()
 {
@@ -59,7 +60,7 @@ void CSerialPort::set_speed (int fd, int speed)
     int status;
     struct termios Opt;
     tcgetattr (fd, &Opt);
-    for (i = 0; i < sizeof (speed_arr) / sizeof (int); i++) {
+    for (i = 0; i < (int)(sizeof (speed_arr) / sizeof (int)); i++) {
         if (speed == name_arr[i]) {
             tcflush (fd, TCIOFLUSH);
             cfsetispeed (&Opt, speed_arr[i]);
@@ -174,7 +175,7 @@ int CSerialPort::set_opt(int speed, int db, int sb, char pb, int overtime, bool 
     }
 
     //set speed
-    for (i = 0; i < sizeof(speed_arr) / sizeof(int); i++) {
+    for (i = 0; i < (int)(sizeof(speed_arr) / sizeof(int)); i++) {
         if (speed == name_arr[i]) {
             cfsetispeed(&new_cfg, speed_arr[i]);
             cfsetospeed(&new_cfg, speed_arr[i]);

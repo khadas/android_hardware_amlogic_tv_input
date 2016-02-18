@@ -1,3 +1,5 @@
+
+#define LOG_TAG "TvKeyData"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -627,7 +629,7 @@ static int GetMacAddressStartWorkThreadTurnOnFlag()
     return tmp_val;
 }
 
-static void *SSMMacAddressStartWorkMainApp(void *data)
+static void *SSMMacAddressStartWorkMainApp(void *data __unused)
 {
     unsigned int curMacAddrLow = 0, curMacAddrHigh = 0;
     int p_status;
@@ -685,16 +687,12 @@ static void *SSMMacAddressStartWorkMainApp(void *data)
     return NULL;
 }
 
-static void *SSMMacAddressStartWorkThreadMain(void *data)
+static void *SSMMacAddressStartWorkThreadMain(void *data __unused)
 {
     void *tmp_ret = NULL;
-
     SetMacAddressStartWorkThreadExecFlag(1);
-
     tmp_ret = SSMMacAddressStartWorkMainApp(NULL);
-
     SetMacAddressStartWorkThreadExecFlag(0);
-
     return tmp_ret;
 }
 
@@ -879,20 +877,17 @@ int GetSSMHandleHDMIEdidByCustomerEnableCFG()
 {
     const char *config_value;
 
-    config_value = config_get_str(CFG_SECTION_TV, CS_HDMI_EDID_EN_CFG, "null");
-#if 0
-    LOGD("%s, get \"%s\" is \"%s\".\n", __FUNCTION__, CS_HDMI_EDID_EN_CFG,
-         config_value);
-#endif
+    config_value = config_get_str(CFG_SECTION_TV, CFG_SSM_HDMI_EDID_EN, "null");
     if (strcmp(config_value, "null") == 0) {
         LOGD(
             "%s, get config \"%s\" is \"%s\", return 0 to not enable handle hdmi edid by customer.\n",
-            __FUNCTION__, CS_HDMI_EDID_EN_CFG, config_value);
+            __FUNCTION__, CFG_SSM_HDMI_EDID_EN, config_value);
         return 0;
     }
 
     return strtoul(config_value, NULL, 10);
 }
+
 int RealHandleHDMIEdid(unsigned char customer_hdmi_edid_buf[])
 {
     int i = 0, dev_fd = -1;
@@ -1007,8 +1002,7 @@ static int GetFileOffsetCFG(char *key_str)
     return strtol(cfg_value, NULL, 10);
 }
 
-static int handleDataFilePath(char *file_name, int offset, int nsize,
-                              char file_path[])
+static int handleDataFilePath(char *file_name, int offset __unused, int nsize __unused, char file_path[] __unused)
 {
     if (file_name == NULL) {
         LOGE("%s, file_name is NULL!!!\n", CFG_SECTION_TV);

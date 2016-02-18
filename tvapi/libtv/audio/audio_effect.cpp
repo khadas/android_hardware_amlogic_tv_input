@@ -19,6 +19,7 @@
 CAudioEffect::CAudioEffect()
 {
 }
+
 CAudioEffect::~CAudioEffect()
 {
 }
@@ -27,7 +28,6 @@ int CAudioEffect::GetEQBandCount()
 {
     return CC_BAND_ITEM_CNT;
 }
-
 
 int CAudioEffect::SetEQSwitch(int switch_val)
 {
@@ -49,9 +49,8 @@ int CAudioEffect::SetEQValue(int gain_val_buf[])
     return tmp_ret;
 }
 
-int CAudioEffect::GetEQValue(int gain_val_buf[])
+int CAudioEffect::GetEQValue(int gain_val_buf[] __unused)
 {
-    int tmp_ret = 0;
     return 0;
 }
 
@@ -75,6 +74,7 @@ int CAudioEffect::SetSrsInputOutputGain(int input_gain_val, int output_gain_val)
     tmp_ret |= amAudioSetSRSGain(input_gain_val, output_gain_val);
     return tmp_ret;
 }
+
 int CAudioEffect::SetSrsTruBassSwitch(int switch_val)
 {
     int tmp_ret = 0;
@@ -117,11 +117,15 @@ int CAudioEffect::SetSrsTrubassSpeakerSize(int set_val)
     return tmp_ret;
 }
 
-int CAudioEffect::DbxTv_SetMode(int mode, int son_value, int vol_value, int sur_value)
+int CAudioEffect::DbxTv_SetMode(int mode __unused, int son_value, int vol_value, int sur_value)
 {
+    son_value = son_value;
+    vol_value = vol_value;
+    sur_value = sur_value;
+
     int ret = 0;
 #ifdef TV_AUDIO_USE_DBX_TV
-    ret |= amAudioSetDBXTVParameter( son_value,  vol_value,  sur_value);
+    ret |= amAudioSetDBXTVParameter( son_value, vol_value, sur_value);
 #endif
     return ret;
 }

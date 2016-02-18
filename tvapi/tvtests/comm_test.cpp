@@ -8,7 +8,7 @@ void usage(char *processname)
 }
 
 
-int main(int argc, char **argv)
+int main(int argc __unused, char **argv __unused)
 {
     int cmd,  go = 1;
     LOGD("---------------0------------------------");

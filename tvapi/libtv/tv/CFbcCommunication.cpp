@@ -1,9 +1,10 @@
+#define LOG_TAG "FBC"
+
 #include <time.h>
 #include "CFbcCommunication.h"
 #include  "CTvLog.h"
 #include "../tvconfig/tvconfig.h"
 #include "../tvutils/tvutils.h"
-#define LOG_TAG "FBC"
 
 static CFbcCommunication *gSingletonFBC = NULL;
 CFbcCommunication *GetSingletonFBC()
@@ -121,17 +122,17 @@ void CFbcCommunication::showTime(struct timeval *_time)
         curTime.tv_usec = _time->tv_usec;
     }
     if (curTime.tv_usec > 100000) {
-        LOGD("[%d.%d]", curTime.tv_sec, curTime.tv_usec);
+        LOGD("[%ld.%ld]", curTime.tv_sec, curTime.tv_usec);
     } else if (curTime.tv_usec > 10000) {
-        LOGD("[%d.0%d]", curTime.tv_sec, curTime.tv_usec);
+        LOGD("[%ld.0%ld]", curTime.tv_sec, curTime.tv_usec);
     } else if (curTime.tv_usec > 1000) {
-        LOGD("[%d.00%d]", curTime.tv_sec, curTime.tv_usec);
+        LOGD("[%ld.00%ld]", curTime.tv_sec, curTime.tv_usec);
     } else if (curTime.tv_usec > 100) {
-        LOGD("[%d.000%d]", curTime.tv_sec, curTime.tv_usec);
+        LOGD("[%ld.000%ld]", curTime.tv_sec, curTime.tv_usec);
     } else if (curTime.tv_usec > 10) {
-        LOGD("[%d.0000%d]", curTime.tv_sec, curTime.tv_usec);
+        LOGD("[%ld.0000%ld]", curTime.tv_sec, curTime.tv_usec);
     } else if (curTime.tv_usec > 1) {
-        LOGD("[%d.00000%d]", curTime.tv_sec, curTime.tv_usec);
+        LOGD("[%ld.00000%ld]", curTime.tv_sec, curTime.tv_usec);
     }
 }
 long CFbcCommunication::getTime(void)
@@ -191,7 +192,7 @@ unsigned int CFbcCommunication::GetCrc32(unsigned char *InStr, unsigned int len)
 {
     //开始计算CRC32校验便
     unsigned int Crc = 0xffffffff;
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < (int)len; i++) {
         Crc = (Crc >> 8) ^ mCrc32Table[(Crc & 0xFF) ^ InStr[i]];
     }
 
@@ -205,8 +206,8 @@ unsigned int CFbcCommunication::Calcrc32(unsigned int crc, const unsigned char *
                                               0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c, 0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c
                                             };
     unsigned int crcu32 = crc;
-    if (buf_len < 0)
-        return 0;
+    //if (buf_len < 0)
+    //    return 0;
     if (!ptr) return 0;
     crcu32 = ~crcu32;
     while (buf_len--) {
@@ -217,7 +218,7 @@ unsigned int CFbcCommunication::Calcrc32(unsigned int crc, const unsigned char *
     return ~crcu32;
 }
 
-int CFbcCommunication::sendDataOneway(int devno, unsigned char *pData, int dataLen, int flags)
+int CFbcCommunication::sendDataOneway(int devno, unsigned char *pData, int dataLen, int flags __unused)
 {
     int ret = -1;
     switch (devno) {
@@ -244,6 +245,7 @@ int CFbcCommunication::addToRequestList()
 {
     return 0;
 }
+
 //timeout ms
 int CFbcCommunication::sendDataAndWaitReply(int devno, int waitForDevno, int waitForCmd, unsigned char *pData, int dataLen, int timeout, unsigned char *pReData, int *reDataLen, int flags)
 {
@@ -260,7 +262,7 @@ int CFbcCommunication::sendDataAndWaitReply(int devno, int waitForDevno, int wai
 
     mLock.lock();
     ret = mReplyList.WaitReplyCondition.waitRelative(mLock, timeout);//wait reply
-    LOGD("wait reply return = %d", __FUNCTION__, __LINE__, ret);
+    LOGD("%s, %d, wait reply return = %d", __FUNCTION__, __LINE__, ret);
     mLock.unlock();
 
     //
@@ -310,12 +312,14 @@ int CFbcCommunication::handleCmd(COMM_DEV_TYPE_E fromDev, int *pData, int *pRetV
         cfbc_Set_Gain_Red(fromDev, pData[2]);
         break;
 
-    case VPU_CMD_RED_GAIN_DEF|0x80:
+    /*
+    //case value '192' not in enumerated type 'fbc_command_t
+    case (VPU_CMD_RED_GAIN_DEF|0x80):
         cfbc_Get_Gain_Red(fromDev, &ret_value);
         pRetValue[0] = VPU_CMD_RED_GAIN_DEF | 0x80;
         pRetValue[1] = 3;
         pRetValue[2] = ret_value;
-        break;
+        break;*/
 
     case VPU_CMD_PATTEN_SEL:
         cfbc_Set_Test_Pattern(fromDev, pData[2]);
@@ -325,12 +329,14 @@ int CFbcCommunication::handleCmd(COMM_DEV_TYPE_E fromDev, int *pData, int *pRetV
         cfbc_Set_Backlight(fromDev, pData[2]);
         break;
 
-    case VPU_CMD_PATTEN_SEL|0x80:
+    /*
+    //case value '170' not in enumerated type 'fbc_command_t
+    case (VPU_CMD_PATTEN_SEL|0x80):
         cfbc_Get_Test_Pattern(fromDev, &ret_value);
         pRetValue[0] = VPU_CMD_RED_GAIN_DEF | 0x80;
         pRetValue[1] = 3;
         pRetValue[2] = ret_value;
-        break;
+        break;*/
 
     default:
         return -1;
@@ -816,8 +822,6 @@ bool CFbcCommunication::threadLoop()
     LOGD("thread exited..........\n");
     return false;
 }
-
-
 
 int CFbcCommunication::Fbc_Set_Value_INT8(COMM_DEV_TYPE_E toDev, int cmd_type, int value)
 {
@@ -1479,11 +1483,13 @@ int CFbcCommunication::cfbc_Set_FBC_User_Setting_Default(COMM_DEV_TYPE_E fromDev
 
     return Fbc_Set_BatchValue(fromDev, cmd, 2);
 }
+
 int CFbcCommunication::cfbc_SendRebootToUpgradeCmd(COMM_DEV_TYPE_E fromDev, int value)
 {
     return Fbc_Set_Value_INT32(fromDev, FBC_REBOOT_UPGRADE, value);
 }
-int CFbcCommunication::cfbc_FBC_Send_Key_To_Fbc(COMM_DEV_TYPE_E fromDev, int keycode, int param)
+
+int CFbcCommunication::cfbc_FBC_Send_Key_To_Fbc(COMM_DEV_TYPE_E fromDev, int keycode __unused, int param __unused)
 {
     unsigned char cmd[512];
 
@@ -1793,7 +1799,7 @@ int CFbcCommunication::cfbc_Set_AUTO_ELEC_MODE(COMM_DEV_TYPE_E fromDev, int valu
     return Fbc_Set_Value_INT8(fromDev, VPU_CMD_SET_ELEC_MODE, value);
 }
 
-int CFbcCommunication::cfbc_Get_AUTO_ELEC_MODE(COMM_DEV_TYPE_E fromDev, int *value)
+int CFbcCommunication::cfbc_Get_AUTO_ELEC_MODE(COMM_DEV_TYPE_E fromDev __unused, int *value __unused)
 {
     return 0;
 }
@@ -1811,7 +1817,7 @@ int CFbcCommunication::cfbc_Set_LightSensor_N310(COMM_DEV_TYPE_E fromDev, int va
     //    return Fbc_Set_Value_INT8(fromDev, CMD_LIGHT_SENSOR, value);
 }
 
-int CFbcCommunication::cfbc_Get_LightSensor_N310(COMM_DEV_TYPE_E fromDev, int *value)
+int CFbcCommunication::cfbc_Get_LightSensor_N310(COMM_DEV_TYPE_E fromDev __unused, int *value __unused)
 {
     //    return Fbc_Get_Value_INT8(fromDev, CMD_LIGHT_SENSOR|0x80, value);
     return 0;
@@ -1823,7 +1829,7 @@ int CFbcCommunication::cfbc_Set_Dream_Panel_N310(COMM_DEV_TYPE_E fromDev, int va
     //    return Fbc_Set_Value_INT8(fromDev, CMD_DREAM_PANEL, value);
 }
 
-int CFbcCommunication::cfbc_Get_Dream_Panel_N310(COMM_DEV_TYPE_E fromDev, int *value)
+int CFbcCommunication::cfbc_Get_Dream_Panel_N310(COMM_DEV_TYPE_E fromDev __unused, int *value __unused)
 {
     //    return Fbc_Get_Value_INT8(fromDev, CMD_DREAM_PANEL|0x80, value);
     return 0;
@@ -1835,7 +1841,7 @@ int CFbcCommunication::cfbc_Set_MULT_PQ_N310(COMM_DEV_TYPE_E fromDev, int value)
     //    return Fbc_Set_Value_INT8(fromDev, CMD_MUTI_PQ, value);
 }
 
-int CFbcCommunication::cfbc_Get_MULT_PQ_N310(COMM_DEV_TYPE_E fromDev, int *value)
+int CFbcCommunication::cfbc_Get_MULT_PQ_N310(COMM_DEV_TYPE_E fromDev __unused, int *value __unused)
 {
     //    return Fbc_Get_Value_INT8(fromDev, CMD_MUTI_PQ|0x80, value);
     return 0;
@@ -1847,11 +1853,12 @@ int CFbcCommunication::cfbc_Set_MEMC_N310(COMM_DEV_TYPE_E fromDev, int value)
     //    return Fbc_Set_Value_INT8(fromDev, CMD_MEMC, value);
 }
 
-int CFbcCommunication::cfbc_Get_MEMC_N310(COMM_DEV_TYPE_E fromDev, int *value)
+int CFbcCommunication::cfbc_Get_MEMC_N310(COMM_DEV_TYPE_E fromDev __unused, int *value __unused)
 {
     //    return Fbc_Get_Value_INT8(fromDev, CMD_MEMC|0x80, value);
     return 0;
 }
+
 int CFbcCommunication::cfbc_Set_Bluetooth_IIS_onoff(COMM_DEV_TYPE_E fromDev, int value)
 {
     return Fbc_Set_Value_INT8(fromDev, CMD_BLUETOOTH_I2S_STATUS, value);
@@ -1861,6 +1868,7 @@ int CFbcCommunication::cfbc_Get_Bluetooth_IIS_onoff(COMM_DEV_TYPE_E fromDev, int
 {
     return Fbc_Get_Value_INT8(fromDev, CMD_BLUETOOTH_I2S_STATUS | 0x80, value);
 }
+
 int CFbcCommunication::cfbc_Set_Led_onoff(COMM_DEV_TYPE_E fromDev, int val_1, int val_2, int val_3)
 {
     unsigned char cmd[512];

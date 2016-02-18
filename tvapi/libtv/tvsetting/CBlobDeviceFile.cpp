@@ -1,3 +1,5 @@
+#define LOG_TAG "BLOB_FILE"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -7,10 +9,6 @@
 #include "tvconfig/tvconfig.h"
 #include "CBlobDeviceFile.h"
 #include "CTvLog.h"
-
-
-
-#define LOG_TAG "BLOB_FILE"
 
 CBlobDeviceFile::CBlobDeviceFile()
 {

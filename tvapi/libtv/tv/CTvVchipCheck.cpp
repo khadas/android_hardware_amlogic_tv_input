@@ -2,9 +2,11 @@
 CTvVchipCheck:: CTvVchipCheck()
 {
 }
+
 CTvVchipCheck:: ~CTvVchipCheck()
 {
 }
+
 bool CTvVchipCheck::CheckProgramBlock(int id)
 {
     bool lock = false;
@@ -27,7 +29,7 @@ bool CTvVchipCheck::CheckProgramBlock(int id)
         if (prog.isATSCMode()) {
             // ATSC V-Chip
             Vector<CTvDimension::VChipRating *> definedRatings = ev.getVChipRatings();
-            for (int i = 0; i < definedRatings.size(); i++) {
+            for (int i = 0; i < (int)definedRatings.size(); i++) {
                 CTvDimension dm;
                 if (dm.isBlocked(dm, definedRatings[i])) {
                     lock = true;
@@ -49,7 +51,7 @@ bool CTvVchipCheck::CheckProgramBlock(int id)
     return lock;
 }
 
-void *CTvVchipCheck::VchipCheckingThread ( void *arg )
+void *CTvVchipCheck::VchipCheckingThread (void *arg __unused)
 {
     /*CTv *pt = static_cast<CTv *> ( arg );
 

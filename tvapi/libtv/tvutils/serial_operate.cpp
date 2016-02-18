@@ -1,3 +1,5 @@
+#define LOG_TAG "serial_operate"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -19,13 +21,7 @@
 
 #include "serial_base.h"
 #include "serial_operate.h"
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "headset"
-#endif
 #include "CTvLog.h"
-
 
 //******************************************************
 #ifndef HIDIOCSFEATURE

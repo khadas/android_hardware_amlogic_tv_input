@@ -8,14 +8,9 @@
 //  @ Author :
 //
 //
-
+#define LOG_TAG "CTvChannel"
 
 #include "CTvChannel.h"
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CTvChannel"
-#endif
 
 void CTvChannel::createFromCursor(CTvDatabase::Cursor &c)
 {
@@ -106,18 +101,16 @@ void CTvChannel::createFromCursor(CTvDatabase::Cursor &c)
     this->fendID = 0;
 }
 
-
 CTvChannel::CTvChannel()
 {
-
 }
 
-CTvChannel::CTvChannel(int dbID, int mode, int freq, int bw, int mod, int symb, int ofdm, int channelNum)
+CTvChannel::CTvChannel(int dbID, int mode, int freq, int bw, int mod, int symb, int ofdm __unused, int channelNum)
 {
     //other member not init,just a paras
     if (mode == MODE_QAM) {
         id = dbID;
-        frequency  = freq;
+        frequency = freq;
         modulation = mod;
         symbolRate = symb;
         mode = MODE_QAM;
@@ -128,7 +121,7 @@ CTvChannel::CTvChannel(int dbID, int mode, int freq, int bw, int mod, int symb, 
         mode = MODE_OFDM;
     } else if (mode == MODE_ATSC) {
         id = dbID;
-        frequency  = freq;
+        frequency = freq;
         modulation = mod;
         logicalChannelNum = channelNum;
         mod = MODE_ATSC;
@@ -149,12 +142,11 @@ CTvChannel::CTvChannel(int dbID, int mode, int freq, int bw, int mod, int symb, 
 
 CTvChannel::~CTvChannel()
 {
-
 }
 
-Vector<CTvChannel> CTvChannel::tvChannelList(int sat_id)
+Vector<CTvChannel> CTvChannel::tvChannelList(int sat_id __unused)
 {
-    Vector<CTvChannel>  v_channel;
+    Vector<CTvChannel> v_channel;
     return v_channel;
 }
 
@@ -255,6 +247,7 @@ int CTvChannel::getChannelListBySrc(int src, Vector< sp<CTvChannel> > &v_channel
 
     return 0;
 }
+
 int CTvChannel::updateByID(int progID, int std, int freq, int fineFreq)
 {
 
@@ -268,15 +261,12 @@ int CTvChannel::updateByID(int progID, int std, int freq, int fineFreq)
     return 0;
 }
 
-
 void CTvChannel::tvChannelDel()
 {
-
 }
 
-void CTvChannel::tvChannelDelBySatID(int id)
+void CTvChannel::tvChannelDelBySatID(int id __unused)
 {
-
 }
 
 int CTvChannel::getDVBTSID()
@@ -286,62 +276,49 @@ int CTvChannel::getDVBTSID()
 
 void CTvChannel::getDVBOrigNetID()
 {
-
 }
 
 void CTvChannel::getFrontendID()
 {
-
 }
 
 void CTvChannel::getTSSourceID()
 {
-
 }
-
 
 void CTvChannel::isDVBCMode()
 {
-
 }
 
 void CTvChannel::setFrequency()
 {
-
 }
 
 void CTvChannel::setSymbolRate()
 {
-
 }
 
 void CTvChannel::setPolarisation()
 {
-
 }
 
 void CTvChannel::setATVAudio()
 {
-
 }
 
 void CTvChannel::setATVVideoFormat()
 {
-
 }
 
 void CTvChannel::setATVAudioFormat()
 {
-
 }
 
 void CTvChannel::setATVFreq()
 {
-
 }
 
 void CTvChannel::setATVAfcData()
 {
-
 }
 

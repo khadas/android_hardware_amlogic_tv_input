@@ -1,8 +1,8 @@
+#define LOG_TAG "CMsgQueueThread"
+
 #include "CMsgQueue.h"
 #include <CTvLog.h>
 #include <utils/Timers.h>
-
-#define LOG_TAG "CMsgQueueThread"
 
 CMessage::CMessage()
 {
@@ -12,7 +12,6 @@ CMessage::CMessage()
 
 CMessage::~CMessage()
 {
-
 }
 
 CMsgQueueThread::CMsgQueueThread()
@@ -29,12 +28,13 @@ nsecs_t CMsgQueueThread::getNowMs()
 {
     return systemTime(SYSTEM_TIME_MONOTONIC) / 1000000;
 }
+
 void CMsgQueueThread::sendMsg(CMessage &msg)
 {
     CMutex::Autolock _l(mLockQueue);
     msg.mWhenMs = getNowMs() + msg.mDelayMs;//
     int i = 0;
-    while (i < m_v_msg.size() && m_v_msg[i].mWhenMs <= msg.mWhenMs) i++; //find the index that will insert(i)
+    while (i < (int)m_v_msg.size() && m_v_msg[i].mWhenMs <= msg.mWhenMs) i++; //find the index that will insert(i)
     m_v_msg.insertAt(msg, i);//insert at index i
     CMessage msg1 = m_v_msg[0];
     LOGD("sendmsg now = %lld msg[0] when = %lld", getNowMs(), msg1.mWhenMs);
@@ -42,19 +42,20 @@ void CMsgQueueThread::sendMsg(CMessage &msg)
     //if(i == 0)// is empty or new whenMS  is  at  index 0, low all ms in list.  so ,need to  wakeup loop,  to get new delay time.
     mGetMsgCondition.signal();
 }
+
 //有个缺陷，只能根据消息类型移除，同类型消息会全部移除,但足够用了
 void CMsgQueueThread::removeMsg(CMessage &msg)
 {
     CMutex::Autolock _l(mLockQueue);
-    int beforeSize =  m_v_msg.size();
-    for (int i = 0; i < m_v_msg.size(); i++) {
+    int beforeSize = (int)m_v_msg.size();
+    for (int i = 0; i < (int)m_v_msg.size(); i++) {
         const CMessage &_msg = m_v_msg.itemAt(i);
         if (_msg.mType == msg.mType) {
             m_v_msg.removeAt(i);
         }
     }
     //some msg removeed
-    if (beforeSize > m_v_msg.size())
+    if (beforeSize > (int)m_v_msg.size())
         mGetMsgCondition.signal();
 }
 
@@ -71,7 +72,7 @@ int CMsgQueueThread::startMsgQueue()
     return 0;
 }
 
-bool  CMsgQueueThread::threadLoop()
+bool CMsgQueueThread::threadLoop()
 {
     int sleeptime = 100;//ms
     while (!exitPending()) { //requietexit() or requietexitWait() not call

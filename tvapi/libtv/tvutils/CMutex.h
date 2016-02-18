@@ -67,19 +67,17 @@ private:
     pthread_mutex_t mMutex;
 };
 
-
-
-
-
 inline CMutex::CMutex()
 {
     pthread_mutex_init(&mMutex, NULL);
 }
-inline CMutex::CMutex(const char *name)
+
+inline CMutex::CMutex(const char *name __unused)
 {
     pthread_mutex_init(&mMutex, NULL);
 }
-inline CMutex::CMutex(int type, const char *name)
+
+inline CMutex::CMutex(int type, const char *name __unused)
 {
     if (type == SHARED) {
         pthread_mutexattr_t attr;
@@ -91,23 +89,26 @@ inline CMutex::CMutex(int type, const char *name)
         pthread_mutex_init(&mMutex, NULL);
     }
 }
+
 inline CMutex::~CMutex()
 {
     pthread_mutex_destroy(&mMutex);
 }
+
 inline int CMutex::lock()
 {
     return -pthread_mutex_lock(&mMutex);
 }
+
 inline void CMutex::unlock()
 {
     pthread_mutex_unlock(&mMutex);
 }
+
 inline int CMutex::tryLock()
 {
     return -pthread_mutex_trylock(&mMutex);
 }
-
 
 //typedef CMutex::Autolock AutoMutex;
 

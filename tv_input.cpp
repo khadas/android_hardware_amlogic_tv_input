@@ -106,11 +106,11 @@ void TvIputHal_ChannelConl(tv_input_private_t *priv, int ops_type, int device_id
 {
     if (priv->mpTv) {
         if (ops_type) {
-            LOGD ( "%s\, OpenSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
+            LOGD ( "%s, OpenSourceSwitchInput id = %d\n", __FUNCTION__, device_id );
             priv->mpTv->StartTv();
             priv->mpTv->SwitchSourceInput((tv_source_input_t) device_id);
         } else if (priv->mpTv->GetCurrentSourceInput() == device_id) {
-            LOGD ( "%s\, StopSourceSwitchInput  id  = %d\n", __FUNCTION__,  device_id );
+            LOGD ( "%s, StopSourceSwitchInput id = %d\n", __FUNCTION__, device_id );
             priv->mpTv->StopTv();
         }
     }
@@ -338,6 +338,8 @@ author: "Amlogic"
         ,
 methods:
         &tv_input_module_methods,
+dso:    NULL,
+reserved: {0},
     }
 };
 
@@ -418,7 +420,7 @@ static int tv_input_initialize(struct tv_input_device *dev,
     return 0;
 }
 
-static int tv_input_get_stream_configurations(const struct tv_input_device *dev,
+static int tv_input_get_stream_configurations(const struct tv_input_device *dev __unused,
         int device_id, int *num_configurations,
         const tv_stream_config_t **configs)
 {
@@ -460,7 +462,8 @@ static int tv_input_close_stream(struct tv_input_device *dev, int device_id,
 }
 
 static int tv_input_request_capture(
-    struct tv_input_device *dev, int device_id, int stream_id, buffer_handle_t buffer, uint32_t seq)
+    struct tv_input_device *dev __unused, int device_id __unused,
+    int stream_id __unused, buffer_handle_t buffer __unused, uint32_t seq __unused)
 {
     return -EINVAL;
 }

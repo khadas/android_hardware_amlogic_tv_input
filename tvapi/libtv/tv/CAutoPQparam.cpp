@@ -1,3 +1,5 @@
+#define LOG_TAG "CAutoPQ"
+
 #include "CAutoPQparam.h"
 #include "../tvsetting/CTvSetting.h"
 #include "../tvconfig/tvconfig.h"
@@ -14,11 +16,6 @@
 #include <linux/fb.h>
 #include <stdlib.h>
 #include <cutils/properties.h>
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CAutoPQ"
-#endif
 
 CAutoPQparam::CAutoPQparam()
 {
@@ -96,9 +93,9 @@ int CAutoPQparam::adjustPQparameters()
 
     if (new_frame_count != 0) {
 
-        fd = open("/sys/class/video/frame_height", O_RDONLY);
+        fd = open(SYS_VIDEO_FRAME_HEIGHT, O_RDONLY);
         if (fd <= 0) {
-            LOGE("open /sys/class/video/frame_height  ERROR!!error = -%s- \n", strerror ( errno ));
+            LOGE("open %s ERROR!!error = -%s- \n",SYS_VIDEO_FRAME_HEIGHT, strerror ( errno ));
             return -1;
         }
         memset(s, 0, sizeof(s));

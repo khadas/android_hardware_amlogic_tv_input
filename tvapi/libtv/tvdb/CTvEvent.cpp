@@ -7,17 +7,12 @@
 //  @ Date : 2013-11
 //  @ Author :
 //
-//
+#define LOG_TAG "CTvEvent"
 
 #include "CTvEvent.h"
 #include "CTvDatabase.h"
 #include "CTvProgram.h"
 #include <stdlib.h>
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CTvEvent"
-#endif
 
 void CTvEvent::InitFromCursor(CTvDatabase::Cursor &c)
 {
@@ -57,7 +52,7 @@ void CTvEvent::InitFromCursor(CTvDatabase::Cursor &c)
     int l = 0;
     char *pSave;
     tmp = strtok_r(rrtRatings.lockBuffer(rrtRatings.size()), ",", &pSave);
-    LOGD("%s, %d, %s", "TV", __LINE__, tmp);
+    LOGD("TV, %d, %s", __LINE__, tmp);
     while (tmp != NULL) {
         ratings.push_back(String8(tmp));
         tmp = strtok_r(NULL, ",", &pSave);
@@ -65,7 +60,7 @@ void CTvEvent::InitFromCursor(CTvDatabase::Cursor &c)
     rrtRatings.unlockBuffer();
     rating_len = ratings.size();
     if (!ratings.isEmpty()) {
-        for (int i = 0; i < ratings.size(); i++) {
+        for (int i = 0; i < (int)ratings.size(); i++) {
             Vector<String8> rating;
             tmp = strtok_r(ratings.editItemAt(i).lockBuffer(ratings.editItemAt(i).length()), " ", &pSave);
             while (tmp != NULL) {

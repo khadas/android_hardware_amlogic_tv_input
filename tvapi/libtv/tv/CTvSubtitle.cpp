@@ -6,31 +6,38 @@
 //  @ Date : 2013-11
 //  @ Author :
 //
-//
+#define LOG_TAG "CTvSubtitle"
+
 #include "CTvSubtitle.h"
 #include "am_misc.h"
 #include "am_dmx.h"
+
 CTvSubtitle::CTvSubtitle()
 {
     mpObser = NULL;
 }
+
 CTvSubtitle::~CTvSubtitle()
 {
 }
+
 void CTvSubtitle::setObserver(IObserver *pObser)
 {
     isSubOpen = false;
     mpObser = pObser;
 }
+
 void CTvSubtitle::setBuffer(char *share_mem)
 {
     pthread_mutex_lock(&lock);
     buffer = (unsigned char *)share_mem;
     pthread_mutex_unlock(&lock);
 }
+
 void CTvSubtitle::stopDecoder()
 {
 }
+
 /**
  * 开始字幕信息解析showboz sync
  */
@@ -50,7 +57,6 @@ void CTvSubtitle::stop()
  */
 void CTvSubtitle::clear()
 {
-
 }
 
 /**
@@ -58,7 +64,6 @@ void CTvSubtitle::clear()
  */
 void CTvSubtitle::nextPage()
 {
-
 }
 
 /**
@@ -66,16 +71,14 @@ void CTvSubtitle::nextPage()
  */
 void CTvSubtitle::previousPage()
 {
-
 }
 
 /**
  * 在图文模式下跳转到指定页
  * @param page 要跳转到的页号
  */
-void CTvSubtitle::gotoPage(int page)
+void CTvSubtitle::gotoPage(int page __unused)
 {
-
 }
 
 /**
@@ -83,16 +86,14 @@ void CTvSubtitle::gotoPage(int page)
  */
 void CTvSubtitle::goHome()
 {
-
 }
 
 /**
  * 在图文模式下根据颜色跳转到指定链接
  * @param color 颜色，COLOR_RED/COLOR_GREEN/COLOR_YELLOW/COLOR_BLUE
  */
-void CTvSubtitle::colorLink(int color)
+void CTvSubtitle::colorLink(int color __unused)
 {
-
 }
 
 /**
@@ -100,9 +101,8 @@ void CTvSubtitle::colorLink(int color)
  * @param pattern 搜索匹配字符串
  * @param casefold 是否区分大小写
  */
-void CTvSubtitle::setSearchPattern(char *pattern, bool casefold)
+void CTvSubtitle::setSearchPattern(char *pattern __unused, bool casefold __unused)
 {
-
 }
 
 /**
@@ -161,7 +161,6 @@ static void clear_bitmap(CTvSubtitle *pSub)
         memset(ptr, 0, pSub->bmp_pitch);
         ptr += pSub->bmp_pitch;
     }
-
 }
 
 static void show_sub_cb(AM_SUB2_Handle_t handle, AM_SUB2_Picture_t *pic)
@@ -253,7 +252,7 @@ static void show_sub_cb(AM_SUB2_Handle_t handle, AM_SUB2_Picture_t *pic)
 
 }
 
-static uint64_t get_pts_cb(void *handle, uint64_t pts)
+static uint64_t get_pts_cb(void *handle __unused, uint64_t pts __unused)
 {
     char buf[32];
     AM_ErrorCode_t ret;
@@ -275,7 +274,8 @@ static uint64_t get_pts_cb(void *handle, uint64_t pts)
     return r;
 }
 
-static void pes_data_cb(int dev_no, int fhandle, const uint8_t *data, int len, void *user_data)
+static void pes_data_cb(int dev_no __unused, int fhandle __unused,
+    const uint8_t *data, int len, void *user_data)
 {
     CTvSubtitle *pSub = ((CTvSubtitle *) user_data);
     AM_PES_Decode(pSub->pes_handle, (uint8_t *)data, len);
@@ -328,7 +328,7 @@ static int open_dmx(CTvSubtitle *pSub, int dmx_id, int pid)
 
     ret = AM_DMX_SetPesFilter(dmx_id, pSub->filter_handle, &pesp);
     if (ret != AM_SUCCESS) {
-        LOGD("error AM_DMX_SetPesFilter != AM_SUCCESS, err = %d", strerror(errno));
+        LOGD("error AM_DMX_SetPesFilter != AM_SUCCESS, err = %s", strerror(errno));
         goto error;
     }
 
@@ -420,7 +420,8 @@ error:
     return -1;
 }
 
-int CTvSubtitle::sub_start_dtv_tt(int dmx_id, int region_id, int pid, int page, int sub_page, bool is_sub)
+int CTvSubtitle::sub_start_dtv_tt(int dmx_id __unused, int region_id __unused, int pid __unused,
+    int page __unused, int sub_page __unused, bool is_sub __unused)
 {
     return 0;
 }
@@ -447,12 +448,12 @@ int CTvSubtitle::sub_stop_dtv_tt()
     return 0;
 }
 
-int CTvSubtitle::sub_tt_goto(int page)
+int CTvSubtitle::sub_tt_goto(int page __unused)
 {
     return 0;
 }
 
-int CTvSubtitle::sub_tt_color_link(int color)
+int CTvSubtitle::sub_tt_color_link(int color __unused)
 {
     return 0;
 }
@@ -462,17 +463,17 @@ int CTvSubtitle::sub_tt_home_link()
     return 0;
 }
 
-int CTvSubtitle::sub_tt_next(int dir)
+int CTvSubtitle::sub_tt_next(int dir __unused)
 {
     return 0;
 }
 
-int CTvSubtitle::sub_tt_set_search_pattern(char *pattern, bool casefold)
+int CTvSubtitle::sub_tt_set_search_pattern(char *pattern __unused, bool casefold __unused)
 {
     return 0;
 }
 
-int CTvSubtitle::sub_tt_search(int dir)
+int CTvSubtitle::sub_tt_search(int dir __unused)
 {
     return 0;
 }
@@ -601,22 +602,24 @@ int CTvSubtitle::sub_stop_atsc_cc()
     AM_CC_Cmd(CMD_CC_STOP);
     return 0;
 }
+
 int CTvSubtitle::ResetVchipChgStat()
 {
     avchip_chg = 0;
     AM_CC_Cmd(CMD_VCHIP_RST_CHGSTAT);
     return 0;
 }
+
 int CTvSubtitle::IsVchipChange()
 {
     return avchip_chg;
 }
+
 //cnt :data buf len
 //databuf len  is max 512
 //cmdbuf len is max 128
 void CTvSubtitle::close_caption_callback(char *str, int cnt, int data_buf[], int cmd_buf[], void *user_data)
 {
-
     /*
     CTvSubtitle *pSub = (CTvSubtitle *)user_data;
 
@@ -635,9 +638,17 @@ void CTvSubtitle::close_caption_callback(char *str, int cnt, int data_buf[], int
 
     pSub->mpObser->onEvent(pSub->mCurCCEv);
     */
+
+    str = str;
+    cnt = cnt;
+    data_buf = data_buf;
+    cmd_buf = cmd_buf;
+    user_data = user_data;
 }
+
 void CTvSubtitle::atv_vchip_callback(int Is_chg,  void *user_data)
 {
     CTvSubtitle *pSub = (CTvSubtitle *)user_data;
     pSub->avchip_chg = Is_chg;
 }
+

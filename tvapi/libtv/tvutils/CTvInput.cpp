@@ -1,3 +1,5 @@
+#define LOG_TAG "CTvInput"
+
 #include "CTvInput.h"
 #include <stdio.h>
 #include <string.h>
@@ -5,8 +7,6 @@
 #include <fcntl.h>
 #include <CTvLog.h>
 #include <utils/Timers.h>
-
-#define LOG_TAG "FBC"
 
 #define SEND_KEY_ACTION_UP              0x00
 #define SEND_KEY_ACTION_DOWN            0x01
@@ -41,7 +41,7 @@ void CTvInput::sendkeyEvent(const int &type, const int &code, const int &value)
     event.code = code ;
     event.value = value;
     ret = write(mKeyEventFd, &event, sizeof(event));
-    if (ret < sizeof(event)) {
+    if (ret < (int)sizeof(event)) {
         LOGD("sendkeyEvent :write event failed, %s\n", strerror(errno));
         return;
     }
@@ -57,7 +57,7 @@ void CTvInput::sendIRkeyEvent(const int &type, const int &code, const int &value
     event.code = code ;
     event.value = value;
     ret = write(mKeyEventFd_IR, &event, sizeof(event));
-    if (ret < sizeof(event)) {
+    if (ret < (int)sizeof(event)) {
         LOGD("sendIRkeyEvent :write event failed, %s\n", strerror(errno));
         return;
     }
@@ -142,7 +142,7 @@ bool CTvInput::threadLoop()
         int disToSend = -1;
         do {
             disToSend = mWhenTimeRepeatKeyStartToSend - getNowMs();
-            LOGD("dis when = %lld", disToSend);
+            LOGD("dis when = %d", disToSend);
             if (disToSend <= 0) break;
 
             mLock.lock();

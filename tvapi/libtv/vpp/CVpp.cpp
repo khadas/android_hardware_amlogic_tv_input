@@ -1,3 +1,5 @@
+#define LOG_TAG "CVpp"
+
 #include "CVpp.h"
 #include <CTvLog.h>
 #include "../tvsetting/CTvSetting.h"
@@ -18,11 +20,6 @@
 #include "CTvLog.h"
 #include "../tvconfig/tvconfig.h"
 #include "CAv.h"
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CVpp"
-#endif
 
 CVpp *CVpp::mInstance;
 CVpp *CVpp::getInstance()
@@ -697,7 +694,7 @@ int CVpp::Vpp_SetBaseColorMode(vpp_color_basemode_t basemode, tvin_port_t source
     return ret;
 }
 
-int CVpp::Vpp_SetColorTemperatureUser(vpp_color_temperature_mode_t temp_mode,
+int CVpp::Vpp_SetColorTemperatureUser(vpp_color_temperature_mode_t temp_mode __unused,
                                       tv_source_input_type_t source_type)
 {
     tcon_rgb_ogo_t rgbogo;
@@ -736,8 +733,10 @@ int CVpp::Vpp_SetColorTemperatureUser(vpp_color_temperature_mode_t temp_mode,
 }
 
 int CVpp::Vpp_SetColorTemperature(vpp_color_temperature_mode_t Tempmode,
-                                  tv_source_input_type_t source_type, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                                  tvin_trans_fmt_t trans_fmt)
+                                  tv_source_input_type_t source_type,
+                                  tvin_port_t source_port __unused,
+                                  tvin_sig_fmt_t sig_fmt __unused,
+                                  tvin_trans_fmt_t trans_fmt __unused)
 {
     tcon_rgb_ogo_t rgbogo, rgbPreOffset;
     int ret = -1;
@@ -758,7 +757,7 @@ int CVpp::Vpp_SetColorTemperature(vpp_color_temperature_mode_t Tempmode,
     return -1;
 }
 
-int CVpp::Vpp_SetBrightness(int value, tv_source_input_type_t source_type, tvin_port_t source_port,
+int CVpp::Vpp_SetBrightness(int value, tv_source_input_type_t source_type __unused, tvin_port_t source_port,
                             tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
 {
     int ret = -1;
@@ -841,7 +840,7 @@ int CVpp::GetBrightness(tv_source_input_type_t source_type)
     return data;
 }
 
-int CVpp::Vpp_SetContrast(int value, tv_source_input_type_t source_type, tvin_port_t source_port,
+int CVpp::Vpp_SetContrast(int value, tv_source_input_type_t source_type __unused, tvin_port_t source_port,
                           tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
 {
     int ret = -1;
@@ -922,7 +921,7 @@ int CVpp::GetContrast(tv_source_input_type_t source_type)
     return data;
 }
 
-int CVpp::Vpp_SetSaturation(int value, tv_source_input_type_t source_type, tvin_port_t source_port,
+int CVpp::Vpp_SetSaturation(int value, tv_source_input_type_t source_type __unused, tvin_port_t source_port,
                             tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
 {
     int ret = -1;
@@ -938,7 +937,6 @@ int CVpp::Vpp_SetSaturation(int value, tv_source_input_type_t source_type, tvin_
             if (VPP_SetVideoSaturationHue(params, hue) == 0) {
                 return 0;
             }
-        } else {
         }
     }
 
@@ -1057,7 +1055,7 @@ int CVpp::GetHue(tv_source_input_type_t source_type)
     return data;
 }
 
-int CVpp::Vpp_SetSharpness(int value, tv_source_input_type_t source_type, tvin_port_t source_port,
+int CVpp::Vpp_SetSharpness(int value, tv_source_input_type_t source_type __unused, tvin_port_t source_port,
                            tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
 {
     int ret = -1;
@@ -1153,7 +1151,8 @@ int CVpp::SetColorSpaceMode(vpp_color_space_type_t colorSpace)
 }
 
 int CVpp::Vpp_SetNoiseReductionMode(vpp_noise_reduction_mode_t nr_mode,
-                                    tv_source_input_type_t source_type, tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
+                                    tv_source_input_type_t source_type __unused,
+                                    tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
                                     is_3d_type_t is3d, tvin_trans_fmt_t trans_fmt)
 {
     int ret = -1;
@@ -1210,7 +1209,7 @@ vpp_noise_reduction_mode_t CVpp::GetNoiseReductionMode(tv_source_input_type_t so
     return data;
 }
 
-int CVpp::Vpp_SetXVYCCMode(vpp_xvycc_mode_t xvycc_mode, tv_source_input_type_t source_type,
+int CVpp::Vpp_SetXVYCCMode(vpp_xvycc_mode_t xvycc_mode, tv_source_input_type_t source_type __unused,
                            tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
                            tvin_trans_fmt_t trans_fmt)
 {
@@ -1236,7 +1235,7 @@ int CVpp::Vpp_SetXVYCCMode(vpp_xvycc_mode_t xvycc_mode, tv_source_input_type_t s
     return ret;
 }
 
-int CVpp::Vpp_SetMCDIMode(vpp_mcdi_mode_t mcdi_mode, tv_source_input_type_t source_type,
+int CVpp::Vpp_SetMCDIMode(vpp_mcdi_mode_t mcdi_mode, tv_source_input_type_t source_type __unused,
                           tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is3d,
                           tvin_trans_fmt_t trans_fmt)
 {
@@ -1462,14 +1461,9 @@ vpp_color_basemode_t CVpp::GetBaseColorMode(void)
 }
 
 int CVpp::SetColorTempWithoutSave(vpp_color_temperature_mode_t Tempmode,
-                                  tv_source_input_type_t source_type)
+                                  tv_source_input_type_t source_type __unused)
 {
     tcon_rgb_ogo_t rgbogo;
-    int ret = -1;
-
-    if (mbVppCfg_whitebalance_sameparam) {
-        source_type = SOURCE_TYPE_TV; //set all source share to use one group
-    }
 
     if (mbVppCfg_gamma_onoff) {
         VPP_SetGammaOnOff(0);
@@ -1579,13 +1573,9 @@ vpp_display_mode_t CVpp::GetDisplayMode(tv_source_input_type_t source_type)
     return data;
 }
 
-int CVpp::SetBacklightWithoutSave(int value, tv_source_input_type_t source_type)
+int CVpp::SetBacklightWithoutSave(int value, tv_source_input_type_t source_type __unused)
 {
-    int backlight_value, backlight_reverse = 0;
-    int ret = -1;
-    int tmp_pic_mode = 0;
-
-    source_type = SOURCE_TYPE_TV;
+    int backlight_value;
 
     if (value < 0 || value > 100) {
         value = 100;
@@ -2385,11 +2375,10 @@ int CVpp::CheckColorTemperatureParams(void)
     for (i = 0; i < 3; i++) {
         ReadColorTemperatureParams((vpp_color_temperature_mode_t) i, &rgbogo);
 
-        if (rgbogo.r_gain > 2047 || rgbogo.b_gain > 2047 || rgbogo.g_gain > 2047 || rgbogo.r_gain
-                < 0 || rgbogo.b_gain < 0 || rgbogo.g_gain < 0) {
-            if (rgbogo.r_post_offset > 1023 || rgbogo.g_post_offset > 1023 || rgbogo.b_post_offset
-                    > 1023 || rgbogo.r_post_offset < -1024 || rgbogo.g_post_offset < -1024
-                    || rgbogo.b_post_offset < -1024) {
+        if (rgbogo.r_gain > 2047 || rgbogo.b_gain > 2047 || rgbogo.g_gain > 2047
+            /*|| rgbogo.r_gain < 0 || rgbogo.b_gain < 0 || rgbogo.g_gain < 0*/) {
+            if (rgbogo.r_post_offset > 1023 || rgbogo.g_post_offset > 1023 || rgbogo.b_post_offset > 1023 ||
+                rgbogo.r_post_offset < -1024 || rgbogo.g_post_offset < -1024 || rgbogo.b_post_offset < -1024) {
                 return 0;
             }
         }
@@ -2455,7 +2444,7 @@ int CVpp::FactorySetColorTemp_Rgain(int source_type, int colortemp_mode, int rga
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Rgain(int source_type, int colortemp_mode, int rgain)
+int CVpp::FactorySaveColorTemp_Rgain(int source_type __unused, int colortemp_mode, int rgain)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2468,7 +2457,7 @@ int CVpp::FactorySaveColorTemp_Rgain(int source_type, int colortemp_mode, int rg
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Rgain(int source_type, int colortemp_mode)
+int CVpp::FactoryGetColorTemp_Rgain(int source_type __unused, int colortemp_mode)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2497,7 +2486,7 @@ int CVpp::FactorySetColorTemp_Ggain(int source_type, int colortemp_mode, int gga
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Ggain(int source_type, int colortemp_mode, int ggain)
+int CVpp::FactorySaveColorTemp_Ggain(int source_type __unused, int colortemp_mode, int ggain)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2510,7 +2499,7 @@ int CVpp::FactorySaveColorTemp_Ggain(int source_type, int colortemp_mode, int gg
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Ggain(int source_type, int colortemp_mode)
+int CVpp::FactoryGetColorTemp_Ggain(int source_type __unused, int colortemp_mode)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2539,7 +2528,7 @@ int CVpp::FactorySetColorTemp_Bgain(int source_type, int colortemp_mode, int bga
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Bgain(int source_type, int colortemp_mode, int bgain)
+int CVpp::FactorySaveColorTemp_Bgain(int source_type __unused, int colortemp_mode, int bgain)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2552,7 +2541,7 @@ int CVpp::FactorySaveColorTemp_Bgain(int source_type, int colortemp_mode, int bg
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Bgain(int source_type, int colortemp_mode)
+int CVpp::FactoryGetColorTemp_Bgain(int source_type __unused, int colortemp_mode)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2581,7 +2570,7 @@ int CVpp::FactorySetColorTemp_Roffset(int source_type, int colortemp_mode, int r
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Roffset(int source_type, int colortemp_mode, int roffset)
+int CVpp::FactorySaveColorTemp_Roffset(int source_type __unused, int colortemp_mode, int roffset)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2594,7 +2583,7 @@ int CVpp::FactorySaveColorTemp_Roffset(int source_type, int colortemp_mode, int 
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Roffset(int source_type, int colortemp_mode)
+int CVpp::FactoryGetColorTemp_Roffset(int source_type __unused, int colortemp_mode)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2623,7 +2612,7 @@ int CVpp::FactorySetColorTemp_Goffset(int source_type, int colortemp_mode, int g
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Goffset(int source_type, int colortemp_mode, int goffset)
+int CVpp::FactorySaveColorTemp_Goffset(int source_type __unused, int colortemp_mode, int goffset)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2636,7 +2625,7 @@ int CVpp::FactorySaveColorTemp_Goffset(int source_type, int colortemp_mode, int 
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Goffset(int source_type, int colortemp_mode)
+int CVpp::FactoryGetColorTemp_Goffset(int source_type __unused, int colortemp_mode)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2665,7 +2654,7 @@ int CVpp::FactorySetColorTemp_Boffset(int source_type, int colortemp_mode, int b
     return -1;
 }
 
-int CVpp::FactorySaveColorTemp_Boffset(int source_type, int colortemp_mode, int boffset)
+int CVpp::FactorySaveColorTemp_Boffset(int source_type __unused, int colortemp_mode, int boffset)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2678,7 +2667,7 @@ int CVpp::FactorySaveColorTemp_Boffset(int source_type, int colortemp_mode, int 
     return -1;
 }
 
-int CVpp::FactoryGetColorTemp_Boffset(int source_type, int colortemp_mode)
+int CVpp::FactoryGetColorTemp_Boffset(int source_type __unused, int colortemp_mode)
 {
     tcon_rgb_ogo_t rgbogo;
 
@@ -2909,7 +2898,7 @@ int CVpp::FactorySetNolineParams(int type, int source_type, noline_params_t noli
     return ret;
 }
 
-int CVpp::FactorySetOverscan(int source_type, int fmt, int status_3d, int trans_fmt,
+int CVpp::FactorySetOverscan(int source_type, int fmt, int status_3d __unused, int trans_fmt,
                              tvin_cutwin_t cutwin_t)
 {
     int ret = -1;
@@ -3492,10 +3481,10 @@ int CVpp::VPP_GetGrayPattern()
 
 int CVpp::VPP_SplitScreenEffect(int width, int v_register)
 {
-    FILE *fp = fopen("/sys/class/amlogic/debug", "w");
+    FILE *fp = fopen(SYS_DROILOGIC_DEBUG, "w");
 
     if (fp == NULL) {
-        LOGE("Open /sys/class/amlogic/debug ERROR(%s)!!\n", strerror(errno));
+        LOGE("Open %s ERROR(%s)!!\n",SYS_DROILOGIC_DEBUG, strerror(errno));
         return -1;
     }
     LOGD("width = %x----v_register = %x", width, v_register);
@@ -3777,11 +3766,10 @@ int CVpp::VPP_SetScalerPathSel(const unsigned int value)
 {
     FILE *fp = NULL;
 
-    fp = fopen("/sys/class/video/video_scaler_path_sel", "w");
-    LOGD("~~~fopen~~~##VPP_SetScalerPathSel##%s : %d ##", "/sys/class/video/video_scaler_path_sel",
-         value);
+    fp = fopen(SYS_VIDEO_SCALER_PATH_SEL, "w");
+    LOGD("VPP_SetScalerPathSel %s : %d", SYS_VIDEO_SCALER_PATH_SEL, value);
     if (fp == NULL) {
-        LOGE("Open /sys/class/video/video_scaler_path_sel error(%s)!\n", strerror(errno));
+        LOGE("Open %s error(%s)!\n",SYS_VIDEO_SCALER_PATH_SEL, strerror(errno));
         return -1;
     }
     fprintf(fp, "%d", value);

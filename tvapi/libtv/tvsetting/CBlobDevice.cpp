@@ -1,3 +1,5 @@
+#define LOG_TAG "CBlobDevice"
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -6,9 +8,6 @@
 #include "CBlobDeviceE2prom.h"
 #include "CBlobDevice.h"
 #include "CTvLog.h"
-
-#define LOG_TAG "CBlobDevice"
-
 
 CBlobDevice::CBlobDevice()
 {
@@ -22,6 +21,6 @@ CBlobDevice::~CBlobDevice()
 int CBlobDevice::IsFileExist(const char *file_name)
 {
     struct stat tmp_st;
-
     return stat(file_name, &tmp_st);
 }
+

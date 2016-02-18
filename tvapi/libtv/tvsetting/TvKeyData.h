@@ -5,7 +5,6 @@
 #include <stdint.h>
 
 #include "../tv/CTvLog.h"
-#define LOG_TAG "TvKeyData"
 
 #define SSM_CR_RGBOGO_LEN                           (256)
 #define SSM_CR_RGBOGO_CHKSUM_LEN                    (2)
@@ -53,7 +52,7 @@
 #define CS_HDCP_KEY_FILE_OFFSET_CFG             "ssm.handle.hdcpkey.file.offset"
 
 
-#define CS_HDMI_EDID_EN_CFG                     "ssm.handle.hdmi.edid.en"
+//#define CS_HDMI_EDID_EN_CFG                     "ssm.handle.hdmi.edid.en"
 #define CS_HDMI_EDID_USE_CFG                    "ssm.handle.hdmi.edid.use"
 #define CS_HDMI_EDID_FILE_PATH_CFG              "ssm.handle.hdmi.edid.file.path"
 #define CS_HDMI_PORT1_EDID_FILE_PATH_CFG        "ssm.handle.hdmi.port1.edid.file.path"

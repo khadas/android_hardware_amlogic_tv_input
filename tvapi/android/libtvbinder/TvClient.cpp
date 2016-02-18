@@ -168,13 +168,13 @@ void TvClient::notifyCallback(int32_t msgType, const Parcel &p)
     }
 }
 
-void TvClient::binderDied(const wp<IBinder> &who)
+void TvClient::binderDied(const wp<IBinder> &who __unused)
 {
     ALOGW("ITv died");
     //notifyCallback(1, 2, 0);
 }
 
-void TvClient::DeathNotifier::binderDied(const wp<IBinder> &who)
+void TvClient::DeathNotifier::binderDied(const wp<IBinder> &who __unused)
 {
     ALOGW("-----------------binderDied");
     Mutex::Autolock _l(TvClient::mLock);

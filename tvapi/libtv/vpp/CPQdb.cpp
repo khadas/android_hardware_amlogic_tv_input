@@ -8,6 +8,8 @@
  * showbo
  */
 
+#define LOG_TAG "CPQdb"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -19,7 +21,6 @@
 
 #if (PQ_NO_ANDROID == 0)
 #include <android/log.h>
-#define LOG_TAG "CPQdb"
 #include "CTvLog.h"
 #endif
 
@@ -213,7 +214,7 @@ int CPqData::reopenDB()
 }
 
 int CPqData::getRegValues(const char *table_name, tvin_port_t source, tvin_sig_fmt_t signal,
-                          is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+                          is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt __unused, am_regs_t *regs)
 {
     CSqlite::Cursor c_tablelist, c_reg_list;
     int index_am_reg = 0;
@@ -357,8 +358,10 @@ int CPqData::getRegValuesByValue_long(const char *name, const char *f_name, cons
     LOGD("%s, length = %d", __FUNCTION__, index_am_reg);
     return rval;
 }
+
 int CPqData::PQ_GetBaseColorParams(vpp_color_basemode_t basemode, tvin_port_t source_port,
-                                   tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+                                   tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
+                                   tvin_trans_fmt_t trans_fmt __unused, am_regs_t *regs)
 {
     CSqlite::Cursor c;
     char sqlmaster[256];
@@ -381,7 +384,8 @@ int CPqData::PQ_GetBaseColorParams(vpp_color_basemode_t basemode, tvin_port_t so
 }
 
 int CPqData::PQ_GetCM2Params(vpp_color_management2_t basemode, tvin_port_t source_port,
-                             tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+                             tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
+                             tvin_trans_fmt_t trans_fmt __unused, am_regs_t *regs)
 {
     CSqlite::Cursor c;
     char sqlmaster[256];
@@ -417,7 +421,8 @@ int CPqData::PQ_GetCM2Params(vpp_color_management2_t basemode, tvin_port_t sourc
 }
 
 int CPqData::PQ_GetNR2Params(vpp_noise_reduction2_mode_t nr_mode, tvin_port_t source_port,
-                             tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+                             tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
+                             tvin_trans_fmt_t trans_fmt __unused, am_regs_t *regs)
 {
     CSqlite::Cursor c;
     char sqlmaster[256];
@@ -450,7 +455,8 @@ int CPqData::PQ_GetNR2Params(vpp_noise_reduction2_mode_t nr_mode, tvin_port_t so
 }
 
 int CPqData::PQ_GetXVYCCParams(vpp_xvycc_mode_t xvycc_mode, tvin_port_t source_port,
-                               tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs,
+                               tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
+                               tvin_trans_fmt_t trans_fmt __unused, am_regs_t *regs,
                                am_regs_t *regs_1)
 {
     CSqlite::Cursor c;
@@ -484,7 +490,8 @@ int CPqData::PQ_GetXVYCCParams(vpp_xvycc_mode_t xvycc_mode, tvin_port_t source_p
 }
 
 int CPqData::PQ_GetMCDIParams(vpp_mcdi_mode_t mcdi_mode, tvin_port_t source_port,
-                              tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+                              tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
+                              tvin_trans_fmt_t trans_fmt __unused, am_regs_t *regs)
 {
     CSqlite::Cursor c;
     char sqlmaster[256];
@@ -517,7 +524,8 @@ int CPqData::PQ_GetMCDIParams(vpp_mcdi_mode_t mcdi_mode, tvin_port_t source_port
 }
 
 int CPqData::PQ_GetDeblockParams(vpp_deblock_mode_t deb_mode, tvin_port_t source_port,
-                                 tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, am_regs_t *regs)
+                                 tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
+                                 tvin_trans_fmt_t trans_fmt __unused, am_regs_t *regs)
 {
     CSqlite::Cursor c;
     char sqlmaster[256];
@@ -656,7 +664,8 @@ int CPqData::PQ_ResetAllColorTemperatureParams(void)
 }
 
 int CPqData::PQ_GetDNLPParams(tvin_port_t source_port, tvin_sig_fmt_t fmt, is_3d_type_t is2dOr3d,
-                              tvin_trans_fmt_t trans_fmt, ve_dnlp_t *params, ve_dnlp_table_t *newParams, int *dnlpFlag)
+                              tvin_trans_fmt_t trans_fmt __unused, ve_dnlp_t *params,
+                              ve_dnlp_table_t *newParams, int *dnlpFlag)
 {
     CSqlite::Cursor c;
     char sqlmaster[256];
@@ -750,6 +759,7 @@ int CPqData::PQ_SetNoLineAllBrightnessParams(tv_source_input_type_t source_type,
 {
     return SetNonlinearMapping(TVPQ_DATA_BRIGHTNESS, source_type, osd0, osd25, osd50, osd75, osd100);
 }
+
 int CPqData::PQ_GetNoLineAllBrightnessParams(tv_source_input_type_t source_type, int *osd0,
         int *osd25, int *osd50, int *osd75, int *osd100)
 {
@@ -768,8 +778,9 @@ int CPqData::PQ_GetNoLineAllBrightnessParams(tv_source_input_type_t source_type,
 
 }
 
-int CPqData::PQ_GetBrightnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                                    is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params)
+int CPqData::PQ_GetBrightnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt __unused,
+                                    is_3d_type_t is2dOr3d __unused, tvin_trans_fmt_t trans_fmt __unused,
+                                    int level, int *params)
 {
     int val;
 
@@ -778,8 +789,10 @@ int CPqData::PQ_GetBrightnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_
     return 0;
 
 }
-int CPqData::PQ_SetBrightnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                                    is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params)
+
+int CPqData::PQ_SetBrightnessParams(tvin_port_t source_port __unused, tvin_sig_fmt_t sig_fmt __unused,
+                                    is_3d_type_t is2dOr3d __unused, tvin_trans_fmt_t trans_fmt __unused,
+                                    int level __unused, int params __unused)
 {
     return 0;
 }
@@ -789,6 +802,7 @@ int CPqData::PQ_SetNoLineAllContrastParams(tv_source_input_type_t source_type, i
 {
     return SetNonlinearMapping(TVPQ_DATA_CONTRAST, source_type, osd0, osd25, osd50, osd75, osd100);
 }
+
 int CPqData::PQ_GetNoLineAllContrastParams(tv_source_input_type_t source_type, int *osd0,
         int *osd25, int *osd50, int *osd75, int *osd100)
 {
@@ -806,16 +820,20 @@ int CPqData::PQ_GetNoLineAllContrastParams(tv_source_input_type_t source_type, i
     return rval;
 }
 
-int CPqData::PQ_GetContrastParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                                  is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params)
+int CPqData::PQ_GetContrastParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt __unused,
+                                  is_3d_type_t is2dOr3d __unused, tvin_trans_fmt_t trans_fmt __unused,
+                                  int level, int *params)
 {
     int val;
+
     GetNonlinearMapping(TVPQ_DATA_CONTRAST, source_port, level, &val);
     *params = CaculateLevelParam(pq_con_data, con_nodes, val);
     return 0;
 }
-int CPqData::PQ_SetContrastParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                                  is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params)
+
+int CPqData::PQ_SetContrastParams(tvin_port_t source_port __unused, tvin_sig_fmt_t sig_fmt __unused,
+                                  is_3d_type_t is2dOr3d __unused, tvin_trans_fmt_t trans_fmt __unused,
+                                  int level __unused, int params __unused)
 {
     return 0;
 }
@@ -825,6 +843,7 @@ int CPqData::PQ_SetNoLineAllSaturationParams(tv_source_input_type_t source_type,
 {
     return SetNonlinearMapping(TVPQ_DATA_SATURATION, source_type, osd0, osd25, osd50, osd75, osd100);
 }
+
 int CPqData::PQ_GetNoLineAllSaturationParams(tv_source_input_type_t source_type, int *osd0,
         int *osd25, int *osd50, int *osd75, int *osd100)
 {
@@ -842,16 +861,20 @@ int CPqData::PQ_GetNoLineAllSaturationParams(tv_source_input_type_t source_type,
     return rval;
 }
 
-int CPqData::PQ_GetSaturationParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                                    is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params)
+int CPqData::PQ_GetSaturationParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt __unused,
+                                    is_3d_type_t is2dOr3d __unused, tvin_trans_fmt_t trans_fmt __unused,
+                                    int level, int *params)
 {
     int val;
+
     GetNonlinearMapping(TVPQ_DATA_SATURATION, source_port, level, &val);
     *params = CaculateLevelParam(pq_sat_data, sat_nodes, val);
     return 0;
 }
-int CPqData::PQ_SetSaturationParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                                    is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params)
+
+int CPqData::PQ_SetSaturationParams(tvin_port_t source_port __unused, tvin_sig_fmt_t sig_fmt __unused,
+                                    is_3d_type_t is2dOr3d __unused, tvin_trans_fmt_t trans_fmt __unused,
+                                    int level __unused, int params __unused)
 {
     return 0;
 }
@@ -861,6 +884,7 @@ int CPqData::PQ_SetNoLineAllHueParams(tv_source_input_type_t source_type, int os
 {
     return SetNonlinearMapping(TVPQ_DATA_HUE, source_type, osd0, osd25, osd50, osd75, osd100);
 }
+
 int CPqData::PQ_GetNoLineAllHueParams(tv_source_input_type_t source_type, int *osd0, int *osd25,
                                       int *osd50, int *osd75, int *osd100)
 {
@@ -878,16 +902,20 @@ int CPqData::PQ_GetNoLineAllHueParams(tv_source_input_type_t source_type, int *o
     return rval;
 }
 
-int CPqData::PQ_GetHueParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                             is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int *params)
+int CPqData::PQ_GetHueParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt __unused,
+                             is_3d_type_t is2dOr3d __unused, tvin_trans_fmt_t trans_fmt __unused,
+                             int level, int *params)
 {
     int val;
+
     GetNonlinearMapping(TVPQ_DATA_HUE, source_port, level, &val);
     *params = CaculateLevelParam(pq_hue_data, hue_nodes, val);
     return 0;
 }
-int CPqData::PQ_SetHueParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                             is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params)
+
+int CPqData::PQ_SetHueParams(tvin_port_t source_port __unused, tvin_sig_fmt_t sig_fmt __unused,
+                             is_3d_type_t is2dOr3d __unused, tvin_trans_fmt_t trans_fmt __unused,
+                             int level __unused, int params __unused)
 {
     return 0;
 }
@@ -897,6 +925,7 @@ int CPqData::PQ_SetNoLineAllSharpnessParams(tv_source_input_type_t source_type, 
 {
     return SetNonlinearMapping(TVPQ_DATA_SHARPNESS, source_type, osd0, osd25, osd50, osd75, osd100);
 }
+
 int CPqData::PQ_GetNoLineAllSharpnessParams(tv_source_input_type_t source_type, int *osd0,
         int *osd25, int *osd50, int *osd75, int *osd100)
 {
@@ -914,10 +943,12 @@ int CPqData::PQ_GetNoLineAllSharpnessParams(tv_source_input_type_t source_type, 
     return rval;
 }
 
-int CPqData::PQ_GetSharpnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                                   is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, am_regs_t *regs, am_regs_t *regs_l)
+int CPqData::PQ_GetSharpnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt __unused,
+                                   is_3d_type_t is2dOr3d __unused, tvin_trans_fmt_t trans_fmt __unused,
+                                   int level, am_regs_t *regs, am_regs_t *regs_l)
 {
     int val;
+
     GetNonlinearMapping(TVPQ_DATA_SHARPNESS, source_port, level, &val);
     LOGD("val = %d\n", val);
     *regs = CaculateLevelRegsParam(pq_sharpness_reg_data, val, 0);
@@ -926,6 +957,7 @@ int CPqData::PQ_GetSharpnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_f
     }
     return 0;
 }
+
 int CPqData::PQ_GetPLLParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, am_regs_t *regs)
 {
     int ret = -1;
@@ -950,6 +982,7 @@ int CPqData::PQ_GetPLLParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, am
     }
     return ret;
 }
+
 int CPqData::PQ_GetCVD2Params(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, am_regs_t *regs)
 {
     int ret = -1;
@@ -974,8 +1007,10 @@ int CPqData::PQ_GetCVD2Params(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, a
 
     return ret;
 }
-int CPqData::PQ_SetSharpnessParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                                   is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, am_regs_t regs)
+
+int CPqData::PQ_SetSharpnessParams(tvin_port_t source_port __unused, tvin_sig_fmt_t sig_fmt __unused,
+                                   is_3d_type_t is2dOr3d __unused, tvin_trans_fmt_t trans_fmt __unused,
+                                   int level __unused, am_regs_t regs __unused)
 {
     return 0;
 }
@@ -985,6 +1020,7 @@ int CPqData::PQ_SetNoLineAllVolumeParams(tv_source_input_type_t source_type, int
 {
     return SetNonlinearMapping(TVPQ_DATA_VOLUME, source_type, osd0, osd25, osd50, osd75, osd100);
 }
+
 int CPqData::PQ_GetNoLineAllVolumeParams(tv_source_input_type_t source_type, int *osd0, int *osd25,
         int *osd50, int *osd75, int *osd100)
 {
@@ -1002,8 +1038,9 @@ int CPqData::PQ_GetNoLineAllVolumeParams(tv_source_input_type_t source_type, int
     return rval;
 }
 
-int CPqData::PQ_SetVolumeParams(tvin_port_t source_port, tvin_sig_fmt_t sig_fmt,
-                                is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, int level, int params)
+int CPqData::PQ_SetVolumeParams(tvin_port_t source_port __unused, tvin_sig_fmt_t sig_fmt __unused,
+                                is_3d_type_t is2dOr3d __unused, tvin_trans_fmt_t trans_fmt __unused,
+                                int level __unused, int params __unused)
 {
     return 0;
 }
@@ -1026,7 +1063,7 @@ int CPqData::PQ_ResetAllNoLineParams(void)
 
 int CPqData::PQ_GetNoiseReductionParams(vpp_noise_reduction_mode_t nr_mode,
                                         tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
-                                        tvin_trans_fmt_t trans_fmt, int *params)
+                                        tvin_trans_fmt_t trans_fmt __unused, int *params)
 {
     CSqlite::Cursor c;
     char sqlmaster[256];
@@ -1054,15 +1091,17 @@ int CPqData::PQ_GetNoiseReductionParams(vpp_noise_reduction_mode_t nr_mode,
     return rval;
 }
 
-int CPqData::PQ_SetNoiseReductionParams(vpp_noise_reduction_mode_t nr_mode,
-                                        tvin_port_t source_port, tvin_sig_fmt_t sig_fmt, is_3d_type_t is2dOr3d,
-                                        tvin_trans_fmt_t trans_fmt, int *params)
+int CPqData::PQ_SetNoiseReductionParams(vpp_noise_reduction_mode_t nr_mode __unused,
+                                        tvin_port_t source_port __unused, tvin_sig_fmt_t sig_fmt __unused,
+                                        is_3d_type_t is2dOr3d __unused,
+                                        tvin_trans_fmt_t trans_fmt __unused, int *params __unused)
 {
     return 0;
 }
 
 int CPqData::PQ_GetOverscanParams(tv_source_input_type_t source_type, tvin_sig_fmt_t fmt,
-                                  is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, vpp_display_mode_t dmode,
+                                  is_3d_type_t is2dOr3d,
+                                  tvin_trans_fmt_t trans_fmt __unused, vpp_display_mode_t dmode __unused,
                                   tvin_cutwin_t *cutwin_t)
 {
     CSqlite::Cursor c;
@@ -1091,7 +1130,7 @@ int CPqData::PQ_GetOverscanParams(tv_source_input_type_t source_type, tvin_sig_f
     return rval;
 }
 int CPqData::PQ_SetOverscanParams(tv_source_input_type_t source_type, tvin_sig_fmt_t fmt,
-                                  is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt, tvin_cutwin_t cutwin_t)
+                                  is_3d_type_t is2dOr3d, tvin_trans_fmt_t trans_fmt __unused, tvin_cutwin_t cutwin_t)
 {
     CSqlite::Cursor c;
     char sqlmaster[256];
@@ -1164,6 +1203,7 @@ int CPqData::PQ_GetPQModeParams(tv_source_input_type_t source_type, vpp_picture_
     }
     return rval;
 }
+
 int CPqData::PQ_SetPQModeParams(tv_source_input_type_t source_type, vpp_picture_mode_t pq_mode,
                                 vpp_pq_para_t *params)
 {
@@ -1255,15 +1295,15 @@ int CPqData::PQ_GetGammaTable(int panel_id, tvin_port_t source_port, tvin_sig_fm
 {
     CSqlite::Cursor c;
     char sqlmaster[256];
-
     int rval = -1;
+
+    panel_id = panel_id;
 
     getSqlParams(__FUNCTION__, sqlmaster, "select TableName from GeneralGammaTable where "
                  "TVIN_PORT = %d and "
                  "TVIN_SIG_FMT = %d;", source_port, fmt);
 
     rval = this->select(sqlmaster, c);
-
     if (c.moveToFirst()) {
         int index_TableName = 0;//c.getColumnIndex("TableName");
         getSqlParams(__FUNCTION__, sqlmaster, "select %s from %s;", f_name,
@@ -1310,6 +1350,7 @@ int CPqData::PQ_GetVGAAjustPara(tvin_sig_fmt_t vga_fmt, tvafe_vga_parm_t *adjpar
     }
     return rval;
 }
+
 int CPqData::PQ_SetVGAAjustPara(tvin_sig_fmt_t vga_fmt, tvafe_vga_parm_t adjparam)
 {
     CSqlite::Cursor c;
@@ -1531,6 +1572,7 @@ int CPqData::SetNonlinearMappingByName(const char *name, tvpq_data_type_t data_t
     }
     return 0;
 }
+
 int CPqData::getSharpnessFlag()
 {
     return sha_diff_flag;
@@ -1629,6 +1671,7 @@ int CPqData::LoadPQData(tvpq_data_type_t data_type, tvin_port_t source_port,
     tvpq_data_t *pq_data = NULL;
     int *pq_nodes = NULL;
 
+    trans_fmt = trans_fmt;
     switch (data_type) {
     case TVPQ_DATA_BRIGHTNESS:
         getSqlParams(__FUNCTION__, sqlmaster,
@@ -1908,6 +1951,7 @@ int CPqData::replacePqDb(const char *newFilePath)
         return ret;
     }
 }
+
 int CPqData::PQ_GetPhaseArray(am_phase_t *am_phase)
 {
     CSqlite::Cursor c;

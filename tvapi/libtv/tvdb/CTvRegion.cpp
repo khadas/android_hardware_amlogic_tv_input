@@ -8,29 +8,21 @@
 //  @ Author :
 //
 //
-
+#define LOG_TAG "CTvRegion"
 
 #include "CTvRegion.h"
 #include "CTvDatabase.h"
 
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CTvRegion"
-#endif
-
-CTvRegion::CTvRegion(CTvDatabase db)
+CTvRegion::CTvRegion(CTvDatabase db __unused)
 {
-
 }
 
 CTvRegion::CTvRegion()
 {
-
 }
+
 CTvRegion::~CTvRegion()
 {
-
 }
 
 CTvRegion CTvRegion::selectByID()
@@ -41,7 +33,6 @@ CTvRegion CTvRegion::selectByID()
 
 int CTvRegion::getChannelListByName(char *name, Vector<sp<CTvChannel> > &vcp)
 {
-
     if (name == NULL)
         return -1;
 
@@ -140,12 +131,12 @@ int CTvRegion::getChannelListByNameAndFreqRange(char *name, int beginFreq, int e
     c.close();
     return ret;
 }
+
 void CTvRegion::selectByCountry()
 {
-
 }
 
-Vector<String8>  CTvRegion::getAllCountry()
+Vector<String8> CTvRegion::getAllCountry()
 {
     Vector<String8> vStr;
     return vStr;

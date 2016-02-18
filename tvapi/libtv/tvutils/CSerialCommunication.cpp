@@ -1,3 +1,5 @@
+#define LOG_TAG "CSerialCommunication"
+
 #include <CTvLog.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,15 +7,8 @@
 #include <sys/prctl.h>
 #include <fcntl.h>
 #include <errno.h>
-
 #include <cutils/log.h>
-
 #include "CSerialCommunication.h"
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CSerialCommunication"
-#endif
 
 CSerialCommunication::CSerialCommunication()
 {

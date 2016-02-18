@@ -7,17 +7,13 @@
 //  @ Date : 2013-11
 //  @ Author :
 //
-//
+#define LOG_TAG "CTvDatabase"
+
 #include <assert.h>
 #include <tinyxml.h>
 #include "CTvDatabase.h"
 #include "tvutils/tvutils.h"
 #include "../tvconfig/tvconfig.h"
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CTvDatabase"
-#endif
 
 const char *CTvDatabase::DEFAULT_DB_PATH = "/param/tv_default.xml";
 
@@ -144,7 +140,7 @@ int CTvDatabase::getChannelParaList(char *path, Vector<sp<ChannelPara> > &vcp)
 
 int CTvDatabase::ClearDbTable()
 {
-    LOGD(LOG_TAG, "Clearing database ...");
+    LOGD("Clearing database ...");
     exeSql("delete from net_table");
     exeSql("delete from ts_table");
     exeSql("delete from srv_table");
@@ -160,7 +156,7 @@ int CTvDatabase::ClearDbTable()
 
 int CTvDatabase::clearDbAllProgramInfoTable()
 {
-    LOGD(LOG_TAG, "Clearing clearDbAllProgramInfoTable ...");
+    LOGD("Clearing clearDbAllProgramInfoTable ...");
     exeSql("delete from net_table");
     exeSql("delete from ts_table");
     exeSql("delete from srv_table");

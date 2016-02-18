@@ -8,11 +8,9 @@
 //  @ Author :
 //
 //
-#include "CSqlite.h"
-#ifdef LOG_TAG
-#undef LOG_TAG
 #define LOG_TAG "CSqlite"
-#endif
+
+#include "CSqlite.h"
 
 using namespace android;
 
@@ -23,11 +21,12 @@ CSqlite::CSqlite()
 
 CSqlite::~CSqlite()
 {
-    if (mHandle > 0) {
+    if (mHandle != NULL) {
         sqlite3_close(mHandle);
         mHandle = NULL;
     }
 }
+
 //完整性检测，检测数据库是否被破坏
 bool CSqlite::integrityCheck()
 {
@@ -41,7 +40,8 @@ bool CSqlite::integrityCheck()
     }
     return true;
 }
-int CSqlite::sqlite3_exec_callback(void *data, int nColumn, char **colValues, char **colNames)
+
+int CSqlite::sqlite3_exec_callback(void *data __unused, int nColumn, char **colValues, char **colNames __unused)
 {
     LOGD("sqlite3_exec_callback--- nums = %d", nColumn);
     for (int i = 0; i < nColumn; i++) {
@@ -71,6 +71,7 @@ int CSqlite::closeDb()
     }
     return rval;
 }
+
 void CSqlite::setHandle(sqlite3 *h)
 {
     mHandle = h;
@@ -80,6 +81,7 @@ sqlite3 *CSqlite::getHandle()
 {
     return mHandle;
 }
+
 int CSqlite::select(const char *sql, CSqlite::Cursor &c)
 {
     int col, row;
@@ -104,7 +106,6 @@ int CSqlite::select(const char *sql, CSqlite::Cursor &c)
 
 void CSqlite::insert()
 {
-
 }
 
 bool CSqlite::exeSql(const char *sql)
@@ -138,15 +139,13 @@ bool CSqlite::rollbackTransaction()
 
 void CSqlite::del()
 {
-
 }
 
 void CSqlite::update()
 {
-
 }
 
 void CSqlite::xxtable()
 {
-
 }
+

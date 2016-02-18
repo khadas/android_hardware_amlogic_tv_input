@@ -7,15 +7,12 @@
 //  @ Date : 2013-11
 //  @ Author :
 //
-//
+#define LOG_TAG "CTvScanner"
+
 #include "CTvScanner.h"
 #include "CTvProgram.h"
 #include "CTvRegion.h"
 #include "CFrontEnd.h"
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CTvScanner"
-#endif
 
 CTvScanner *CTvScanner::m_s_Scanner = NULL;
 //int CTvScanner::getStartPara()
@@ -57,7 +54,7 @@ AM_Bool_t CTvScanner::atv_cvbs_lock_check(v4l2_std_id  *colorStd)
             tvin_info_t info;
             CTvin::getInstance()->VDIN_GetSignalInfo(&info);
             *colorStd = CTvin::CvbsFtmToV4l2ColorStd(info.fmt);
-            LOGD("atv_cvbs_lock_check     locked   and cvbs fmt = 0x%x std = 0x%x", info.fmt, *colorStd);
+            LOGD("atv_cvbs_lock_check locked and cvbs fmt = %d std = 0x%p", info.fmt, colorStd);
             return true;
         }
         usleep(50 * 1000);
@@ -438,7 +435,7 @@ dvbpsi_pat_t *CTvScanner::get_valid_pats(AM_SCAN_TS_t *ts)
     return valid_pat;
 }
 
-void CTvScanner::scan_process_ts_info(AM_SCAN_Result_t *result, AM_SCAN_TS_t *ts, ScannerEvent *evt)
+void CTvScanner::scan_process_ts_info(AM_SCAN_Result_t *result __unused, AM_SCAN_TS_t *ts, ScannerEvent *evt)
 {
     dvbpsi_nit_t *nit;
     dvbpsi_descriptor_t *descr;
@@ -694,7 +691,7 @@ void CTvScanner::scan_store_dvb_ts_evt_service(SCAN_ServiceInfo_t *srv)
     for (int i = 0; i < srv->ttx_info.teletext_count; i++) {
         if (srv->ttx_info.teletexts[i].type == 0x2 ||
                 srv->ttx_info.teletexts[i].type == 0x5) {
-            if (scnt >= (sizeof(m_s_Scanner->mCurEv.mStype) / sizeof(int)))
+            if (scnt >= (int)(sizeof(m_s_Scanner->mCurEv.mStype) / sizeof(int)))
                 break;
             m_s_Scanner->mCurEv.mStype[scnt] = TYPE_DTV_TELETEXT;
             m_s_Scanner->mCurEv.mSid[scnt] = srv->ttx_info.teletexts[i].pid;
@@ -866,7 +863,7 @@ int CTvScanner::manualDtmbScan(int beginFreq, int endFreq, int modulation)
         para.dtv_para.dmx_dev_id = 0;//default 0
 
         Vector<sp<CTvChannel> > vcp;
-        CTvRegion::getChannelListByNameAndFreqRange("CHINA,Default DTMB ALL", beginFreq, endFreq, vcp);
+        CTvRegion::getChannelListByNameAndFreqRange((char *)"CHINA,Default DTMB ALL", beginFreq, endFreq, vcp);
         int size = vcp.size();
 
         //@author:hao.fu
@@ -1136,14 +1133,14 @@ int CTvScanner::autoDtmbScan()
         para.dtv_para.dmx_dev_id = 0;//default 0
         Vector<sp<CTvChannel> > vcp;
         //CTvDatabase::getChannelParaList("/data/tv_default.xml", vcp);//channel list from xml or db
-        CTvRegion::getChannelListByName("CHINA,Default DTMB ALL", vcp);
+        CTvRegion::getChannelListByName((char *)"CHINA,Default DTMB ALL", vcp);
 
         int size = vcp.size();
         LOGD("channel list size = %d", size);
         //showboz
         if (size == 0) {
             CTvDatabase::GetTvDb()->importXmlToDB("/etc/tv_default.xml");
-            CTvRegion::getChannelListByName("CHINA,Default DTMB ALL", vcp);
+            CTvRegion::getChannelListByName((char *)"CHINA,Default DTMB ALL", vcp);
             size = vcp.size();
         }
 
@@ -1321,7 +1318,7 @@ int CTvScanner::autoDtmbScan()
 
 int CTvScanner::stopScan()
 {
-    LOGD("StopScan mScanHandle=%d", mScanHandle);
+    LOGD("StopScan");
     //requestExit();
     if (mbScanStart) { //if start ok and not stop
         int ret = AM_SCAN_Destroy(mScanHandle, AM_TRUE);
@@ -1337,7 +1334,7 @@ int CTvScanner::stopScan()
     return 0;
 }
 
-void CTvScanner::tv_scan_evt_callback(long dev_no, int event_type, void *param, void *data)
+void CTvScanner::tv_scan_evt_callback(long dev_no, int event_type, void *param, void *data __unused)
 {
     CTvScanner *pT = NULL;
     long long tmpFreq = 0;
@@ -1612,16 +1609,16 @@ int CTvScanner::getAtscChannelPara(int attennaType, Vector<sp<CTvChannel> > &vcp
 {
     switch (attennaType) { //region name should be remove to config file and read here
     case 1:
-        CTvRegion::getChannelListByName("U.S.,ATSC Air", vcp);
+        CTvRegion::getChannelListByName((char *)"U.S.,ATSC Air", vcp);
         break;
     case 2:
-        CTvRegion::getChannelListByName("U.S.,ATSC Cable Standard", vcp);
+        CTvRegion::getChannelListByName((char *)"U.S.,ATSC Cable Standard", vcp);
         break;
     case 3:
-        CTvRegion::getChannelListByName("U.S.,ATSC Cable IRC", vcp);
+        CTvRegion::getChannelListByName((char *)"U.S.,ATSC Cable IRC", vcp);
         break;
     case 4:
-        CTvRegion::getChannelListByName("U.S.,ATSC Cable HRC", vcp);
+        CTvRegion::getChannelListByName((char *)"U.S.,ATSC Cable HRC", vcp);
         break;
     default:
         return -1;

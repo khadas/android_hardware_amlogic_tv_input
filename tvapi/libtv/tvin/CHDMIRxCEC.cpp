@@ -183,7 +183,7 @@ int CHDMIRxCEC::CopyMessageData(unsigned char data_buf[], unsigned char msg_data
 
     memset((void *)data_buf, 0, CC_CEC_STREAM_SIZE);
 
-    if (msg_len > CC_CEC_STREAM_SIZE) {
+    if (msg_len > (int)CC_CEC_STREAM_SIZE) {
         return 0;
     }
 

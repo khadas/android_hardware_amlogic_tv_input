@@ -4,14 +4,12 @@
  *@ Date : 2013-12
  *@ Author :
 */
+#define LOG_TAG "CTvEpg"
+
 #include "CTvEpg.h"
 #include "CTvChannel.h"
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CTvEpg"
-#endif
 
-void CTvEpg::epg_evt_callback(long dev_no, int event_type, void *param, void *user_data)
+void CTvEpg::epg_evt_callback(long dev_no, int event_type, void *param, void *user_data __unused)
 {
     CTvEpg *pEpg;
 

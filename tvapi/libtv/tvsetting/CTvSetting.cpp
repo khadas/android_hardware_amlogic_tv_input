@@ -1,3 +1,5 @@
+#define LOG_TAG "TvSetting"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -275,7 +277,7 @@ int EEPReadOneByte(int offset , unsigned char *data_buf)
 
     close(fd);
 
-    LOGD ( "~~~EEPReadOneByte~~~##offset %d##rw_val %d##" , offset, data_buf);
+    LOGD ( "~~~EEPReadOneByte~~~##offset %d##rw_val %s##" , offset, data_buf);
 
     pthread_mutex_unlock(&ssm_r_w_op_mutex);
     return 0;
@@ -2229,7 +2231,7 @@ int SSMSaveAudioEQGain(int offset, int size, int8_t tmp_buf[])
     return SSMWriteNTypes(SSM_AUD_EQ_GAIN + offset, size, tmp_buf);
 }
 
-int SSMReadAudioEQGain(int offset, int size, int8_t tmp_buf[])
+int SSMReadAudioEQGain(int offset __unused, int size, int8_t tmp_buf[])
 {
     return SSMReadNTypes(SSM_AUD_EQ_GAIN, size, tmp_buf);
 }

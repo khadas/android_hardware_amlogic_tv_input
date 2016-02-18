@@ -1,3 +1,5 @@
+#define LOG_TAG "serial_base"
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -13,8 +15,6 @@
 #include <cutils/log.h>
 
 #include "serial_base.h"
-
-#define LOG_TAG "serial_base"
 #include "CTvLog.h"
 
 #define CS_SERIAL_A_DEV_PATH "/dev/ttyS0"
@@ -140,7 +140,7 @@ static int com_set_opt(int hComm, int speed, int db, int sb, int pb, int to, int
         return -1;
     }
 
-    for (i = 0; i < sizeof(speed_arr) / sizeof(int); i++) {
+    for (i = 0; i < (int)(sizeof(speed_arr) / sizeof(int)); i++) {
         if (speed == name_arr[i]) {
             cfsetispeed(&tmpOpt, speed_arr[i]);
             cfsetospeed(&tmpOpt, speed_arr[i]);
@@ -281,7 +281,7 @@ int com_a_open_dev()
 
     pthread_mutex_lock(&serial_a_op_mutex);
 
-    tmp_ret = open_com_dev(&gSerialAHandle, CS_SERIAL_A_DEV_PATH);
+    tmp_ret = open_com_dev(&gSerialAHandle, (char *)CS_SERIAL_A_DEV_PATH);
 
     pthread_mutex_unlock(&serial_a_op_mutex);
 
@@ -294,7 +294,7 @@ int com_b_open_dev()
 
     pthread_mutex_lock(&serial_b_op_mutex);
 
-    tmp_ret = open_com_dev(&gSerialBHandle, CS_SERIAL_B_DEV_PATH);
+    tmp_ret = open_com_dev(&gSerialBHandle, (char *)CS_SERIAL_B_DEV_PATH);
 
     pthread_mutex_unlock(&serial_b_op_mutex);
 

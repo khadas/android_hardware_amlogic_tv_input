@@ -1,3 +1,4 @@
+#define LOG_TAG "CTvin"
 
 #include "CTvin.h"
 #include <CTvLog.h>
@@ -22,12 +23,6 @@
 #include "../tvconfig/tvconfig.h"
 #include "CFbcCommunication.h"
 
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CTvin"
-#endif
-
 #define AFE_DEV_PATH        "/dev/tvafe0"
 #define HDMIRX_KSV_PATH     "/dev/hdmirx0"
 
@@ -42,8 +37,8 @@
 #define MODE_BT                 0x00000010
 #define MODE_LR_SWITCH          0x00000020
 #define MODE_FIELD_DEPTH        0x00000040
-#define MODE_3D_TO_2D_L         0x00000080
-#define MODE_3D_TO_2D_R         0x00000100
+//#define MODE_3D_TO_2D_L         0x00000080 redefine
+//#define MODE_3D_TO_2D_R         0x00000100 redefine
 #define LR_FORMAT_INDICATOR     0x00000200
 #define BT_FORMAT_INDICATOR     0x00000400
 
@@ -176,7 +171,7 @@ char *CTvin::VDIN_CheckVideoPath ( const char *videopath )
         }
 
         if ( gExistD2D3 == 0 ) {
-            DelSub ( gVideoPath, "d2d3 " );
+            DelSub ( gVideoPath, (char *)"d2d3 " );
         }
     }
 
@@ -527,7 +522,7 @@ int CTvin::VDIN_GetDisplayVFreq (void)
     memset(buf, 0, sizeof(buf));
     read(fd, buf, sizeof(buf));
     close(fd);
-    LOGD( "s%, VDIN_GetDisplayVFreq is %s\n", __FUNCTION__, buf);
+    LOGD( "%s, VDIN_GetDisplayVFreq is %s\n", __FUNCTION__, buf);
     if (strstr(buf, "50hz") != NULL) {
         return 50;
     } else if (strstr(buf, "60hz") != 0) {
@@ -880,7 +875,7 @@ int CTvin::VDIN_TurnOnBlackBarDetect ( int isEnable )
     return 0;
 }
 
-int CTvin::VDIN_LoadHdcpKey ( unsigned char *hdcpkey_buff )
+int CTvin::VDIN_LoadHdcpKey ( unsigned char *hdcpkey_buff __unused)
 {
     unsigned char testHdcp[368] = { 0x53, 0x4B, 0x59, 0x01, 0x00, 0x10, 0x0D, 0x15, 0x3A, 0x8E, 0x99, 0xEE, 0x2A, 0x55, 0x58, 0xEE, 0xED, 0x4B, 0xBE, 0x00, 0x74, 0xA9, 0x00, 0x10, 0x0A, 0x21, 0xE3,
                                     0x30, 0x66, 0x34, 0xCE, 0x9C, 0xC7, 0x8B, 0x51, 0x27, 0xF9, 0x0B, 0xAD, 0x09, 0x5F, 0x4D, 0xC2, 0xCA, 0xA2, 0x13, 0x06, 0x18, 0x8D, 0x34, 0x82, 0x46, 0x2D, 0xC9, 0x4B, 0xB0, 0x1C, 0xDE,
@@ -915,7 +910,7 @@ int CTvin::VDIN_LoadHdcpKey ( unsigned char *hdcpkey_buff )
     return ret;
 }
 
-int CTvin::VDIN_KeepLastFrame ( int enable )
+int CTvin::VDIN_KeepLastFrame ( int enable __unused)
 {
     return 0;
     /*
@@ -1722,8 +1717,8 @@ char *CTvin::get_cap_addr ( enum adc_cal_type_e calType )
             dp = ( char * ) mmap ( NULL, VGA_CAP_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, m_vdin_dev_fd, 0 );
         }
 
-        if ( dp < 0 ) {
-            LOGD ( "get_cap_addr, mmap failed!\n" );
+        if ( dp == NULL ) {
+            LOGE ( "get_cap_addr, mmap failed!\n" );
         }
 
         return dp;
@@ -1903,9 +1898,7 @@ int CTvin::get_frame_average ( enum adc_cal_type_e calType, struct adc_cal_s *me
 
     if ( VDIN_DeviceIOCtl ( TVIN_IOC_START_DEC, &gTvinAFEParam ) < 0 ) {
         LOGW ( "get_frame_average, get vdin signal info, error(%s),fd(%d).\n", strerror ( errno ), m_vdin_dev_fd );
-        return NULL;
-    } else {
-        ;
+        return 0;
     }
 
     return 0;
@@ -2418,7 +2411,7 @@ tv_source_input_t CTvin::Tvin_PortToSourceInput ( tvin_port_t port )
     int i;
 
     for ( i = SOURCE_TV; i < SOURCE_MAX; i++ ) {
-        if ( mSourceInputToPortMap[i] == port ) {
+        if ( mSourceInputToPortMap[i] == (int)port ) {
             break;
         }
     }

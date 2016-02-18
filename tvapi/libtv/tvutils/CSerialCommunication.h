@@ -20,11 +20,13 @@ public:
     public:
         ISerialCommunicationObserver() {};
         virtual ~ISerialCommunicationObserver() {};
-        virtual void onSerialCommunication(int dev_id, int rd_len, unsigned char data_buf[]) {};
+        virtual void onSerialCommunication(int dev_id __unused,
+                                            int rd_len __unused,
+                                            unsigned char data_buf[] __unused) {
+        };
     };
 
-    void setObserver(ISerialCommunicationObserver *pOb)
-    {
+    void setObserver(ISerialCommunicationObserver *pOb) {
         mpObserver = pOb;
     };
 

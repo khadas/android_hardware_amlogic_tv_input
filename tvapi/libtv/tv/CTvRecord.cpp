@@ -1,3 +1,5 @@
+#define LOG_TAG "CTvRecord"
+
 #include <string.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -13,11 +15,6 @@
 #include "CTvProgram.h"
 #include "../tvconfig/tvconfig.h"
 #include "CTvRecord.h"
-
-#ifdef LOG_TAG
-#undef LOG_TAG
-#endif
-#define LOG_TAG "CTvRecord"
 
 #define FEND_DEV_NO 0
 #define DVR_DEV_NO 0

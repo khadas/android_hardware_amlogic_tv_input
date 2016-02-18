@@ -17,20 +17,18 @@ using namespace android;
 #include "am_sub2.h"
 #include "am_pes.h"
 #include "CTvEv.h"
-#define LOG_TAG "CTvSubtitle"
 
-
-typedef enum cc_param_country {
+enum cc_param_country {
     CC_PARAM_COUNTRY_USA = 0,
     CC_PARAM_COUNTRY_KOREA,
 };
 
-typedef enum cc_param_source_type {
+enum cc_param_source_type {
     CC_PARAM_SOURCE_VBIDATA = 0,
     CC_PARAM_SOURCE_USERDATA,
 };
 
-typedef enum cc_param_caption_type {
+enum cc_param_caption_type {
     CC_PARAM_ANALOG_CAPTION_TYPE_CC1 = 0,
     CC_PARAM_ANALOG_CAPTION_TYPE_CC2,
     CC_PARAM_ANALOG_CAPTION_TYPE_CC3,
@@ -47,6 +45,7 @@ typedef enum cc_param_caption_type {
     CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE5,
     CC_PARAM_DIGITAL_CAPTION_TYPE_SERVICE6,
 };
+
 class CTvSubtitle {
 public:
     class IObserver {

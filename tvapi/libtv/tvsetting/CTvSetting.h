@@ -9,8 +9,6 @@
 #include "TvKeyData.h"
 #include "../tv/CTvLog.h"
 
-#define LOG_TAG "TvSetting"
-
 using namespace android;
 
 #ifdef __cplusplus

@@ -22,11 +22,6 @@ struct fields_t {
     jmethodID post_event;
 };
 
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "TvJNI"
-#endif
-
 static fields_t fields;
 static Mutex sLock;
 class JNITvContext: public TvListener {
@@ -453,7 +448,7 @@ int register_com_droidlogic_app_tv_TvControlManager(JNIEnv *env)
 }
 
 
-jint JNI_OnLoad(JavaVM *vm, void *reserved)
+jint JNI_OnLoad(JavaVM *vm, void *reserved __unused)
 {
     JNIEnv *env = NULL;
     jint result = -1;

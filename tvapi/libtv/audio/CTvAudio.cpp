@@ -1,3 +1,5 @@
+#define LOG_TAG "CTvAudio"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,15 +16,13 @@
 #include "audio_effect.h"
 #include "CTvAudio.h"
 
-#define LOG_TAG "CTvAudio"
 #include "CTvLog.h"
 
 CTvAudio::CTvAudio()
 {
-
 }
 
 CTvAudio::~CTvAudio()
 {
-
 }
+

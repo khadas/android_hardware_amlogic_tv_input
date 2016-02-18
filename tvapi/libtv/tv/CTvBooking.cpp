@@ -1,11 +1,8 @@
+#define LOG_TAG "CTvBooking"
 
 #include "CTvBooking.h"
 #include "CTvDatabase.h"
 
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CTvBooking"
-#endif
 int CTvBooking::InitFromCursor(CTvDatabase::Cursor &c)
 {
     int col;
@@ -99,7 +96,7 @@ int CTvBooking::bookProgram(CTvProgram &prog, CTvEvent &evt)
           + String8("sub_pids,sub_types,sub_composition_page_ids,sub_ancillary_page_ids,sub_languages,")
           + String8("ttx_pids,ttx_types,ttx_magazine_numbers,ttx_page_numbers,ttx_languages, other_pids,from_storage,repeat)")
           + String8("values(") + String8::format("%d,", prog.getID()) + String8::format("%d,", evt.getEventId()) + progName.string() + String8(",") + evtName.string()
-          + String8::format("%d,", evt.getStartTime()) + String8::format("%d,", evt.getEndTime() - evt.getStartTime()) + String8::format("%d,", flag)
+          + String8::format("%ld,", evt.getStartTime()) + String8::format("%ld,", evt.getEndTime() - evt.getStartTime()) + String8::format("%d,", flag)
           + String8::format("%d,", status) + String8(",") + String8::format("%d,", prog.getVideo()->getPID()) + String8::format("%d,", prog.getVideo()->getFormat())
           + String8::format("%d,", prog.getAudio(0)->getPID()) + String8::format("%d,", prog.getAudio(0)->getFormat()) + prog.getAudio(0)->getLang().string()
           + String8(" , , , , , , , , , , , , ,)");

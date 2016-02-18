@@ -20,9 +20,7 @@
 #include <utils/RefBase.h>
 #include <stdlib.h>
 #include "CTvLog.h"
-#define LOG_TAG "CTvBooking"
 
-// ??????/ ???
 class CTvBooking : public LightRefBase<CTvBooking> {
 public:
     CTvBooking(CTvDatabase::Cursor &c);

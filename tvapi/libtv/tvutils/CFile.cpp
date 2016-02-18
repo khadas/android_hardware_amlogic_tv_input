@@ -1,11 +1,9 @@
+#define LOG_TAG "CFILE"
+
 #include "CFile.h"
-#include  "CTvLog.h"
+#include "CTvLog.h"
 
 #include <stdlib.h>
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CFILE"
-#endif
 
 CFile::CFile()
 {
@@ -92,14 +90,14 @@ int CFile::copyTo(const char *dstPath)
     char buffer[BUFFER_SIZE];
     char *ptr;
     int ret = 0;
-    while (bytes_read = read(mFd, buffer, BUFFER_SIZE)) {
+    while ((bytes_read = read(mFd, buffer, BUFFER_SIZE))) {
         /* 一个致命的错误发生了 */
         if ((bytes_read == -1) && (errno != EINTR)) {
             ret = -1;
             break;
         } else if (bytes_read > 0) {
             ptr = buffer;
-            while (bytes_write = write(dstFd, ptr, bytes_read)) {
+            while ((bytes_write = write(dstFd, ptr, bytes_read))) {
                 /* 一个致命错误发生了 */
                 if ((bytes_write == -1) && (errno != EINTR)) {
                     ret = -1;
@@ -178,7 +176,7 @@ int  CFile::setFileAttrValue(const char *path, int value)
     return 0;
 }
 
-int CFile::getFileAttrStr(const char *path, char *str)
+int CFile::getFileAttrStr(const char *path __unused, char *str __unused)
 {
     return 0;
 }

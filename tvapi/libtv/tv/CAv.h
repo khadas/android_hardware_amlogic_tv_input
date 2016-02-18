@@ -15,7 +15,6 @@ static const char *PATH_3D_SCALER = "/sys/module/amvideo/parameters/force_3d_sca
 static const char *PATH_VIDEO_SCALER = "/sys/class/video/stereo_scaler";
 
 static const char *PATH_MEPG_DTMB_LOOKUP_PTS_FLAG = "/sys/module/amvdec_mpeg12/parameters/dtmb_flag";
-static const char *PATH_VIDEO_HEIGHT = "/sys/class/video/frame_height";
 /*cmd use for 3d operation*/
 #define MODE_3D_DISABLE     0x00000000
 #define MODE_3D_ENABLE      0x00000001

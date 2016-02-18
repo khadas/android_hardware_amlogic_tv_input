@@ -114,7 +114,7 @@ void CIniFile::printAll()
     return;
 }
 
-int CIniFile::LoadFromString(const char *str)
+int CIniFile::LoadFromString(const char *str __unused)
 {
     return 0;
 }

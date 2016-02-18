@@ -9,7 +9,6 @@
 //
 //
 
-
 #if !defined(_CTVPROGRAM_H)
 #define _CTVPROGRAM_H
 
@@ -32,7 +31,7 @@ public:
         AM_SCAN_SRV_DRADIO      = 2,    < 数字广播类型
         AM_SCAN_SRV_ATV         = 3,    < 模拟电视类型
     };
-     * /
+    */
     /**未定义类型*/
     static const int TYPE_UNKNOWN = 0;
     /**电视节目*/

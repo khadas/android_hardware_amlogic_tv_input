@@ -1,3 +1,5 @@
+#define LOG_TAG "CSourceConnectDetect"
+
 #include "CTvin.h"
 #include <CTvLog.h>
 #include <stdio.h>
@@ -13,10 +15,6 @@
 #include "../tvconfig/tvconfig.h"
 
 #include "CSourceConnectDetect.h"
-#ifdef LOG_TAG
-#undef LOG_TAG
-#define LOG_TAG "CSourceConnectDetect"
-#endif
 
 CSourceConnectDetect::CSourceConnectDetect()
 {
