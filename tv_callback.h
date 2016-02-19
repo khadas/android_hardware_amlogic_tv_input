@@ -1,6 +1,6 @@
 #ifndef TV_CALLBACK
 #define TV_CALLBACK
-#include "tvapi/android/tv/TvPlay.h"
+#include "TvPlay.h"
 class TvCallback : public TvPlayObserver {
 public:
     TvCallback(void *data)

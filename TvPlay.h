@@ -5,7 +5,7 @@
 //extern "C" {
 #endif
 
-#include <include/TvClient.h>
+#include <TvClient.h>
 
 typedef enum tv_source_input_e {
     SOURCE_INVALID = -1,

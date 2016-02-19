@@ -22,9 +22,9 @@
 #include <cutils/native_handle.h>
 
 #include <hardware/tv_input.h>
-#include "tvapi/android/tv/TvPlay.h"
+#include "TvPlay.h"
 #include "tv_callback.h"
-#include "tvapi/android/include/tvcmd.h"
+#include <tvcmd.h>
 #include <ui/GraphicBufferMapper.h>
 #include <ui/GraphicBuffer.h>
 /*****************************************************************************/

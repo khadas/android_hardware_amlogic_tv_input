@@ -1,6 +1,6 @@
 #include <utils/Log.h>
 #include "TvPlay.h"
-#include "../include/tvcmd.h"
+#include "tvcmd.h"
 
 TvPlay::TvPlay()
 {
