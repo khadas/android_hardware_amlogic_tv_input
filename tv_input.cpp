@@ -27,6 +27,12 @@
 #include <tvcmd.h>
 #include <ui/GraphicBufferMapper.h>
 #include <ui/GraphicBuffer.h>
+#include <gralloc_priv.h>
+#include <gralloc_helper.h>
+#include <hardware/hardware.h>
+#include <hardware/aml_screen.h>
+#include <linux/videodev2.h>
+#include <android/native_window.h>
 /*****************************************************************************/
 
 #define LOGD(...) \
@@ -34,9 +40,8 @@
 __android_log_print(ANDROID_LOG_DEBUG, "tv_input", __VA_ARGS__); }
 
 #ifndef container_of
-#define container_of(ptr, type, member) ({                      \
-    const typeof(((type *) 0)->member) *__mptr = (ptr);     \
-    (type *) ((char *) __mptr - (char *)(&((type *)0)->member)); })
+#define container_of(ptr, type, member) \
+    (type *)((char*)(ptr) - offsetof(type, member))
 #endif
 
 struct sideband_handle_t {
@@ -49,6 +54,7 @@ typedef struct tv_input_private {
     tv_input_device_t device;
     const tv_input_callback_ops_t *callback;
     void *callback_data;
+    aml_screen_device_t *mDev;
     TvPlay *mpTv;
     TvCallback *tvcallback;
 } tv_input_private_t;
@@ -190,6 +196,27 @@ static int notify_HDMI_stream_configurations_change(tv_input_private_t *priv, tv
     return 0;
 }
 
+static int notify_TV_Input_Capture_Succeeded(tv_input_private_t *priv, int device_id, int stream_id, uint32_t seq)
+{
+    tv_input_event_t event;
+    event.type = TV_INPUT_EVENT_CAPTURE_SUCCEEDED;
+    event.capture_result.device_id = device_id;
+    event.capture_result.stream_id = stream_id;
+    event.capture_result.seq = seq;
+    priv->callback->notify(&priv->device, &event, priv->callback_data);
+    return 0;
+}
+
+static int notify_TV_Input_Capture_Fail(tv_input_private_t *priv, int device_id, int stream_id, uint32_t seq)
+{
+    tv_input_event_t event;
+    event.type = TV_INPUT_EVENT_CAPTURE_FAILED;
+    event.capture_result.device_id = device_id;
+    event.capture_result.stream_id = stream_id;
+    event.capture_result.seq = seq;
+    priv->callback->notify(&priv->device, &event, priv->callback_data);
+    return 0;
+}
 void TvCallback::onTvEvent (int32_t msgType, const Parcel &p)
 {
     tv_input_private_t *priv = (tv_input_private_t *)(mPri);
@@ -333,7 +360,7 @@ static int get_tv_stream(tv_stream_t *stream)
         tvstream->usage = GRALLOC_USAGE_AML_VIDEO_OVERLAY;
         stream->type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE;
         stream->sideband_stream_source_handle = (native_handle_t *)tvstream;
-    } else if (stream->stream_id == NORMAL_STREAM_ID) {
+    } else if (stream->stream_id == FRAME_CAPTURE_STREAM_ID) {
         stream->type = TV_STREAM_TYPE_BUFFER_PRODUCER;
     }
     return 0;
@@ -466,6 +493,25 @@ static int tv_input_open_stream(struct tv_input_device *dev, int device_id,
             TvIputHal_ChannelConl(priv, 1, device_id);
             return 0;
         } else if (stream->stream_id == FRAME_CAPTURE_STREAM_ID) {
+            aml_screen_module_t* mModule;
+            if (hw_get_module(AML_SCREEN_HARDWARE_MODULE_ID,
+                (const hw_module_t **)&mModule) < 0) {
+                ALOGE("can not get screen source module");
+            } else {
+                mModule->common.methods->open((const hw_module_t *)mModule,
+                AML_SCREEN_SOURCE, (struct hw_device_t**)&(priv->mDev));
+                //do test here, we can use ops of mDev to operate vdin source
+            }
+
+            if (priv->mDev) {
+                int mCustomW = stream->buffer_producer.width;
+                int mCustomH = stream->buffer_producer.height;
+                mBufferSize = mCustomW * mCustomH * 3/2;
+
+                priv->mDev->ops.set_format(priv->mDev, mCustomW, mCustomH, V4L2_PIX_FMT_NV21);
+                priv->mDev->ops.set_port_type(priv->mDev, (int)0x4000); //TVIN_PORT_HDMI0 = 0x4000
+                priv->mDev->ops.start_v4l2_device(priv->mDev);
+            }
             return 0;
         }
     }
@@ -480,6 +526,9 @@ static int tv_input_close_stream(struct tv_input_device *dev, int device_id,
         TvIputHal_ChannelConl(priv, 0, device_id);
         return 0;
     } else if (stream_id == FRAME_CAPTURE_STREAM_ID) {
+        if (priv->mDev) {
+            priv->mDev->ops.stop_v4l2_device(priv->mDev);
+        }
         return 0;
     }
     return -EINVAL;
@@ -487,9 +536,40 @@ static int tv_input_close_stream(struct tv_input_device *dev, int device_id,
 
 static int tv_input_request_capture(
     struct tv_input_device *dev __unused, int device_id __unused,
-    int stream_id __unused, buffer_handle_t buffer __unused, uint32_t seq __unused)
+    int stream_id __unused, buffer_handle_t* buffer __unused, uint32_t seq __unused)
 {
-    return -EINVAL;
+    tv_input_private_t *priv = (tv_input_private_t *)dev;
+    int index;
+    aml_screen_buffer_info_t buff_info;
+    int mFrameWidth , mFrameHeight ;
+    int ret;
+    long *src = NULL;
+    unsigned char *dest = NULL;
+    ANativeWindowBuffer *buf;
+    if (priv->mDev) {
+        ret = priv->mDev->ops.aquire_buffer(priv->mDev, &buff_info);
+        if (ret != 0 || (buff_info.buffer_mem == 0)) {
+            LOGD("Get V4l2 buffer failed");
+            notify_TV_Input_Capture_Fail(priv,device_id,stream_id,--seq);
+            return -EWOULDBLOCK;
+        }
+        src = (long *)buff_info.buffer_mem;
+        buf = container_of(buffer, ANativeWindowBuffer, handle);
+        sp<GraphicBuffer> graphicBuffer(new GraphicBuffer(buf, false));
+        graphicBuffer->lock(SCREENSOURCE_GRALLOC_USAGE, (void **)&dest);
+        if (dest == NULL) {
+            LOGD("Invalid Gralloc Handle");
+            return -EWOULDBLOCK;
+        }
+        memcpy(dest, src, mBufferSize);
+        graphicBuffer->unlock();
+        graphicBuffer.clear();
+        priv->mDev->ops.release_buffer(priv->mDev, src);
+
+        notify_TV_Input_Capture_Succeeded(priv,device_id,stream_id,seq);
+        return 0;
+    }
+    return -EWOULDBLOCK;
 }
 
 static int tv_input_cancel_capture(struct tv_input_device *, int, int, uint32_t)
@@ -505,6 +585,9 @@ static int tv_input_device_close(struct hw_device_t *dev)
     if (priv) {
         if (priv->mpTv) {
             delete priv->mpTv;
+        }
+        if (priv->mDev) {
+            delete priv->mDev;
         }
         free(priv);
     }
