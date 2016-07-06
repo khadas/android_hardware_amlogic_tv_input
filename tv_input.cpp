@@ -84,54 +84,6 @@ static int getHdmiPort(tv_source_input_t source_input)
     return port;
 }
 
-static int notify_ATV_device_available(tv_input_private_t *priv)
-{
-    tv_input_event_t event;
-    event.device_info.device_id = SOURCE_TV;
-    event.device_info.type = TV_INPUT_TYPE_TUNER;
-    event.type = TV_INPUT_EVENT_DEVICE_AVAILABLE;
-    event.device_info.audio_type = AUDIO_DEVICE_NONE;
-    event.device_info.audio_address = NULL;
-    priv->callback->notify(&priv->device, &event, priv->callback_data);
-    return 0;
-}
-
-static int notify_ATV_stream_configurations_change(tv_input_private_t *priv)
-{
-    tv_input_event_t event;
-    event.device_info.device_id = SOURCE_TV;
-    event.device_info.type = TV_INPUT_TYPE_TUNER;
-    event.type = TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED;
-    event.device_info.audio_type = AUDIO_DEVICE_NONE;
-    event.device_info.audio_address = NULL;
-    priv->callback->notify(&priv->device, &event, priv->callback_data);
-    return 0;
-}
-
-static int notify_DTV_device_available(tv_input_private_t *priv)
-{
-    tv_input_event_t event;
-    event.device_info.device_id = SOURCE_DTV;
-    event.device_info.type = TV_INPUT_TYPE_TUNER;
-    event.type = TV_INPUT_EVENT_DEVICE_AVAILABLE;
-    event.device_info.audio_type = AUDIO_DEVICE_NONE;
-    event.device_info.audio_address = NULL;
-    priv->callback->notify(&priv->device, &event, priv->callback_data);
-    return 0;
-}
-
-static int notify_DTV_stream_configurations_change(tv_input_private_t *priv)
-{
-    tv_input_event_t event;
-    event.device_info.device_id = SOURCE_DTV;
-    event.device_info.type = TV_INPUT_TYPE_TUNER;
-    event.type = TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED;
-    event.device_info.audio_type = AUDIO_DEVICE_NONE;
-    event.device_info.audio_address = NULL;
-    priv->callback->notify(&priv->device, &event, priv->callback_data);
-    return 0;
-}
-
 void TvIputHal_ChannelConl(tv_input_private_t *priv, int ops_type, int device_id)
 {
     if (priv->mpTv) {
@@ -146,52 +98,34 @@ void TvIputHal_ChannelConl(tv_input_private_t *priv, int ops_type, int device_id
     }
 }
 
-static int notify_AV_device_available(tv_input_private_t *priv, tv_source_input_t source_input, int type)
+static int notify_tv_device_status(tv_input_private_t *priv, tv_source_input_t source_input, int type)
 {
     tv_input_event_t event;
     event.device_info.device_id = source_input;
-    event.device_info.type = TV_INPUT_TYPE_COMPONENT;
+    event.device_info.audio_type = AUDIO_DEVICE_NONE;
+    event.device_info.audio_address = NULL;
     event.type = type;
-    event.device_info.audio_type = AUDIO_DEVICE_NONE;
-    event.device_info.audio_address = NULL;
-    priv->callback->notify(&priv->device, &event, priv->callback_data);
-    return 0;
-}
-
-static int notify_AV_stream_configurations_change(tv_input_private_t *priv, tv_source_input_t source_input)
-{
-    tv_input_event_t event;
-    event.device_info.device_id = source_input;
-    event.device_info.type = TV_INPUT_TYPE_COMPONENT;
-    event.type = TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED;
-    event.device_info.audio_type = AUDIO_DEVICE_NONE;
-    event.device_info.audio_address = NULL;
-    priv->callback->notify(&priv->device, &event, priv->callback_data);
-    return 0;
-}
-
-static int notify_HDMI_device_available(tv_input_private_t *priv, tv_source_input_t source_input, uint32_t port_id, int type)
-{
-    tv_input_event_t event;
-    event.device_info.device_id = source_input;
-    event.device_info.type = TV_INPUT_TYPE_HDMI;
-    event.type = type;
-    event.device_info.hdmi.port_id = port_id;
-    event.device_info.audio_type = AUDIO_DEVICE_NONE;
-    event.device_info.audio_address = NULL;
-    priv->callback->notify(&priv->device, &event, priv->callback_data);
-    return 0;
-}
-
-static int notify_HDMI_stream_configurations_change(tv_input_private_t *priv, tv_source_input_t source_input, uint32_t port_id)
-{
-    tv_input_event_t event;
-    event.device_info.device_id = source_input;
-    event.device_info.type = TV_INPUT_TYPE_HDMI;
-    event.type = TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED;
-    event.device_info.hdmi.port_id = port_id;
-    event.device_info.audio_type = AUDIO_DEVICE_NONE;
-    event.device_info.audio_address = NULL;
+    switch (source_input) {
+        case SOURCE_TV:
+        case SOURCE_DTV:
+            event.device_info.type = TV_INPUT_TYPE_TUNER;
+            break;
+        case SOURCE_AV1:
+        case SOURCE_AV2:
+            event.device_info.type = TV_INPUT_TYPE_COMPONENT;
+            break;
+        case SOURCE_HDMI1:
+        case SOURCE_HDMI2:
+        case SOURCE_HDMI3:
+            event.device_info.type = TV_INPUT_TYPE_HDMI;
+            event.device_info.hdmi.port_id = getHdmiPort(source_input);
+            break;
+        case SOURCE_SPDIF:
+            event.device_info.type = TV_INPUT_TYPE_OTHER_HARDWARE;
+            break;
+        default:
+            break;
+    }
     priv->callback->notify(&priv->device, &event, priv->callback_data);
     return 0;
 }
@@ -222,40 +156,22 @@ void TvCallback::onTvEvent (int32_t msgType, const Parcel &p)
     tv_input_private_t *priv = (tv_input_private_t *)(mPri);
     switch (msgType) {
     case SOURCE_CONNECT_CALLBACK: {
-        int source = p.readInt32();
+        tv_source_input_t source = (tv_source_input_t)p.readInt32();
         int connectState = p.readInt32();
-        LOGD("TvCallback::onTvEvent  source = %d, status = %d", source, connectState)
+        LOGD("TvCallback::onTvEvent  source = %d, status = %d", source, connectState);
 
-        switch (source) {
-        case SOURCE_HDMI1:
-        case SOURCE_HDMI2:
-        case SOURCE_HDMI3: {
-            if (connectState == 1) {
-                notify_HDMI_device_available(priv, (tv_source_input_t)source, getHdmiPort((tv_source_input_t)source), TV_INPUT_EVENT_DEVICE_AVAILABLE);
-                notify_HDMI_stream_configurations_change(priv, (tv_source_input_t)source, getHdmiPort((tv_source_input_t)source));
-            } else {
-                notify_HDMI_device_available(priv, (tv_source_input_t)source, getHdmiPort((tv_source_input_t)source), TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
-            }
-        }
-        break;
-
-        case SOURCE_AV1:
-        case SOURCE_AV2: {
-            if (connectState == 1) {
-                notify_AV_device_available(priv, (tv_source_input_t)source, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-                notify_AV_stream_configurations_change(priv, (tv_source_input_t)source);
-            } else {
-                notify_AV_device_available(priv, (tv_source_input_t)source, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
-            }
-        }
-        break;
-
-        default:
+        if (source != SOURCE_HDMI1 && source != SOURCE_HDMI2 && source != SOURCE_HDMI3
+            && source != SOURCE_AV1 && source != SOURCE_AV2)
             break;
-        }
-    }
-    break;
 
+        if (connectState == 1) {
+            notify_tv_device_status(priv, source, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+            notify_tv_device_status(priv, source, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
+        } else {
+            notify_tv_device_status(priv, source, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
+        }
+        break;
+    }
     default:
         break;
     }
@@ -340,6 +256,18 @@ static int get_stream_configs(int dev_id, int *num_configurations, const tv_stre
         *num_configurations = 2;
         *configs = mconfig;
         break;
+    case SOURCE_SPDIF:
+        mconfig[0].stream_id = NORMAL_STREAM_ID;
+        mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
+        mconfig[0].max_video_width = 1920;
+        mconfig[0].max_video_height = 1080;
+        mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
+        mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
+        mconfig[1].max_video_width = 1920;
+        mconfig[1].max_video_height = 1080;
+        *num_configurations = 2;
+        *configs = mconfig;
+        break;
     default:
         break;
     }
@@ -364,6 +292,47 @@ static int get_tv_stream(tv_stream_t *stream)
         stream->type = TV_STREAM_TYPE_BUFFER_PRODUCER;
     }
     return 0;
+}
+
+static void available_all_tv_device(tv_input_private_t *priv)
+{
+    int tv_devices[15];
+    int count = 0;
+    priv->mpTv->getAllTvDevices(tv_devices, &count);
+
+    if (count == 0) {
+        ALOGE("tv.source.input.ids.default is not set.");
+        return;
+    }
+
+    notify_tv_device_status(priv, SOURCE_TV, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+    notify_tv_device_status(priv, SOURCE_TV, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
+
+    notify_tv_device_status(priv, SOURCE_DTV, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+    notify_tv_device_status(priv, SOURCE_DTV, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
+
+    if (priv->mpTv->GetHdmiAvHotplugDetectOnoff()) {
+        for (int i=0; i < count; i++) {
+            tv_source_input_t source_input  = (tv_source_input_t)tv_devices[i];
+            if (source_input == SOURCE_TV || source_input == SOURCE_DTV)
+                continue;
+
+            int status = priv->mpTv->GetSourceConnectStatus(source_input);
+            if (status == 1) {
+                notify_tv_device_status(priv, source_input, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+                notify_tv_device_status(priv, source_input, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
+            }
+        }
+        priv->mpTv->setTvObserver(priv->tvcallback);
+    } else {
+        for (int i=0; i < count; i++) {
+            tv_source_input_t source_input  = (tv_source_input_t)tv_devices[i];
+            if (source_input == SOURCE_TV || source_input == SOURCE_DTV)
+                continue;
+            notify_tv_device_status(priv, source_input, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+            notify_tv_device_status(priv, source_input, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
+        }
+    }
 }
 
 static int tv_input_device_open(const struct hw_module_t *module,
@@ -407,67 +376,8 @@ static int tv_input_initialize(struct tv_input_device *dev,
     }
     priv->callback = callback;
     priv->callback_data = data;
-    /*  ATV_DEVICE_AVAILABLE */
-    notify_ATV_device_available(priv);
-    notify_ATV_stream_configurations_change(priv);
-    /*  DTV_DEVICE_AVAILABLE */
-    notify_DTV_device_available(priv);
-    notify_DTV_stream_configurations_change(priv);
 
-    if (priv->mpTv->GetHdmiAvHotplugDetectOnoff()) {
-        /*  AV1_DEVICE_AVAILABLE */
-        int status = priv->mpTv->GetSourceConnectStatus(SOURCE_AV1);
-        if (status == 1) { //IN
-            notify_AV_device_available(priv, SOURCE_AV1, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-            notify_AV_stream_configurations_change(priv, SOURCE_AV1);
-        }
-
-        /*  AV2_DEVICE_AVAILABLE */
-        status = priv->mpTv->GetSourceConnectStatus(SOURCE_AV2);
-        if (status == 1) { //IN
-            notify_AV_device_available(priv, SOURCE_AV2, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-            notify_AV_stream_configurations_change(priv, SOURCE_AV2);
-        }
-
-        /*  HDMI1_DEVICE_AVAILABLE */
-        status = priv->mpTv->GetSourceConnectStatus(SOURCE_HDMI1);
-        if (status == 1) { //IN
-            notify_HDMI_device_available(priv, SOURCE_HDMI1, getHdmiPort(SOURCE_HDMI1), TV_INPUT_EVENT_DEVICE_AVAILABLE);
-            notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI1, getHdmiPort(SOURCE_HDMI1));
-        }
-
-        /*  HDMI2_DEVICE_AVAILABLE */
-        status = priv->mpTv->GetSourceConnectStatus(SOURCE_HDMI2);
-        if (status == 1) { //IN
-            notify_HDMI_device_available(priv, SOURCE_HDMI2, getHdmiPort(SOURCE_HDMI2), TV_INPUT_EVENT_DEVICE_AVAILABLE);
-            notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI2, getHdmiPort(SOURCE_HDMI2));
-        }
-
-        /*  HDMI3_DEVICE_AVAILABLE */
-        status = priv->mpTv->GetSourceConnectStatus(SOURCE_HDMI3);
-        if (status == 1) { //IN
-            notify_HDMI_device_available(priv, SOURCE_HDMI3, getHdmiPort(SOURCE_HDMI3), TV_INPUT_EVENT_DEVICE_AVAILABLE);
-            notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI3, getHdmiPort(SOURCE_HDMI3));
-        }
-
-        priv->mpTv->setTvObserver(priv->tvcallback);
-    } else {
-        /*  AV1_DEVICE_AVAILABLE */
-        notify_AV_device_available(priv, SOURCE_AV1, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-        notify_AV_stream_configurations_change(priv, SOURCE_AV1);
-        /*  AV2_DEVICE_AVAILABLE */
-        notify_AV_device_available(priv, SOURCE_AV2, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-        notify_AV_stream_configurations_change(priv, SOURCE_AV2);
-        /*  HDMI1_DEVICE_AVAILABLE */
-        notify_HDMI_device_available(priv, SOURCE_HDMI1, getHdmiPort(SOURCE_HDMI1), TV_INPUT_EVENT_DEVICE_AVAILABLE);
-        notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI1, getHdmiPort(SOURCE_HDMI1));
-        /*  HDMI2_DEVICE_AVAILABLE */
-        notify_HDMI_device_available(priv, SOURCE_HDMI2, getHdmiPort(SOURCE_HDMI2), TV_INPUT_EVENT_DEVICE_AVAILABLE);
-        notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI2, getHdmiPort(SOURCE_HDMI2));
-        /*  HDMI3_DEVICE_AVAILABLE */
-        notify_HDMI_device_available(priv, SOURCE_HDMI3, getHdmiPort(SOURCE_HDMI3), TV_INPUT_EVENT_DEVICE_AVAILABLE);
-        notify_HDMI_stream_configurations_change(priv, SOURCE_HDMI3, getHdmiPort(SOURCE_HDMI3));
-    }
+    available_all_tv_device(priv);
     return 0;
 }
 

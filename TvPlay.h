@@ -23,6 +23,7 @@ typedef enum tv_source_input_e {
     SOURCE_SVIDEO,
     SOURCE_IPTV,
     SOURCE_DUMMY,
+    SOURCE_SPDIF,
     SOURCE_MAX,
 } tv_source_input_t;
 
@@ -47,6 +48,7 @@ public:
     int GetCurrentSourceInput();
     int GetHdmiAvHotplugDetectOnoff();
     int setTvObserver (TvPlayObserver *ob);
+    int getAllTvDevices(int *devices, int *count);
     virtual void notify(int32_t msgType, const Parcel &p);
 
     sp<TvClient> tvSession;

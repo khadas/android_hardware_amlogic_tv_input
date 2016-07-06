@@ -1,4 +1,7 @@
+#define LOG_TAG "TvPlay"
+
 #include <utils/Log.h>
+#include <string.h>
 #include "TvPlay.h"
 #include "tvcmd.h"
 
@@ -93,5 +96,27 @@ int TvPlay::GetHdmiAvHotplugDetectOnoff()
     p.writeInt32(HDMIAV_HOTPLUGDETECT_ONOFF);
     tvSession->processCmd(p, &r);
     return r.readInt32();
+}
+
+int TvPlay::getAllTvDevices(int *devices, int *count)
+{
+    Parcel p, r;
+    p.writeInt32(GET_ALL_TV_DEVICES);
+    tvSession->processCmd(p, &r);
+    const char *input_list = r.readCString();
+    ALOGD("input_list = %s", input_list);
+
+    int len = 0;
+    const char *seg = ",";
+    char *pT = strtok((char*)input_list, seg);
+    while (pT) {
+        len ++;
+        *devices = atoi(pT);
+        ALOGD("devices: %d: %d", len , *devices);
+        devices ++;
+        pT = strtok(NULL, seg);
+    }
+    *count = len;
+    return 0;
 }
 
