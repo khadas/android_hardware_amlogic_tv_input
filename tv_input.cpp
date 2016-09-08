@@ -112,7 +112,7 @@ static int notify_tv_device_status(tv_input_private_t *priv, tv_source_input_t s
             break;
         case SOURCE_AV1:
         case SOURCE_AV2:
-            event.device_info.type = TV_INPUT_TYPE_COMPONENT;
+            event.device_info.type = TV_INPUT_TYPE_COMPOSITE;
             break;
         case SOURCE_HDMI1:
         case SOURCE_HDMI2:
@@ -182,95 +182,16 @@ void TvCallback::onTvEvent (int32_t msgType, const Parcel &p)
 static tv_stream_config_t mconfig[2];
 static int get_stream_configs(int dev_id, int *num_configurations, const tv_stream_config_t **configs)
 {
-    switch (dev_id) {
-    case SOURCE_TV:
-        mconfig[0].stream_id = NORMAL_STREAM_ID;
-        mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-        mconfig[0].max_video_width = 1920;
-        mconfig[0].max_video_height = 1080;
-        mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
-        mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
-        mconfig[1].max_video_width = 1920;
-        mconfig[1].max_video_height = 1080;
-        *num_configurations = 2;
-        *configs = mconfig;
-        break;
-    case SOURCE_DTV:
-        mconfig[0].stream_id = NORMAL_STREAM_ID;
-        mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-        mconfig[0].max_video_width = 1920;
-        mconfig[0].max_video_height = 1080;
-        mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
-        mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
-        mconfig[1].max_video_width = 1920;
-        mconfig[1].max_video_height = 1080;
-        *num_configurations = 2;
-        *configs = mconfig;
-        break;
-    case SOURCE_AV1:
-    case SOURCE_AV2:
-        mconfig[0].stream_id = NORMAL_STREAM_ID;
-        mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-        mconfig[0].max_video_width = 1920;
-        mconfig[0].max_video_height = 1080;
-        mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
-        mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
-        mconfig[1].max_video_width = 1920;
-        mconfig[1].max_video_height = 1080;
-        *num_configurations = 2;
-        *configs = mconfig;
-        break;
-    case SOURCE_HDMI1:
-        mconfig[0].stream_id = NORMAL_STREAM_ID;
-        mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-        mconfig[0].max_video_width = 1920;
-        mconfig[0].max_video_height = 1080;
-        mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
-        mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
-        mconfig[1].max_video_width = 1920;
-        mconfig[1].max_video_height = 1080;
-        *num_configurations = 2;
-        *configs = mconfig;
-        break;
-    case SOURCE_HDMI2:
-        mconfig[0].stream_id = NORMAL_STREAM_ID;
-        mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-        mconfig[0].max_video_width = 1920;
-        mconfig[0].max_video_height = 1080;
-        mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
-        mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
-        mconfig[1].max_video_width = 1920;
-        mconfig[1].max_video_height = 1080;
-        *num_configurations = 2;
-        *configs = mconfig;
-        break;
-    case SOURCE_HDMI3:
-        mconfig[0].stream_id = NORMAL_STREAM_ID;
-        mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-        mconfig[0].max_video_width = 1920;
-        mconfig[0].max_video_height = 1080;
-        mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
-        mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
-        mconfig[1].max_video_width = 1920;
-        mconfig[1].max_video_height = 1080;
-        *num_configurations = 2;
-        *configs = mconfig;
-        break;
-    case SOURCE_SPDIF:
-        mconfig[0].stream_id = NORMAL_STREAM_ID;
-        mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
-        mconfig[0].max_video_width = 1920;
-        mconfig[0].max_video_height = 1080;
-        mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
-        mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
-        mconfig[1].max_video_width = 1920;
-        mconfig[1].max_video_height = 1080;
-        *num_configurations = 2;
-        *configs = mconfig;
-        break;
-    default:
-        break;
-    }
+    mconfig[0].stream_id = NORMAL_STREAM_ID;
+    mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
+    mconfig[0].max_video_width = 1920;
+    mconfig[0].max_video_height = 1080;
+    mconfig[1].stream_id = FRAME_CAPTURE_STREAM_ID;
+    mconfig[1].type = TV_STREAM_TYPE_BUFFER_PRODUCER ;
+    mconfig[1].max_video_width = 1920;
+    mconfig[1].max_video_height = 1080;
+    *num_configurations = 2;
+    *configs = mconfig;
     return 0;
 }
 
