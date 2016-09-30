@@ -59,6 +59,11 @@ typedef struct tv_input_private {
     TvCallback *tvcallback;
 } tv_input_private_t;
 
+#define SCREENSOURCE_GRALLOC_USAGE  ( GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_HW_RENDER | GRALLOC_USAGE_SW_READ_RARELY | GRALLOC_USAGE_SW_WRITE_NEVER)
+//static int capBufferSize ;
+static int capWidth;
+static int capHeight;
+
 enum hdmi_port_id {
     PORT_HDMI1 = 1,
     PORT_HDMI3,
@@ -335,11 +340,11 @@ static int tv_input_open_stream(struct tv_input_device *dev, int device_id,
             }
 
             if (priv->mDev) {
-                int mCustomW = stream->buffer_producer.width;
-                int mCustomH = stream->buffer_producer.height;
-                mBufferSize = mCustomW * mCustomH * 3/2;
-
-                priv->mDev->ops.set_format(priv->mDev, mCustomW, mCustomH, V4L2_PIX_FMT_NV21);
+                if (capWidth == 0 || capHeight == 0) {
+                    capWidth = stream->buffer_producer.width;
+                    capHeight = stream->buffer_producer.height;
+                }
+                priv->mDev->ops.set_format(priv->mDev, capWidth, capHeight, V4L2_PIX_FMT_NV21);
                 priv->mDev->ops.set_port_type(priv->mDev, (int)0x4000); //TVIN_PORT_HDMI0 = 0x4000
                 priv->mDev->ops.start_v4l2_device(priv->mDev);
             }
@@ -367,7 +372,7 @@ static int tv_input_close_stream(struct tv_input_device *dev, int device_id,
 
 static int tv_input_request_capture(
     struct tv_input_device *dev __unused, int device_id __unused,
-    int stream_id __unused, buffer_handle_t* buffer __unused, uint32_t seq __unused)
+    int stream_id __unused, buffer_handle_t buffer __unused, uint32_t seq __unused)
 {
     tv_input_private_t *priv = (tv_input_private_t *)dev;
     int index;
@@ -392,7 +397,7 @@ static int tv_input_request_capture(
             LOGD("Invalid Gralloc Handle");
             return -EWOULDBLOCK;
         }
-        memcpy(dest, src, mBufferSize);
+        memcpy(dest, src, capWidth*capHeight);
         graphicBuffer->unlock();
         graphicBuffer.clear();
         priv->mDev->ops.release_buffer(priv->mDev, src);
@@ -408,6 +413,16 @@ static int tv_input_cancel_capture(struct tv_input_device *, int, int, uint32_t)
     return -EINVAL;
 }
 
+static int tv_input_set_capturesurface_size(struct tv_input_device *dev __unused, int width, int height)
+{
+    if (width == 0 || height == 0) {
+        return -EINVAL;
+    } else {
+        capWidth = width;
+        capHeight = height;
+        return 1;
+    }
+}
 /*****************************************************************************/
 
 static int tv_input_device_close(struct hw_device_t *dev)
@@ -433,7 +448,6 @@ static int tv_input_device_open(const struct hw_module_t *module,
     int status = -EINVAL;
     if (!strcmp(name, TV_INPUT_DEFAULT_DEVICE)) {
         tv_input_private_t *dev = (tv_input_private_t *)malloc(sizeof(*dev));
-
         /* initialize our state here */
         memset(dev, 0, sizeof(*dev));
         dev->mpTv = new TvPlay();
@@ -451,6 +465,7 @@ static int tv_input_device_open(const struct hw_module_t *module,
         dev->device.close_stream = tv_input_close_stream;
         dev->device.request_capture = tv_input_request_capture;
         dev->device.cancel_capture = tv_input_cancel_capture;
+        dev->device.set_capturesurface_size = tv_input_set_capturesurface_size;
 
         *device = &dev->device.common;
         status = 0;
