@@ -49,12 +49,15 @@ public:
     int GetHdmiAvHotplugDetectOnoff();
     int setTvObserver (TvPlayObserver *ob);
     int getAllTvDevices(int *devices, int *count);
+    int getHdmiPorts();
+    int getHdmiPort(tv_source_input_t source_input);
     virtual void notify(int32_t msgType, const Parcel &p);
 
     sp<TvClient> tvSession;
 
 private:
     TvPlayObserver *mpObserver;
+    int mHdmiPorts;
 };
 
 #ifdef __cplusplus

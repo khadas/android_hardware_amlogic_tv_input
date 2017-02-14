@@ -10,6 +10,7 @@ TvPlay::TvPlay()
     mpObserver = NULL;
     tvSession = TvClient::connect();
     tvSession->setListener(this);
+    mHdmiPorts = getHdmiPorts();
 }
 
 TvPlay::~TvPlay()
@@ -118,5 +119,18 @@ int TvPlay::getAllTvDevices(int *devices, int *count)
     }
     *count = len;
     return 0;
+}
+
+int TvPlay::getHdmiPorts()
+{
+    Parcel p, r;
+    p.writeInt32(GET_HDMI_PORTS);
+    tvSession->processCmd(p, &r);
+
+    return r.readInt32();
+}
+
+int TvPlay::getHdmiPort(tv_source_input_t source_input) {
+    return mHdmiPorts == 0 ? 0 : 0x3 & (mHdmiPorts >> (2* (source_input - SOURCE_HDMI1)));
 }
 

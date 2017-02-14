@@ -64,31 +64,6 @@ typedef struct tv_input_private {
 static int capWidth;
 static int capHeight;
 
-enum hdmi_port_id {
-    PORT_HDMI1 = 1,
-    PORT_HDMI3,
-    PORT_HDMI2,
-};
-
-static int getHdmiPort(tv_source_input_t source_input)
-{
-    int port = PORT_HDMI1;
-    switch (source_input) {
-        case SOURCE_HDMI1:
-            port = PORT_HDMI1;
-            break;
-        case SOURCE_HDMI2:
-            port = PORT_HDMI2;
-            break;
-        case SOURCE_HDMI3:
-            port = PORT_HDMI3;
-            break;
-        default:
-            break;
-    }
-    return port;
-}
-
 void TvIputHal_ChannelConl(tv_input_private_t *priv, int ops_type, int device_id)
 {
     if (priv->mpTv) {
@@ -123,7 +98,7 @@ static int notify_tv_device_status(tv_input_private_t *priv, tv_source_input_t s
         case SOURCE_HDMI2:
         case SOURCE_HDMI3:
             event.device_info.type = TV_INPUT_TYPE_HDMI;
-            event.device_info.hdmi.port_id = getHdmiPort(source_input);
+            event.device_info.hdmi.port_id = priv->mpTv->getHdmiPort(source_input);
             break;
         case SOURCE_SPDIF:
             event.device_info.type = TV_INPUT_TYPE_OTHER_HARDWARE;
