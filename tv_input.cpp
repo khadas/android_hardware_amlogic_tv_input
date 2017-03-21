@@ -88,6 +88,7 @@ static int notify_tv_device_status(tv_input_private_t *priv, tv_source_input_t s
     switch (source_input) {
         case SOURCE_TV:
         case SOURCE_DTV:
+        case SOURCE_ADTV:
             event.device_info.type = TV_INPUT_TYPE_TUNER;
             break;
         case SOURCE_AV1:
@@ -206,30 +207,27 @@ static void available_all_tv_device(tv_input_private_t *priv)
         return;
     }
 
-    notify_tv_device_status(priv, SOURCE_TV, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-    notify_tv_device_status(priv, SOURCE_TV, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
-
-    notify_tv_device_status(priv, SOURCE_DTV, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-    notify_tv_device_status(priv, SOURCE_DTV, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
-
-    if (priv->mpTv->GetHdmiAvHotplugDetectOnoff()) {
-        for (int i=0; i < count; i++) {
-            tv_source_input_t source_input  = (tv_source_input_t)tv_devices[i];
-            if (source_input == SOURCE_TV || source_input == SOURCE_DTV)
-                continue;
-
-            int status = priv->mpTv->GetSourceConnectStatus(source_input);
-            if (status == 1) {
-                notify_tv_device_status(priv, source_input, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-                notify_tv_device_status(priv, source_input, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
-            }
+    for (int i=0; i < count; i++) {
+        tv_source_input_t source_input  = (tv_source_input_t)tv_devices[i];
+        if (source_input == SOURCE_TV) {
+            notify_tv_device_status(priv, SOURCE_TV, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+            notify_tv_device_status(priv, SOURCE_TV, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
         }
-        priv->mpTv->setTvObserver(priv->tvcallback);
-    } else {
-        for (int i=0; i < count; i++) {
-            tv_source_input_t source_input  = (tv_source_input_t)tv_devices[i];
-            if (source_input == SOURCE_TV || source_input == SOURCE_DTV)
-                continue;
+        if (source_input == SOURCE_DTV) {
+            notify_tv_device_status(priv, SOURCE_DTV, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+            notify_tv_device_status(priv, SOURCE_DTV, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
+        }
+        if (source_input == SOURCE_ADTV) {
+            notify_tv_device_status(priv, SOURCE_ADTV, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+            notify_tv_device_status(priv, SOURCE_ADTV, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
+        }
+
+        int status = 1;
+        if (priv->mpTv->GetHdmiAvHotplugDetectOnoff()) {
+            status = priv->mpTv->GetSourceConnectStatus(source_input);
+            priv->mpTv->setTvObserver(priv->tvcallback);
+        }
+        if (status == 1) {
             notify_tv_device_status(priv, source_input, TV_INPUT_EVENT_DEVICE_AVAILABLE);
             notify_tv_device_status(priv, source_input, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
         }

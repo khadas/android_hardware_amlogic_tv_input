@@ -24,8 +24,14 @@ typedef enum tv_source_input_e {
     SOURCE_IPTV,
     SOURCE_DUMMY,
     SOURCE_SPDIF,
+    SOURCE_ADTV,
     SOURCE_MAX,
 } tv_source_input_t;
+
+typedef enum tv_source_type_e {
+    TYPE_REAL,
+    TYPE_VIRTUAL,
+} tv_source_type_t;
 
 class TvPlayObserver {
 public:
