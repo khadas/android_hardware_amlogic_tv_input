@@ -7,7 +7,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 DVB_PATH := $(wildcard vendor/amlogic/dvb)
-TVAPI_PATH := vendor/amlogic/frameworks/libtvbinder/include
+LIB_TV_BINDER_PATH := vendor/amlogic/tv/framework/libtvbinder
 LIB_SQLITE_PATH := $(wildcard external/sqlite)
 AM_LIBPLAYER_PATH := $(wildcard vendor/amlogic/frameworks/av/LibPlayer)
 
@@ -28,7 +28,7 @@ LOCAL_SRC_FILES := tv_input.cpp \
 LOCAL_MODULE := tv_input.amlogic
 LOCAL_MODULE_TAGS := optional
 LOCAL_C_INCLUDES += \
-	$(TVAPI_PATH)	\
+	$(LIB_TV_BINDER_PATH)/include	\
 	$(DVB_PATH)/android/ndk/include \
 	$(DVB_PATH)/include/am_adp \
 	$(DVB_PATH)/include/am_mw \
