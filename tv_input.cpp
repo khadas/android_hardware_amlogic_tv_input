@@ -29,6 +29,7 @@
 #include <ui/GraphicBuffer.h>
 #include <gralloc_priv.h>
 #include <gralloc_helper.h>
+#include <gralloc_usage_ext.h>
 #include <hardware/hardware.h>
 #include <hardware/aml_screen.h>
 #include <linux/videodev2.h>
