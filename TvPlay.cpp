@@ -86,7 +86,7 @@ int TvPlay::GetSourceConnectStatus(tv_source_input_t source_input)
 int TvPlay::GetCurrentSourceInput()
 {
     Parcel p, r;
-    p.writeInt32(SSM_READ_SOURCE_INPUT);
+    p.writeInt32(GET_CURRENT_SOURCE_INPUT_VIRTUAL);
     tvSession->processCmd(p, &r);
     return r.readInt32();
 }
