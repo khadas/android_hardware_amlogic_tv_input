@@ -7,7 +7,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 DVB_PATH := $(wildcard vendor/amlogic/dvb)
-LIB_TV_BINDER_PATH := vendor/amlogic/tv/framework/libtvbinder
+LIB_TV_BINDER_PATH := vendor/amlogic/tv/frameworks/libtvbinder
 LIB_SQLITE_PATH := $(wildcard external/sqlite)
 AM_LIBPLAYER_PATH := $(wildcard vendor/amlogic/frameworks/av/LibPlayer)
 
