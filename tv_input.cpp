@@ -29,7 +29,11 @@
 #include <ui/GraphicBuffer.h>
 #include <gralloc_priv.h>
 #include <gralloc_helper.h>
+
+#if PLATFORM_SDK_VERSION > 23
 #include <gralloc_usage_ext.h>
+#endif
+
 #include <hardware/hardware.h>
 #include <hardware/aml_screen.h>
 #include <linux/videodev2.h>

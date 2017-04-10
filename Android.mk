@@ -22,6 +22,8 @@ LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_SHARED_LIBRARIES := libcutils libutils libtvbinder libbinder libui liblog libhardware
 LOCAL_REQUIRED_MODULES := libtvbinder
 
+LOCAL_CFLAGS += -DPLATFORM_SDK_VERSION=$(PLATFORM_SDK_VERSION)
+
 LOCAL_SRC_FILES := tv_input.cpp \
 		TvPlay.cpp
 
