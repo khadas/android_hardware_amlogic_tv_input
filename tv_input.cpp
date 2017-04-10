@@ -166,7 +166,7 @@ void TvCallback::onTvEvent (int32_t msgType, const Parcel &p)
 #define NORMAL_STREAM_ID 1
 #define FRAME_CAPTURE_STREAM_ID 2
 static tv_stream_config_t mconfig[2];
-static int get_stream_configs(int dev_id, int *num_configurations, const tv_stream_config_t **configs)
+static int get_stream_configs(int dev_id __unused, int *num_configurations, const tv_stream_config_t **configs)
 {
     mconfig[0].stream_id = NORMAL_STREAM_ID;
     mconfig[0].type = TV_STREAM_TYPE_INDEPENDENT_VIDEO_SOURCE ;
@@ -212,27 +212,20 @@ static void available_all_tv_device(tv_input_private_t *priv)
         return;
     }
 
+    bool isHotplugDetectOn = priv->mpTv->GetHdmiAvHotplugDetectOnoff();
+
+    if (isHotplugDetectOn)
+        priv->mpTv->setTvObserver(priv->tvcallback);
+
     for (int i=0; i < count; i++) {
         tv_source_input_t source_input  = (tv_source_input_t)tv_devices[i];
-        if (source_input == SOURCE_TV) {
-            notify_tv_device_status(priv, SOURCE_TV, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-            notify_tv_device_status(priv, SOURCE_TV, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
-        }
-        if (source_input == SOURCE_DTV) {
-            notify_tv_device_status(priv, SOURCE_DTV, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-            notify_tv_device_status(priv, SOURCE_DTV, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
-        }
-        if (source_input == SOURCE_ADTV) {
-            notify_tv_device_status(priv, SOURCE_ADTV, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-            notify_tv_device_status(priv, SOURCE_ADTV, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
+
+        bool status = true;
+        if (isHotplugDetectOn && SOURCE_AV1 <= source_input && source_input <= SOURCE_HDMI3) {
+            status = priv->mpTv->GetSourceConnectStatus(source_input);
         }
 
-        int status = 1;
-        if (priv->mpTv->GetHdmiAvHotplugDetectOnoff()) {
-            status = priv->mpTv->GetSourceConnectStatus(source_input);
-            priv->mpTv->setTvObserver(priv->tvcallback);
-        }
-        if (status == 1) {
+        if (status) {
             notify_tv_device_status(priv, source_input, TV_INPUT_EVENT_DEVICE_AVAILABLE);
             notify_tv_device_status(priv, source_input, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
         }
