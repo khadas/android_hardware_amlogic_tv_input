@@ -103,6 +103,7 @@ static int notify_tv_device_status(tv_input_private_t *priv, tv_source_input_t s
         case SOURCE_HDMI1:
         case SOURCE_HDMI2:
         case SOURCE_HDMI3:
+        case SOURCE_HDMI4:
             event.device_info.type = TV_INPUT_TYPE_HDMI;
             event.device_info.hdmi.port_id = priv->mpTv->getHdmiPort(source_input);
             break;
@@ -147,7 +148,7 @@ void TvCallback::onTvEvent (int32_t msgType, const Parcel &p)
         LOGD("TvCallback::onTvEvent  source = %d, status = %d", source, connectState);
 
         if (source != SOURCE_HDMI1 && source != SOURCE_HDMI2 && source != SOURCE_HDMI3
-            && source != SOURCE_AV1 && source != SOURCE_AV2)
+            && source != SOURCE_HDMI4 && source != SOURCE_AV1 && source != SOURCE_AV2)
             break;
 
         if (connectState == 1) {
@@ -221,7 +222,7 @@ static void available_all_tv_device(tv_input_private_t *priv)
         tv_source_input_t source_input  = (tv_source_input_t)tv_devices[i];
 
         bool status = true;
-        if (isHotplugDetectOn && SOURCE_AV1 <= source_input && source_input <= SOURCE_HDMI3) {
+        if (isHotplugDetectOn && SOURCE_AV1 <= source_input && source_input <= SOURCE_HDMI4) {
             status = priv->mpTv->GetSourceConnectStatus(source_input);
         }
 
