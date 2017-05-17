@@ -131,6 +131,9 @@ int TvPlay::getHdmiPorts()
 }
 
 int TvPlay::getHdmiPort(tv_source_input_t source_input) {
-    return mHdmiPorts == 0 ? 0 : 0x3 & (mHdmiPorts >> (2* (source_input - SOURCE_HDMI1)));
+    int max_port_num = 3;
+    if ( (source_input - SOURCE_HDMI1) > (max_port_num-1))
+        max_port_num = (max_port_num << 1) + 1;
+    return mHdmiPorts == 0 ? 0 : max_port_num & (mHdmiPorts >> (2* (source_input - SOURCE_HDMI1)));
 }
 
