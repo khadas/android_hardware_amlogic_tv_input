@@ -4,6 +4,7 @@
 #include <string.h>
 #include "TvPlay.h"
 #include "tvcmd.h"
+#include <math.h>
 
 TvPlay::TvPlay()
 {
@@ -11,6 +12,14 @@ TvPlay::TvPlay()
     tvSession = TvClient::connect();
     tvSession->setListener(this);
     mHdmiPorts = getHdmiPorts();
+
+    if ( mHdmiPorts >= pow(10, (max_port_num-1)))
+        hdmi_port[3] = mHdmiPorts/pow(10, (max_port_num-1));
+    else
+        hdmi_port[3] = 0;//in this case,there is only 3 hdmi_in ports
+    hdmi_port[2] = (mHdmiPorts -hdmi_port[3]*1000)/100;
+    hdmi_port[1] = (mHdmiPorts -hdmi_port[3]*1000-hdmi_port[2]*100)/10;
+    hdmi_port[0] = mHdmiPorts -hdmi_port[3]*1000-hdmi_port[2]*100-hdmi_port[1]*10;
 }
 
 TvPlay::~TvPlay()
@@ -131,9 +140,6 @@ int TvPlay::getHdmiPorts()
 }
 
 int TvPlay::getHdmiPort(tv_source_input_t source_input) {
-    int max_port_num = 3;
-    if ( (source_input - SOURCE_HDMI1) > (max_port_num-1))
-        max_port_num = (max_port_num << 1) + 1;
-    return mHdmiPorts == 0 ? 0 : max_port_num & (mHdmiPorts >> (2* (source_input - SOURCE_HDMI1)));
+     return mHdmiPorts == 0 ? 0 : hdmi_port[source_input - SOURCE_HDMI1];
 }
 

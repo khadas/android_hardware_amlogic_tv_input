@@ -65,6 +65,8 @@ public:
 private:
     TvPlayObserver *mpObserver;
     int mHdmiPorts;
+    int max_port_num = 4;
+    int hdmi_port[4];// the length of hdmi_port should be equal to max_port_num
 };
 
 #ifdef __cplusplus
