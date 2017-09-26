@@ -147,25 +147,15 @@ void TvCallback::onTvEvent (int32_t msgType, const Parcel &p)
         int connectState = p.readInt32();
         LOGD("TvCallback::onTvEvent  source = %d, status = %d", source, connectState);
 
-        bool isHotplugDetectOn = priv->mpTv->GetHdmiAvHotplugDetectOnoff();
-        if (isHotplugDetectOn) {
-            if (source != SOURCE_HDMI1 && source != SOURCE_HDMI2 && source != SOURCE_HDMI3
-                && source != SOURCE_HDMI4 && source != SOURCE_AV1 && source != SOURCE_AV2)
-                break;
+        if (source != SOURCE_HDMI1 && source != SOURCE_HDMI2 && source != SOURCE_HDMI3
+            && source != SOURCE_HDMI4 && source != SOURCE_AV1 && source != SOURCE_AV2)
+            break;
 
-            if (connectState == 1) {
-                notify_tv_device_status(priv, source, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-                notify_tv_device_status(priv, source, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
-            } else {
-                notify_tv_device_status(priv, source, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
-            }
+        if (connectState == 1) {
+            notify_tv_device_status(priv, source, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+            notify_tv_device_status(priv, source, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
         } else {
-            if (connectState == 1 && (source == SOURCE_AV1 || source == SOURCE_AV2)) {
-                // need close afe at first ,it's a workarround way
-                notify_tv_device_status(priv, source, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
-                notify_tv_device_status(priv, source, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-                notify_tv_device_status(priv, source, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
-            }
+            notify_tv_device_status(priv, source, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
         }
         break;
     }
@@ -225,8 +215,8 @@ static void available_all_tv_device(tv_input_private_t *priv)
 
     bool isHotplugDetectOn = priv->mpTv->GetHdmiAvHotplugDetectOnoff();
 
-   // if (isHotplugDetectOn)
-   priv->mpTv->setTvObserver(priv->tvcallback);
+    if (isHotplugDetectOn)
+        priv->mpTv->setTvObserver(priv->tvcallback);
 
     for (int i=0; i < count; i++) {
         tv_source_input_t source_input  = (tv_source_input_t)tv_devices[i];
