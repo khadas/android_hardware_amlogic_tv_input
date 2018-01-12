@@ -35,7 +35,7 @@
 #endif
 
 #include <hardware/hardware.h>
-#include <hardware/aml_screen.h>
+#include <aml_screen.h>
 #include <linux/videodev2.h>
 #include <android/native_window.h>
 /*****************************************************************************/
@@ -363,7 +363,10 @@ static int tv_input_request_capture(
         }
         src = (long *)buff_info.buffer_mem;
         buf = container_of(buffer, ANativeWindowBuffer, handle);
-        sp<GraphicBuffer> graphicBuffer(new GraphicBuffer(buf, false));
+        sp<GraphicBuffer> graphicBuffer(new GraphicBuffer(buf->handle, GraphicBuffer::WRAP_HANDLE,
+                buf->width, buf->height,
+                buf->format, buf->layerCount,
+                buf->usage, buf->stride));
         graphicBuffer->lock(SCREENSOURCE_GRALLOC_USAGE, (void **)&dest);
         if (dest == NULL) {
             LOGD("Invalid Gralloc Handle");
@@ -437,7 +440,7 @@ static int tv_input_device_open(const struct hw_module_t *module,
         dev->device.close_stream = tv_input_close_stream;
         dev->device.request_capture = tv_input_request_capture;
         dev->device.cancel_capture = tv_input_cancel_capture;
-        dev->device.set_capturesurface_size = tv_input_set_capturesurface_size;
+        //dev->device.set_capturesurface_size = tv_input_set_capturesurface_size;
 
         *device = &dev->device.common;
         status = 0;
