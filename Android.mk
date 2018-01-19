@@ -18,14 +18,23 @@ else
 endif
 
 LOCAL_MODULE_RELATIVE_PATH := hw
-LOCAL_SHARED_LIBRARIES := libcutils libutils libtvbinder libbinder libui liblog libhardware
+LOCAL_SHARED_LIBRARIES := \
+    vendor.amlogic.hardware.tvserver@1.0_vendor \
+    libcutils \
+    libutils \
+    libtvbinder \
+    libbinder \
+    libui \
+    liblog \
+    libhardware
+
 LOCAL_REQUIRED_MODULES := libtvbinder
 
 LOCAL_CFLAGS += -DPLATFORM_SDK_VERSION=$(PLATFORM_SDK_VERSION)
 
 LOCAL_SRC_FILES := \
     tv_input.cpp \
-    TvPlay.cpp
+    TvInputIntf.cpp
 
 LOCAL_MODULE := tv_input.amlogic
 LOCAL_MODULE_TAGS := optional
@@ -42,9 +51,17 @@ LOCAL_C_INCLUDES += \
     system/core/libion/kernel-headers \
     hardware/amlogic/gralloc \
     hardware/amlogic/screen_source \
+    hardware/amlogic/audio/libTVaudio \
     frameworks/native/libs/nativewindow/include \
     $(GRALLOC_DIR)
 
-LOCAL_C_INCLUDES += hardware/amlogic/audio/libTVaudio
+LOCAL_C_INCLUDES += \
+   external/libcxx/include
+
+LOCAL_CPPFLAGS += -std=c++14
+
+ifeq ($(shell test $(PLATFORM_SDK_VERSION) -ge 26 && echo OK),OK)
+LOCAL_PROPRIETARY_MODULE := true
+endif
 
 include $(BUILD_SHARED_LIBRARY)
