@@ -90,19 +90,22 @@ void channelControl(tv_input_private_t *priv, bool opsStart, int device_id) {
 int notifyDeviceStatus(tv_input_private_t *priv, tv_source_input_t inputSrc, int type)
 {
     tv_input_event_t event;
+    const char address[64] = {0};
     event.device_info.device_id = inputSrc;
     event.device_info.audio_type = AUDIO_DEVICE_NONE;
-    event.device_info.audio_address = NULL;
+    event.device_info.audio_address = address;
     event.type = type;
     switch (inputSrc) {
         case SOURCE_TV:
         case SOURCE_DTV:
         case SOURCE_ADTV:
             event.device_info.type = TV_INPUT_TYPE_TUNER;
+            event.device_info.audio_type = AUDIO_DEVICE_IN_TV_TUNER;
             break;
         case SOURCE_AV1:
         case SOURCE_AV2:
             event.device_info.type = TV_INPUT_TYPE_COMPOSITE;
+            event.device_info.audio_type = AUDIO_DEVICE_IN_LINE;
             break;
         case SOURCE_HDMI1:
         case SOURCE_HDMI2:
@@ -110,9 +113,11 @@ int notifyDeviceStatus(tv_input_private_t *priv, tv_source_input_t inputSrc, int
         case SOURCE_HDMI4:
             event.device_info.type = TV_INPUT_TYPE_HDMI;
             event.device_info.hdmi.port_id = priv->mpTv->getHdmiPort(inputSrc);
+            event.device_info.audio_type = AUDIO_DEVICE_IN_HDMI;
             break;
         case SOURCE_SPDIF:
             event.device_info.type = TV_INPUT_TYPE_OTHER_HARDWARE;
+            event.device_info.audio_type = AUDIO_DEVICE_IN_SPDIF;
             break;
         default:
             break;
@@ -143,7 +148,7 @@ static int notifyCaptureFail(tv_input_private_t *priv, int device_id, int stream
     return 0;
 }
 
-static bool getStreamConfigs(int dev_id __unused, int *num_configurations, const tv_stream_config_t **configs)
+static bool getAvailableStreamConfigs(int dev_id __unused, int *num_configurations, const tv_stream_config_t **configs)
 {
     static tv_stream_config_t mconfig[2];
     mconfig[0].stream_id = STREAM_ID_NORMAL;
@@ -157,6 +162,13 @@ static bool getStreamConfigs(int dev_id __unused, int *num_configurations, const
     *num_configurations = 2;
     *configs = mconfig;
     return true;
+}
+
+static int getUnavailableStreamConfigs(int dev_id __unused, int *num_configurations, const tv_stream_config_t **configs)
+{
+    *num_configurations = 0;
+    *configs = NULL;
+    return 0;
 }
 
 static int getTvStream(tv_stream_t *stream)
@@ -197,16 +209,7 @@ void initTvDevices(tv_input_private_t *priv)
 
     for (int i = 0; i < count; i++) {
         tv_source_input_t inputSrc = (tv_source_input_t)supportDevices[i];
-
-        bool status = true;
-        if (isHotplugDetectOn && SOURCE_AV1 <= inputSrc && inputSrc <= SOURCE_HDMI4) {
-            status = priv->mpTv->getSourceConnectStatus(inputSrc);
-        }
-
-        if (status) {
-            notifyDeviceStatus(priv, inputSrc, TV_INPUT_EVENT_DEVICE_AVAILABLE);
-            notifyDeviceStatus(priv, inputSrc, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
-        }
+         notifyDeviceStatus(priv, inputSrc, TV_INPUT_EVENT_DEVICE_AVAILABLE);
     }
 }
 
@@ -232,11 +235,20 @@ static int tv_input_get_stream_configurations(const struct tv_input_device *dev 
         int device_id, int *num_configurations,
         const tv_stream_config_t **configs)
 {
-    if (getStreamConfigs(device_id, num_configurations, configs)) {
-        return 0;
+    tv_input_private_t *priv = (tv_input_private_t *)dev;
+    bool status = true;
+    if (SOURCE_AV1 <= device_id && device_id <= SOURCE_HDMI4) {
+        status = priv->mpTv->getSourceConnectStatus((tv_source_input_t)device_id);
     }
-    return -EINVAL;
+    LOGD("tv_input_get_stream_configurations  source = %d, status = %d", device_id, status);
+    if (status) {
+        getAvailableStreamConfigs(device_id, num_configurations, configs);
+    } else {
+        getUnavailableStreamConfigs(device_id, num_configurations, configs);
+    }
+    return 0;
 }
+
 
 static int tv_input_open_stream(struct tv_input_device *dev, int device_id,
                                 tv_stream_t *stream)
