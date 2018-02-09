@@ -19,7 +19,7 @@ endif
 
 LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_SHARED_LIBRARIES := \
-    vendor.amlogic.hardware.tvserver@1.0_vendor \
+    vendor.amlogic.hardware.tvserver@1.0 \
     libcutils \
     libutils \
     libtvbinder \
