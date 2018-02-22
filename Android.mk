@@ -40,11 +40,6 @@ LOCAL_MODULE := tv_input.amlogic
 LOCAL_MODULE_TAGS := optional
 LOCAL_C_INCLUDES += \
     $(LIB_TV_BINDER_PATH)/include	\
-    $(DVB_PATH)/android/ndk/include \
-    $(DVB_PATH)/include/am_adp \
-    $(DVB_PATH)/include/am_mw \
-    $(DVB_PATH)/include/am_ver \
-    $(DVB_PATH)/android/ndk/include \
     $(LIB_SQLITE_PATH)/dist \
     system/media/audio_effects/include \
     system/core/libion/include \
