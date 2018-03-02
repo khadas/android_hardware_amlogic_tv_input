@@ -343,7 +343,7 @@ static int tv_input_cancel_capture(struct tv_input_device *, int, int, uint32_t)
 {
     return -EINVAL;
 }
-
+/*
 static int tv_input_set_capturesurface_size(struct tv_input_device *dev __unused, int width, int height)
 {
     if (width == 0 || height == 0) {
@@ -354,7 +354,7 @@ static int tv_input_set_capturesurface_size(struct tv_input_device *dev __unused
         return 1;
     }
 }
-
+*/
 static int tv_input_device_close(struct hw_device_t *dev)
 {
     tv_input_private_t *priv = (tv_input_private_t *)dev;
