@@ -49,22 +49,14 @@ struct sideband_handle_t *pTvStream = nullptr;
 void EventCallback::onTvEvent (const source_connect_t &scrConnect) {
     tv_input_private_t *priv = (tv_input_private_t *)(mPri);
 
-    //ALOGI("callback::onTvEvent msgType = %d", scrConnect.msgType);
+    ALOGI("callback::onTvEvent msgType = %d", scrConnect.msgType);
     switch (scrConnect.msgType) {
         case SOURCE_CONNECT_CALLBACK: {
             tv_source_input_t source = (tv_source_input_t)scrConnect.source;
             int connectState = scrConnect.state;
             ALOGI("callback::onTvEvent source = %d, status = %d", source, connectState);
-
-            if (source != SOURCE_HDMI1 && source != SOURCE_HDMI2 && source != SOURCE_HDMI3
-                && source != SOURCE_HDMI4 && source != SOURCE_AV1 && source != SOURCE_AV2)
-                break;
-
-            if (connectState == 1) {
-                notifyDeviceStatus(priv, source, TV_INPUT_EVENT_DEVICE_AVAILABLE);
+            if (SOURCE_AV1 <= source && source <= SOURCE_HDMI4) {
                 notifyDeviceStatus(priv, source, TV_INPUT_EVENT_STREAM_CONFIGURATIONS_CHANGED);
-            } else {
-                notifyDeviceStatus(priv, source, TV_INPUT_EVENT_DEVICE_UNAVAILABLE);
             }
         }
         break;
