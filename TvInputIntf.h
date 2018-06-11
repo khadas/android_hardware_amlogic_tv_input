@@ -47,6 +47,7 @@ typedef enum tv_source_input_e {
     SOURCE_DUMMY,
     SOURCE_SPDIF,
     SOURCE_ADTV,
+    SOURCE_AUX,
     SOURCE_MAX,
 } tv_source_input_t;
 
