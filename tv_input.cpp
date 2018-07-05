@@ -216,10 +216,10 @@ static int tv_input_initialize(struct tv_input_device *dev,
         return -EINVAL;
     }
     tv_input_private_t *priv = (tv_input_private_t *)dev;
-    if (priv->callback != NULL) {
+    /*if (priv->callback != NULL) {
         ALOGE("tv input had been init done, do not need init again");
         return -EEXIST;
-    }
+    }*/
     priv->callback = callback;
     priv->callback_data = data;
 
