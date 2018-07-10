@@ -32,20 +32,6 @@ using namespace android;
 TvInputIntf::TvInputIntf() : mpObserver(nullptr) {
     mTvSession = TvServerHidlClient::connect(CONNECT_TYPE_HAL);
     mTvSession->setListener(this);
-
-    int hdmiPorts = getHdmiPorts();
-    int count = 0;
-    while (hdmiPorts !=0) {
-        if (count > HDMI_MAX_SUPPORT_NUM - 1) {
-            ALOGE("max support num:%d, but now count:%d", HDMI_MAX_SUPPORT_NUM, count);
-            break;
-        }
-
-        mHdmiPorts[count++] = (hdmiPorts%10);
-        hdmiPorts = hdmiPorts/10;
-    }
-
-    ALOGI("get hdmi ports:%d, port count:%d", hdmiPorts,  count);
 }
 
 TvInputIntf::~TvInputIntf()
@@ -123,16 +109,7 @@ int TvInputIntf::getSupportInputDevices(int *devices, int *count)
 
 }
 
-int TvInputIntf::getHdmiPorts()
-{
-    return mTvSession->getHdmiPorts();
-}
-
 int TvInputIntf::getHdmiPort(tv_source_input_t source_input) {
-    if (source_input > SOURCE_HDMI4) {
-        ALOGE("input source:%d > max hdmi source4: %d", (int)source_input , SOURCE_HDMI4);
-        return -1;
-    }
-    return mHdmiPorts[source_input - SOURCE_HDMI1];
+    return mTvSession->getHdmiPorts(source_input);
 }
 

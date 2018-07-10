@@ -77,15 +77,12 @@ public:
     int getHdmiAvHotplugDetectOnoff();
     int setTvObserver (TvPlayObserver *ob);
     int getSupportInputDevices(int *devices, int *count);
-    int getHdmiPorts();
     int getHdmiPort(tv_source_input_t source_input);
     virtual void notify(const tv_parcel_t &parcel);
 
 private:
     sp<TvServerHidlClient> mTvSession;
     TvPlayObserver *mpObserver;
-
-    int mHdmiPorts[HDMI_MAX_SUPPORT_NUM];// the length of hdmi_port should be equal to max_port_num
 };
 
 #endif/*_ANDROID_TV_INPUT_INTERFACE_H_*/
