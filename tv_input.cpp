@@ -232,16 +232,24 @@ static int tv_input_get_stream_configurations(const struct tv_input_device *dev 
         const tv_stream_config_t **configs)
 {
     tv_input_private_t *priv = (tv_input_private_t *)dev;
-    bool status = true;
-    if (SOURCE_AV1 <= device_id && device_id <= SOURCE_HDMI4) {
-        status = priv->mpTv->getSourceConnectStatus((tv_source_input_t)device_id);
-    }
-    LOGD("tv_input_get_stream_configurations  source = %d, status = %d", device_id, status);
-    if (status) {
+    int isHotplugDetectOn = priv->mpTv->getHdmiAvHotplugDetectOnoff();
+    if (isHotplugDetectOn == 0) {
+        LOGD("%s:Hot plug disabled!\n", __FUNCTION__);
         getAvailableStreamConfigs(device_id, num_configurations, configs);
     } else {
-        getUnavailableStreamConfigs(device_id, num_configurations, configs);
+        LOGD("%s:Hot plug enabled!\n", __FUNCTION__);
+        bool status = true;
+        if (SOURCE_AV1 <= device_id && device_id <= SOURCE_HDMI4) {
+            status = priv->mpTv->getSourceConnectStatus((tv_source_input_t)device_id);
+        }
+        LOGD("tv_input_get_stream_configurations  source = %d, status = %d", device_id, status);
+        if (status) {
+            getAvailableStreamConfigs(device_id, num_configurations, configs);
+        } else {
+            getUnavailableStreamConfigs(device_id, num_configurations, configs);
+        }
     }
+
     return 0;
 }
 
