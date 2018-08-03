@@ -115,6 +115,10 @@ int notifyDeviceStatus(tv_input_private_t *priv, tv_source_input_t inputSrc, int
             event.device_info.type = TV_INPUT_TYPE_OTHER_HARDWARE;
             event.device_info.audio_type = AUDIO_DEVICE_IN_LINE;
             break;
+        case SOURCE_ARC:
+            event.device_info.type = TV_INPUT_TYPE_OTHER_HARDWARE;
+            event.device_info.audio_type = AUDIO_DEVICE_IN_SPDIF;
+            break;
         default:
             break;
     }
