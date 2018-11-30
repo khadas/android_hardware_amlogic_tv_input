@@ -104,7 +104,7 @@ int notifyDeviceStatus(tv_input_private_t *priv, tv_source_input_t inputSrc, int
         case SOURCE_HDMI3:
         case SOURCE_HDMI4:
             event.device_info.type = TV_INPUT_TYPE_HDMI;
-            event.device_info.hdmi.port_id = priv->mpTv->getHdmiPort(inputSrc);
+            event.device_info.hdmi.port_id = inputSrc - SOURCE_YPBPR2;
             event.device_info.audio_type = AUDIO_DEVICE_IN_HDMI;
             break;
         case SOURCE_SPDIF:
