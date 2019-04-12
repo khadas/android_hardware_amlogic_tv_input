@@ -70,6 +70,8 @@ void channelControl(tv_input_private_t *priv, bool opsStart, int device_id) {
     if (priv->mpTv) {
         ALOGI ("%s, device id:%d ,startTV:%d\n", __FUNCTION__, device_id, opsStart?1:0);
 
+        if (SOURCE_DTVKIT == device_id)
+            return;
         if (opsStart) {
             priv->mpTv->startTv();
             priv->mpTv->switchSourceInput((tv_source_input_t) device_id);
@@ -91,6 +93,7 @@ int notifyDeviceStatus(tv_input_private_t *priv, tv_source_input_t inputSrc, int
         case SOURCE_TV:
         case SOURCE_DTV:
         case SOURCE_ADTV:
+        case SOURCE_DTVKIT:
             event.device_info.type = TV_INPUT_TYPE_TUNER;
             event.device_info.audio_type = AUDIO_DEVICE_IN_TV_TUNER;
             break;
